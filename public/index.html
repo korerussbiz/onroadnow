@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e6f0fa 100%); color: #0f172a; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e6f0fa 100%); color: #0f172a; }
     .hero { background: linear-gradient(120deg, #1e3a8a, #2563eb); color: white; padding: 2rem 1.5rem; border-radius: 0 0 2rem 2rem; text-align: center; margin-bottom: 2rem; }
     .hero h1 { font-size: 2.5rem; }
     .container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
@@ -24,8 +24,8 @@
     .btn-outline { background: transparent; border: 1px solid #cbd5e1; }
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.8rem; }
     .form-group { margin-bottom: 1.2rem; }
-    input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 1rem; }
-    #map { height: 450px; border-radius: 1.5rem; margin-top: 0.5rem; }
+    input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 1rem; font-family: inherit; }
+    #map { height: 450px; border-radius: 1.5rem; margin-top: 0.5rem; width: 100%; }
     .place-list { max-height: 280px; overflow-y: auto; background: white; border-radius: 1rem; border: 1px solid #e2e8f0; margin-top: 1rem; }
     .place { padding: 0.8rem 1rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
     .listing-card { border: 1px solid #e2e8f0; border-radius: 1.2rem; padding: 1.2rem; margin-bottom: 1rem; }
@@ -37,12 +37,14 @@
     .tutorial-steps { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
     .step { flex: 1; min-width: 180px; background: #f8fafc; border-radius: 1rem; padding: 1rem; text-align: center; }
     .footer { text-align: center; padding: 1.5rem; color: #64748b; font-size: 0.8rem; }
+    .search-box { margin-bottom: 1rem; display: flex; gap: 0.5rem; }
+    .search-box input { flex: 1; }
   </style>
 </head>
 <body>
 <div class="hero">
   <h1>🏍️ OnRoadNow</h1>
-  <p>Get anything delivered • Sell items locally • Earn money as a deliverer</p>
+  <p>Post items for pickup/delivery • Earn money as a deliverer</p>
 </div>
 <div class="container">
   <div id="authSection"></div>
@@ -50,15 +52,14 @@
     <div class="card-header"><i class="fas fa-info-circle"></i> How It Works</div>
     <div class="tutorial-steps">
       <div class="step"><i class="fas fa-user-plus fa-2x"></i><h4>1. Sign Up</h4><p>Google or Email</p></div>
-      <div class="step"><i class="fas fa-map-marker-alt fa-2x"></i><h4>2. Find Store</h4><p>Move map, click a shop</p></div>
-      <div class="step"><i class="fas fa-clipboard-list fa-2x"></i><h4>3. Post Request</h4><p>Describe item & payment</p></div>
-      <div class="step"><i class="fas fa-hand-holding-usd fa-2x"></i><h4>4. Earn Money</h4><p>Deliver, get paid +22.4% fee</p></div>
+      <div class="step"><i class="fas fa-map-marker-alt fa-2x"></i><h4>2. Explore Map</h4><p>View stores around you</p></div>
+      <div class="step"><i class="fas fa-clipboard-list fa-2x"></i><h4>3. Post Request</h4><p>Describe item & location</p></div>
+      <div class="step"><i class="fas fa-hand-holding-usd fa-2x"></i><h4>4. Earn Money</h4><p>Accept, deliver, get paid +22.4% fee</p></div>
     </div>
-    <p><strong>💰 Fees:</strong> Normal delivery – set your own fee. <strong>Deliverer Fronts Cost</strong> – deliverer pays for item, receives reimbursement +22.4% on delivery confirmation.</p>
   </div>
   <div id="memberDashboard" class="card hidden">
     <div class="card-header"><i class="fas fa-user-circle"></i> Your Dashboard</div>
-    <div id="profileInfo" style="margin-bottom:1rem;"></div>
+    <div id="profileInfo"></div>
     <div class="form-group"><label><i class="fas fa-phone-alt"></i> Phone Number</label><input type="tel" id="phoneInput" placeholder="+1234567890"></div>
     <button id="savePhoneBtn" class="btn btn-primary">Save Phone</button>
     <hr><h4>Your Sales History</h4><div id="salesLogs"></div><hr>
@@ -70,25 +71,31 @@
     <button id="postListingBtn" class="btn btn-primary">Post Listing</button>
   </div>
   <div class="card">
-    <div class="card-header"><i class="fas fa-map-marked-alt"></i> Find Stores & Shops</div>
+    <div class="card-header"><i class="fas fa-map-marked-alt"></i> Nearby Stores & Shops (move map)</div>
+    <div class="search-box"><input type="text" id="locationSearch" placeholder="Search for a location..."><button id="searchLocationBtn" class="btn btn-primary">Go</button></div>
     <div id="map"></div>
     <div id="places" class="place-list"></div>
   </div>
   <div class="grid-2">
     <div class="card">
-      <div class="card-header"><i class="fas fa-truck"></i> Post a Delivery Request</div>
+      <div class="card-header"><i class="fas fa-truck"></i> Post a Delivery/Pickup Request</div>
       <form id="requestForm">
-        <div class="form-group"><input type="text" id="storeName" placeholder="Store name"></div>
-        <div class="form-group"><input type="text" id="itemDescReq" placeholder="Item description"></div>
-        <div class="form-group"><input type="number" id="itemCost" placeholder="Item cost (JMD)"></div>
-        <div class="form-group"><select id="paymentMethod"><option value="visa_mc">Visa/Mastercard</option><option value="etransfer">E-Transfer</option><option value="deliverer_fronts">Deliverer Fronts Cost (+22.4% fee)</option></select></div>
-        <button type="submit" class="btn btn-primary">Post Request</button>
+        <div class="form-group"><textarea id="itemDetails" placeholder="What do you need? (e.g., Food, package, groceries)" rows="2" required></textarea></div>
+        <div class="form-group"><input type="text" id="pickupLocation" placeholder="Pickup location (address, store, area)" required></div>
+        <div class="form-group"><input type="text" id="dropoffLocation" placeholder="Dropoff location (address, area)" required></div>
+        <div class="form-group"><input type="number" id="itemCost" placeholder="Item cost / offer (JMD)" required></div>
+        <div class="form-group"><select id="paymentMethod" required>
+          <option value="visa_mc">💳 Visa/Mastercard</option>
+          <option value="etransfer">📧 E-Transfer</option>
+          <option value="deliverer_fronts">🛵 Deliverer Fronts Cost (+22.4% fee)</option>
+        </select></div>
+        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Post Request</button>
       </form>
     </div>
     <div class="card">
       <div class="card-header"><i class="fas fa-tools"></i> Deliverer Tools</div>
       <div id="delivererControls">
-        <button id="startTrackingBtn" class="btn btn-primary">Start Tracking</button>
+        <button id="startTrackingBtn" class="btn btn-primary">Start Tracking (go online)</button>
         <button id="stopTrackingBtn" class="btn btn-outline hidden">Stop Tracking</button>
         <p id="trackingStatus"></p>
       </div>
@@ -146,17 +153,67 @@
   function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])) : ''; }
   document.getElementById('savePhoneBtn')?.addEventListener('click', async () => { await apiCall('/api/user', { method: 'POST', body: JSON.stringify({ phone: phoneInput.value }) }); alert('Phone saved!'); });
   document.getElementById('postListingBtn')?.addEventListener('click', async () => { if (!currentUser) return alert('Login first'); const title = document.getElementById('itemTitle').value, description = document.getElementById('itemDesc').value, price = parseFloat(document.getElementById('itemPrice').value), feePercent = parseFloat(document.getElementById('itemFee').value); if (!title || !description || isNaN(price)) return alert('Fill all fields'); await apiCall('/api/listings', { method: 'POST', body: JSON.stringify({ title, description, price, feePercent }) }); alert('Listing posted!'); loadMarketplaceListings(); document.getElementById('itemTitle').value = ''; document.getElementById('itemDesc').value = ''; document.getElementById('itemPrice').value = ''; });
-  function initMap() { const defaultLocation = { lat: 18.4655, lng: -77.9223 }; map = new google.maps.Map(document.getElementById('map'), { center: defaultLocation, zoom: 14 }); infoWindow = new google.maps.InfoWindow(); service = new google.maps.places.PlacesService(map); if (navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => { map.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }); searchNearbyPlaces({ lat: pos.coords.latitude, lng: pos.coords.longitude }); }, () => searchNearbyPlaces(defaultLocation)); else searchNearbyPlaces(defaultLocation); map.addListener('idle', () => { const c = map.getCenter(); searchNearbyPlaces({ lat: c.lat(), lng: c.lng() }); }); }
-  function searchNearbyPlaces(location) { service.nearbySearch({ location, radius: 1500, type: ['store','supermarket','restaurant','cafe','pharmacy'] }, (results, status) => { const placesDiv = document.getElementById('places'); if (status === google.maps.places.PlacesServiceStatus.OK && results.length) { clearMarkers(); placesDiv.innerHTML = ''; results.forEach(place => { const marker = new google.maps.Marker({ map, position: place.geometry.location, title: place.name }); markers.push(marker); google.maps.event.addListener(marker, 'click', () => infoWindow.setContent(`<strong>${place.name}</strong><br>${place.vicinity || ''}`) && infoWindow.open(map, marker)); const div = document.createElement('div'); div.className = 'place'; div.innerHTML = `<i class="fas fa-store"></i> ${place.name}`; div.onclick = () => { document.getElementById('storeName').value = place.name; map.setCenter(place.geometry.location); map.setZoom(16); }; placesDiv.appendChild(div); }); } else placesDiv.innerHTML = '<div style="padding:1rem;">No shops found. Move map.</div>'; }); }
+  // Google Maps
+  function initMap() {
+    const defaultLocation = { lat: 18.4655, lng: -77.9223 };
+    map = new google.maps.Map(document.getElementById('map'), { center: defaultLocation, zoom: 14 });
+    infoWindow = new google.maps.InfoWindow();
+    service = new google.maps.places.PlacesService(map);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => { map.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }); searchNearbyPlaces({ lat: pos.coords.latitude, lng: pos.coords.longitude }); }, () => searchNearbyPlaces(defaultLocation));
+    } else searchNearbyPlaces(defaultLocation);
+    map.addListener('idle', () => { const c = map.getCenter(); searchNearbyPlaces({ lat: c.lat(), lng: c.lng() }); });
+    document.getElementById('searchLocationBtn').addEventListener('click', () => { const address = document.getElementById('locationSearch').value; if (address) new google.maps.Geocoder().geocode({ address }, (results, status) => { if (status === 'OK') { map.setCenter(results[0].geometry.location); searchNearbyPlaces(results[0].geometry.location); } else alert('Location not found'); }); });
+  }
+  function searchNearbyPlaces(location) {
+    service.nearbySearch({ location, radius: 1500, type: ['store','supermarket','restaurant','cafe','pharmacy','shopping_mall'] }, (results, status) => {
+      const placesDiv = document.getElementById('places');
+      if (status === google.maps.places.PlacesServiceStatus.OK && results.length) {
+        clearMarkers(); placesDiv.innerHTML = '';
+        results.forEach(place => {
+          const marker = new google.maps.Marker({ map, position: place.geometry.location, title: place.name });
+          markers.push(marker);
+          google.maps.event.addListener(marker, 'click', () => infoWindow.setContent(`<strong>${place.name}</strong><br>${place.vicinity || ''}`) && infoWindow.open(map, marker));
+          const div = document.createElement('div'); div.className = 'place'; div.innerHTML = `<i class="fas fa-store"></i> ${place.name}`;
+          div.onclick = () => { map.setCenter(place.geometry.location); map.setZoom(16); };
+          placesDiv.appendChild(div);
+        });
+      } else placesDiv.innerHTML = '<div style="padding:1rem;">No shops found. Move map or search.</div>';
+    });
+  }
   function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
   window.initMap = initMap;
-  document.getElementById('requestForm').addEventListener('submit', async (e) => { e.preventDefault(); if (!currentUser) return alert('Login first'); await apiCall('/api/requests', { method: 'POST', body: JSON.stringify({ storeName: document.getElementById('storeName').value, itemDesc: document.getElementById('itemDescReq').value, itemCost: parseFloat(document.getElementById('itemCost').value), paymentMethod: document.getElementById('paymentMethod').value }) }); alert('Request posted!'); loadRequests(); });
-  async function loadRequests() { const reqs = await apiCall('/api/requests'); const container = document.getElementById('requests'); container.innerHTML = ''; reqs.forEach(r => { const div = document.createElement('div'); div.className = 'card'; let actions = ''; if (currentUser && currentUser.id !== r.userId && r.status === 'open') { actions = `<button onclick="acceptRequest(${r.id})" class="btn btn-primary btn-sm">Accept</button>`; if (r.paymentMethod === 'deliverer_fronts') actions += `<button onclick="offerLoan(${r.id})" class="btn btn-outline btn-sm">Front money</button>`; } div.innerHTML = `<div><strong>${escapeHtml(r.storeName)}</strong><br>${escapeHtml(r.itemDesc)}<br>💰 JMD ${r.itemCost}<br>💳 ${r.paymentMethod}<br>📌 ${r.status}</div><div>${actions}</div>`; container.appendChild(div); }); }
+  // Delivery requests (updated fields)
+  document.getElementById('requestForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) return alert('Login first');
+    const itemDetails = document.getElementById('itemDetails').value;
+    const pickupLocation = document.getElementById('pickupLocation').value;
+    const dropoffLocation = document.getElementById('dropoffLocation').value;
+    const itemCost = parseFloat(document.getElementById('itemCost').value);
+    const paymentMethod = document.getElementById('paymentMethod').value;
+    await apiCall('/api/requests', { method: 'POST', body: JSON.stringify({ itemDetails, pickupLocation, dropoffLocation, itemCost, paymentMethod }) });
+    alert('Request posted!'); loadRequests();
+  });
+  async function loadRequests() {
+    const reqs = await apiCall('/api/requests');
+    const container = document.getElementById('requests');
+    container.innerHTML = '';
+    reqs.forEach(r => {
+      const div = document.createElement('div'); div.className = 'card'; let actions = '';
+      if (currentUser && currentUser.id !== r.userId && r.status === 'open') {
+        actions = `<button onclick="acceptRequest(${r.id})" class="btn btn-primary btn-sm">Accept</button>`;
+        if (r.paymentMethod === 'deliverer_fronts') actions += `<button onclick="offerLoan(${r.id})" class="btn btn-outline btn-sm">Front money</button>`;
+      }
+      div.innerHTML = `<div><strong>${escapeHtml(r.itemDetails)}</strong><br>Pickup: ${escapeHtml(r.pickupLocation)}<br>Dropoff: ${escapeHtml(r.dropoffLocation)}<br>💰 JMD ${r.itemCost}<br>💳 ${r.paymentMethod}<br>Status: ${r.status}</div><div>${actions}</div>`;
+      container.appendChild(div);
+    });
+  }
   window.acceptRequest = async (id) => { await apiCall(`/api/accept?id=${id}`, { method: 'POST', body: JSON.stringify({ delivererId: currentUser.id, delivererName: currentUser.name }) }); alert('Accepted!'); loadRequests(); loadActiveDeliveries(); };
   window.offerLoan = async (id) => { const amount = prompt('Amount to front (JMD):'); if (amount) await apiCall('/api/offerLoan', { method: 'POST', body: JSON.stringify({ requestId: id, delivererId: currentUser.id, amountFronted: parseFloat(amount) }) }); };
   let watchId = null; const startBtn = document.getElementById('startTrackingBtn'), stopBtn = document.getElementById('stopTrackingBtn'), trackingStatus = document.getElementById('trackingStatus'), roleSelect = document.getElementById('roleSelect'); if (roleSelect) { roleSelect.value = localStorage.getItem('onroadnow_role') || 'buyer'; roleSelect.onchange = (e) => { localStorage.setItem('onroadnow_role', e.target.value); location.reload(); }; }
   if (startBtn && currentUser && localStorage.getItem('onroadnow_role') === 'deliverer') { startBtn.onclick = () => { if (!navigator.geolocation) return alert('Geolocation not supported'); watchId = navigator.geolocation.watchPosition(async (pos) => { await apiCall('/api/updateLocation', { method: 'POST', body: JSON.stringify({ delivererId: currentUser.id, lat: pos.coords.latitude, lon: pos.coords.longitude, status: 'in_progress' }) }); trackingStatus.innerHTML = `<i class="fas fa-street-view"></i> Live: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`; }, console.error, { enableHighAccuracy: true }); startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden'); }; stopBtn.onclick = () => { if (watchId) navigator.geolocation.clearWatch(watchId); startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden'); trackingStatus.innerHTML = ''; }; } else if (startBtn) { startBtn.style.display = 'none'; stopBtn.style.display = 'none'; }
-  async function loadActiveDeliveries() { if (localStorage.getItem('onroadnow_role') !== 'buyer' || !currentUser) return; const reqs = await apiCall('/api/requests'); const myRequests = reqs.filter(r => r.userId === currentUser.id && (r.status === 'accepted' || r.status === 'in_progress')); const container = document.getElementById('activeDeliveries'); container.innerHTML = ''; for (const req of myRequests) { const locData = await apiCall(`/api/getLocation?requestId=${req.id}`); const div = document.createElement('div'); div.className = 'card'; div.innerHTML = `<div><strong>${escapeHtml(req.storeName)}</strong><br>Deliverer: ${req.delivererName}<br>Status: ${locData.status}<br>Location: ${locData.location ? `${locData.location.lat.toFixed(5)}, ${locData.location.lon.toFixed(5)}` : 'Not yet'}</div>${locData.status === 'in_progress' ? `<button onclick="confirmDelivery(${req.id})" class="btn btn-primary btn-sm">Confirm Delivery & Release Payment</button>` : ''}`; container.appendChild(div); } }
+  async function loadActiveDeliveries() { if (localStorage.getItem('onroadnow_role') !== 'buyer' || !currentUser) return; const reqs = await apiCall('/api/requests'); const myRequests = reqs.filter(r => r.userId === currentUser.id && (r.status === 'accepted' || r.status === 'in_progress')); const container = document.getElementById('activeDeliveries'); container.innerHTML = ''; for (const req of myRequests) { const locData = await apiCall(`/api/getLocation?requestId=${req.id}`); const div = document.createElement('div'); div.className = 'card'; div.innerHTML = `<div><strong>${escapeHtml(req.itemDetails)}</strong><br>Pickup: ${escapeHtml(req.pickupLocation)}<br>Dropoff: ${escapeHtml(req.dropoffLocation)}<br>Deliverer: ${req.delivererName || '—'}<br>Status: ${locData.status}<br>Location: ${locData.location ? `${locData.location.lat.toFixed(5)}, ${locData.location.lon.toFixed(5)}` : 'Not yet'}</div>${locData.status === 'in_progress' ? `<button onclick="confirmDelivery(${req.id})" class="btn btn-primary btn-sm">Confirm Delivery & Release Payment</button>` : ''}`; container.appendChild(div); } }
   window.confirmDelivery = async (id) => { await apiCall('/api/confirmDelivery', { method: 'POST', body: JSON.stringify({ requestId: id, customerId: currentUser.id }) }); alert('Delivery confirmed. Deliverer will be paid.'); loadActiveDeliveries(); loadRequests(); };
   setInterval(() => { if (localStorage.getItem('onroadnow_role') === 'buyer') loadActiveDeliveries(); }, 5000);
   loadRequests(); if (localStorage.getItem('onroadnow_role') === 'buyer') loadActiveDeliveries();
