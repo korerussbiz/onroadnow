@@ -4,264 +4,161 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>OnRoadNow – Delivery & Marketplace</title>
-  <!-- Google Maps API (replace YOUR_API_KEY) -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places&callback=initMap" async defer></script>
-  <!-- Font Awesome for icons -->
+  <!-- Google Maps with your API key -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTd4-1QDwlwGxdI22VXpnRop48glDBT0E&libraries=places&callback=initMap" async defer></script>
+  <!-- Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
+    /* (keep the same styles as the previous professional version) */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: #f4f7fc;
-      color: #1a2c3e;
-      line-height: 1.5;
-    }
-    /* Custom scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb { background: #2563eb; border-radius: 10px; }
-    .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
-    /* Card style */
-    .card {
-      background: white;
-      border-radius: 1.75rem;
-      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.08);
-      padding: 1.5rem;
-      margin-bottom: 1.8rem;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .card:hover { box-shadow: 0 25px 40px -12px rgba(0,0,0,0.15); }
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.25rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 2px solid #eef2ff;
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.6rem 1.2rem;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: #f1f5f9;
-      color: #1e293b;
-    }
-    .btn-primary { background: #2563eb; color: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
-    .btn-danger { background: #ef4444; color: white; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e6f0fa 100%); color: #0f172a; }
+    .hero { background: linear-gradient(120deg, #1e3a8a, #2563eb); color: white; padding: 2rem 1.5rem; border-radius: 0 0 2rem 2rem; text-align: center; margin-bottom: 2rem; }
+    .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
+    .card { background: white; border-radius: 1.75rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.08); padding: 1.5rem; margin-bottom: 1.8rem; transition: transform 0.2s; }
+    .card:hover { transform: translateY(-3px); }
+    .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; border-bottom: 2px solid #eef2ff; padding-bottom: 0.75rem; font-weight: 700; }
+    .btn { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.6rem 1.4rem; border-radius: 40px; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-google { background: #db4437; color: white; }
     .btn-outline { background: transparent; border: 1px solid #cbd5e1; }
-    .btn-sm { padding: 0.4rem 1rem; font-size: 0.8rem; }
-    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 1.8rem; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.8rem; }
     .form-group { margin-bottom: 1.2rem; }
-    label { font-weight: 500; display: block; margin-bottom: 0.3rem; font-size: 0.85rem; }
-    input, select, textarea {
-      width: 100%;
-      padding: 0.8rem 1rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 1rem;
-      font-size: 0.95rem;
-      transition: 0.2s;
-      background: #fefefe;
-    }
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
-    }
-    #map { height: 450px; width: 100%; border-radius: 1.5rem; margin-top: 0.5rem; box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05); }
-    .place-list {
-      max-height: 280px;
-      overflow-y: auto;
-      background: white;
-      border-radius: 1.2rem;
-      border: 1px solid #e2e8f0;
-      margin-top: 1rem;
-    }
-    .place {
-      padding: 0.8rem 1rem;
-      border-bottom: 1px solid #f1f5f9;
-      cursor: pointer;
-      transition: background 0.1s;
-      font-weight: 500;
-    }
+    input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 1rem; font-size: 0.95rem; }
+    #map { height: 450px; border-radius: 1.5rem; margin-top: 0.5rem; box-shadow: 0 4px 10px -2px rgba(0,0,0,0.05); }
+    .place-list { max-height: 280px; overflow-y: auto; background: white; border-radius: 1rem; border: 1px solid #e2e8f0; margin-top: 1rem; }
+    .place { padding: 0.8rem 1rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-weight: 500; }
     .place:hover { background: #f8fafc; }
-    .listing-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 1.2rem;
-      padding: 1.2rem;
-      margin-bottom: 1rem;
-      transition: all 0.2s;
-    }
-    .listing-card:hover { border-color: #2563eb; box-shadow: 0 8px 15px -6px rgba(0,0,0,0.05); }
-    .badge {
-      background: #eef2ff;
-      padding: 0.25rem 0.75rem;
-      border-radius: 40px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #1e40af;
-      display: inline-block;
-    }
-    .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem; }
+    .listing-card { border: 1px solid #e2e8f0; border-radius: 1.2rem; padding: 1.2rem; margin-bottom: 1rem; }
+    .badge { background: #eef2ff; padding: 0.25rem 0.75rem; border-radius: 40px; font-size: 0.7rem; font-weight: 600; color: #1e40af; display: inline-block; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
     .hidden { display: none; }
-    /* Modal */
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-    }
-    .modal-content {
-      background: white;
-      max-width: 500px;
-      width: 90%;
-      border-radius: 1.8rem;
-      padding: 1.8rem;
-      box-shadow: 0 30px 40px -20px black;
-    }
-    .disclaimer-footer {
-      font-size: 0.7rem;
-      color: #64748b;
-      text-align: center;
-      margin-top: 2rem;
-      border-top: 1px solid #e2e8f0;
-      padding-top: 1rem;
-    }
-    .icon-text { display: inline-flex; align-items: center; gap: 0.4rem; }
-    @media (max-width: 640px) {
-      .container { padding: 1rem; }
-      .card { padding: 1.2rem; }
-      h1 { font-size: 1.5rem; }
-    }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+    .modal-content { background: white; max-width: 500px; width: 90%; border-radius: 1.8rem; padding: 1.8rem; }
+    .tutorial-steps { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+    .step { flex: 1; min-width: 180px; background: #f8fafc; border-radius: 1rem; padding: 1rem; text-align: center; }
+    .footer { text-align: center; padding: 1.5rem; color: #64748b; font-size: 0.8rem; }
+    @media (max-width: 640px) { .hero h1 { font-size: 1.8rem; } }
   </style>
 </head>
 <body>
+<div class="hero">
+  <h1>🏍️ OnRoadNow</h1>
+  <p>Get anything delivered • Sell items locally • Earn money as a deliverer</p>
+</div>
 <div class="container">
-  <!-- Header -->
-  <div class="flex-between" style="margin-bottom: 1.2rem;">
-    <div class="icon-text"><i class="fas fa-motorcycle" style="font-size: 1.8rem; color: #2563eb;"></i><h1 style="font-weight: 700;">OnRoadNow</h1></div>
-    <div id="authSection"></div>
-  </div>
+  <div id="authSection"></div>
 
-  <!-- Legal Disclaimer Modal -->
-  <div id="disclaimerModal" class="modal">
-    <div class="modal-content">
-      <h2><i class="fas fa-gavel"></i> Legal Disclaimer</h2>
-      <p style="margin: 1rem 0;">OnRoadNow is a platform connecting users for local delivery and marketplace transactions. We are not responsible for any illegal or wrongful activities conducted by users. All transactions are between buyers and sellers/deliverers. By using this site, you agree to follow local laws and assume all risks. <strong>KorerussBiz is not liable for any loss, damage, or dispute.</strong></p>
-      <button id="acceptDisclaimerBtn" class="btn btn-primary">I Understand & Accept</button>
+  <!-- Business & Tutorial Card -->
+  <div class="card">
+    <div class="card-header"><i class="fas fa-info-circle"></i> How It Works</div>
+    <div class="tutorial-steps">
+      <div class="step"><i class="fas fa-user-plus fa-2x" style="color:#2563eb;"></i><h4>1. Sign Up</h4><p>Google or Email</p></div>
+      <div class="step"><i class="fas fa-map-marker-alt fa-2x" style="color:#2563eb;"></i><h4>2. Find Store</h4><p>Move the map, click a shop</p></div>
+      <div class="step"><i class="fas fa-clipboard-list fa-2x" style="color:#2563eb;"></i><h4>3. Post Request</h4><p>Describe item & payment</p></div>
+      <div class="step"><i class="fas fa-hand-holding-usd fa-2x" style="color:#2563eb;"></i><h4>4. Earn Money</h4><p>Deliver, get paid +22.4% fee</p></div>
     </div>
+    <p><strong>💰 Fees:</strong> Normal delivery – set your own fee. <strong>Deliverer Fronts Cost</strong> – deliverer pays for item, receives reimbursement +22.4% on delivery confirmation.</p>
   </div>
 
   <!-- Member Dashboard (after login) -->
   <div id="memberDashboard" class="card hidden">
-    <div class="card-header"><i class="fas fa-user-circle fa-lg"></i><span>Member Dashboard</span></div>
+    <div class="card-header"><i class="fas fa-user-circle"></i> Your Dashboard</div>
     <div id="profileInfo" style="margin-bottom: 1rem;"></div>
     <div class="form-group"><label><i class="fas fa-phone-alt"></i> Phone Number (for job contacts)</label><input type="tel" id="phoneInput" placeholder="+1234567890"></div>
     <button id="savePhoneBtn" class="btn btn-primary"><i class="fas fa-save"></i> Save Phone</button>
     <hr style="margin: 1rem 0;">
     <h4><i class="fas fa-chart-line"></i> Your Sales History</h4>
-    <div id="salesLogs" style="max-height: 200px; overflow-y: auto; margin-top: 0.5rem;"></div>
-    <hr style="margin: 1rem 0;">
-    <h4><i class="fas fa-store"></i> Post an Item for Sale</h4>
+    <div id="salesLogs" style="max-height: 200px; overflow-y: auto;"></div>
+    <hr>
+    <h4><i class="fas fa-store"></i> Sell an Item</h4>
     <div class="form-group"><input type="text" id="itemTitle" placeholder="Title"></div>
     <div class="form-group"><textarea id="itemDesc" placeholder="Description" rows="2"></textarea></div>
     <div class="form-group"><input type="number" id="itemPrice" placeholder="Price (JMD)"></div>
-    <div class="form-group"><input type="number" id="itemFee" placeholder="Fee % (1-3.8)" value="2"></div>
+    <div class="form-group"><input type="number" id="itemFee" placeholder="Your listing fee % (1-3.8)" value="2"></div>
     <button id="postListingBtn" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Post Listing</button>
   </div>
 
   <!-- Map Card -->
   <div class="card">
-    <div class="card-header"><i class="fas fa-map-marked-alt"></i><span>Find Stores & Shops Worldwide (Google Maps)</span></div>
+    <div class="card-header"><i class="fas fa-map-marked-alt"></i> Find Stores & Shops (Google Maps)</div>
     <div id="map"></div>
-    <div id="places" class="place-list"><div style="padding:1rem; text-align:center;"><i class="fas fa-spinner fa-pulse"></i> Move map to load shops...</div></div>
+    <div id="places" class="place-list"><div style="padding:1rem;"><i class="fas fa-spinner fa-pulse"></i> Move map to load shops...</div></div>
   </div>
 
   <!-- Two Columns: Request & Deliverer Tools -->
   <div class="grid-2">
     <div class="card">
-      <div class="card-header"><i class="fas fa-truck"></i><span>Post a Delivery Request</span></div>
+      <div class="card-header"><i class="fas fa-truck"></i> Post a Delivery Request</div>
       <form id="requestForm">
         <div class="form-group"><input type="text" id="storeName" placeholder="Store name" required></div>
         <div class="form-group"><input type="text" id="itemDescReq" placeholder="Item description" required></div>
         <div class="form-group"><input type="number" id="itemCost" placeholder="Item cost (JMD)" required></div>
         <div class="form-group"><select id="paymentMethod" required>
-          <option value="visa_mc"><i class="fas fa-credit-card"></i> Visa/Mastercard</option>
-          <option value="etransfer"><i class="fas fa-envelope"></i> E-Transfer</option>
-          <option value="deliverer_fronts"><i class="fas fa-hand-holding-usd"></i> Deliverer Fronts Cost (+22.4% fee)</option>
+          <option value="visa_mc">💳 Visa/Mastercard</option>
+          <option value="etransfer">📧 E-Transfer</option>
+          <option value="deliverer_fronts">🛵 Deliverer Fronts Cost (+22.4% fee)</option>
         </select></div>
         <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Post Request</button>
       </form>
     </div>
     <div class="card">
-      <div class="card-header"><i class="fas fa-tools"></i><span>Deliverer Tools</span></div>
+      <div class="card-header"><i class="fas fa-tools"></i> Deliverer Tools</div>
       <div id="delivererControls">
-        <button id="startTrackingBtn" class="btn btn-primary"><i class="fas fa-location-dot"></i> Start Tracking (go online)</button>
-        <button id="stopTrackingBtn" class="btn btn-danger hidden"><i class="fas fa-ban"></i> Stop Tracking</button>
-        <p id="trackingStatus" style="margin-top: 0.5rem; font-size: 0.8rem;"></p>
+        <button id="startTrackingBtn" class="btn btn-primary"><i class="fas fa-location-dot"></i> Start Tracking (online)</button>
+        <button id="stopTrackingBtn" class="btn btn-outline hidden">🛑 Stop Tracking</button>
+        <p id="trackingStatus" style="margin-top:0.5rem;"></p>
       </div>
-      <hr style="margin: 1rem 0;">
-      <p><strong>Your Role:</strong> <select id="roleSelect" style="width: auto;"><option value="buyer">Customer (buy goods)</option><option value="deliverer">Deliverer (earn money)</option></select></p>
+      <hr>
+      <p><strong>Your Role:</strong> <select id="roleSelect" style="width: auto;"><option value="buyer">👤 Customer</option><option value="deliverer">🛵 Deliverer</option></select></p>
     </div>
   </div>
 
   <!-- Marketplace Listings -->
   <div class="card">
-    <div class="card-header"><i class="fas fa-shopping-cart"></i><span>Newest Items for Sale</span></div>
+    <div class="card-header"><i class="fas fa-shopping-cart"></i> Newest Items for Sale</div>
     <div id="marketplaceListings"></div>
   </div>
 
   <!-- Open Delivery Requests -->
   <div class="card">
-    <div class="card-header"><i class="fas fa-clipboard-list"></i><span>Open Delivery Requests</span></div>
+    <div class="card-header"><i class="fas fa-clipboard-list"></i> Open Delivery Requests</div>
     <div id="requests"></div>
   </div>
 
   <!-- Active Deliveries (Customer view) -->
   <div class="card">
-    <div class="card-header"><i class="fas fa-sync-alt"></i><span>Your Active Deliveries (Customer view)</span></div>
+    <div class="card-header"><i class="fas fa-sync-alt"></i> Your Active Deliveries</div>
     <div id="activeDeliveries"></div>
   </div>
 
-  <div class="disclaimer-footer">
-    <i class="fas fa-shield-alt"></i> © 2025 OnRoadNow by KorerussBiz. Users are solely responsible for their actions. 
-    <a href="#" id="showDisclaimerLink" style="color: #2563eb;">Legal Disclaimer</a>
+  <div class="footer">
+    <i class="fas fa-shield-alt"></i> OnRoadNow by KorerussBiz – Users assume all liability. <a href="#" id="showDisclaimerLink" style="color:#2563eb;">Legal Disclaimer</a>
+  </div>
+</div>
+
+<!-- Legal Disclaimer Modal -->
+<div id="disclaimerModal" class="modal">
+  <div class="modal-content">
+    <h2><i class="fas fa-gavel"></i> Legal Disclaimer</h2>
+    <p style="margin:1rem 0;">OnRoadNow is a platform connecting users. We are not responsible for illegal or wrongful activities. All transactions are between buyers and sellers/deliverers. By using this site, you agree to follow local laws and assume all risks. <strong>KorerussBiz is not liable for any loss, damage, or dispute.</strong></p>
+    <button id="acceptDisclaimerBtn" class="btn btn-primary">I Understand & Accept</button>
   </div>
 </div>
 
 <script>
-  // ----------------------------- Helper -----------------------------
+  // Helper API call (credentials included)
   async function apiCall(url, options = {}) {
-    const res = await fetch(url, {
-      ...options,
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...options.headers }
-    });
+    const res = await fetch(url, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
     return res.json();
   }
 
   let currentUser = null;
-  let map, service, infoWindow;
-  let markers = [];
+  let map, service, infoWindow, markers = [];
 
-  // ----------------------------- Authentication UI -----------------------------
+  // DOM elements
   const authDiv = document.getElementById('authSection');
   const memberDash = document.getElementById('memberDashboard');
   const profileInfoDiv = document.getElementById('profileInfo');
@@ -269,7 +166,7 @@
   const salesLogsDiv = document.getElementById('salesLogs');
   const marketplaceDiv = document.getElementById('marketplaceListings');
 
-  // Disclaimer handling
+  // Disclaimer modal
   const disclaimerModal = document.getElementById('disclaimerModal');
   if (!localStorage.getItem('disclaimerAccepted')) {
     disclaimerModal.style.display = 'flex';
@@ -280,67 +177,102 @@
   } else disclaimerModal.style.display = 'none';
   document.getElementById('showDisclaimerLink').onclick = (e) => { e.preventDefault(); disclaimerModal.style.display = 'flex'; };
 
+  // ---- Google Sign-In callback ----
+  function handleCredentialResponse(response) {
+    fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.user) location.reload();
+      else alert('Google login failed');
+    });
+  }
+
+  // Render login UI (Google + email/password)
+  function renderLogin() {
+    authDiv.innerHTML = `
+      <div style="background: white; border-radius: 1.5rem; padding: 1.2rem;">
+        <div id="g_id_onload"
+             data-client_id="143959632064-fckvs74sau6obig3fun6kdokfj5t2p3f.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin"
+             data-type="standard"
+             data-size="large"
+             data-theme="outline"
+             data-text="sign_in_with"
+             data-shape="rectangular"
+             data-logo_alignment="left">
+        </div>
+        <div style="margin: 1rem 0; text-align: center;">or</div>
+        <div class="flex-between" style="gap:0.5rem;">
+          <input type="email" id="loginEmail" placeholder="Email" style="flex:1;">
+          <input type="password" id="loginPassword" placeholder="Password" style="flex:1;">
+          <button id="emailLoginBtn" class="btn btn-primary">Login</button>
+          <button id="emailSignupBtn" class="btn btn-outline">Signup</button>
+        </div>
+        <p id="authMsg" style="font-size:0.7rem; margin-top:0.5rem;"></p>
+      </div>
+    `;
+    document.getElementById('emailLoginBtn').onclick = async () => {
+      const email = document.getElementById('loginEmail').value;
+      const pwd = document.getElementById('loginPassword').value;
+      const res = await apiCall('/api/login', { method: 'POST', body: JSON.stringify({ email, password: pwd }) });
+      if (res.error) document.getElementById('authMsg').innerText = res.error;
+      else location.reload();
+    };
+    document.getElementById('emailSignupBtn').onclick = async () => {
+      const email = document.getElementById('loginEmail').value;
+      const pwd = document.getElementById('loginPassword').value;
+      const name = prompt('Your full name:');
+      if (!name) return;
+      const res = await apiCall('/api/signup', { method: 'POST', body: JSON.stringify({ email, password: pwd, name }) });
+      if (res.error) document.getElementById('authMsg').innerText = res.error;
+      else location.reload();
+    };
+  }
+
+  // Check if user is already authenticated via our backend
   async function checkAuth() {
     const data = await apiCall('/api/me');
     if (data.id) {
       currentUser = data;
-      authDiv.innerHTML = `<span class="icon-text"><i class="fas fa-user-check"></i> ${data.email} <button id="logoutBtn" class="btn btn-sm btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</button></span>`;
+      authDiv.innerHTML = `<div class="flex-between"><span><i class="fas fa-user-check"></i> ${data.email}</span><button id="logoutBtn" class="btn btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</button></div>`;
       document.getElementById('logoutBtn').onclick = async () => {
         await apiCall('/api/logout', { method: 'POST' });
         location.reload();
       };
       memberDash.classList.remove('hidden');
-      profileInfoDiv.innerHTML = `<div><i class="fas fa-id-card"></i> <strong>${data.name || '—'}</strong> &nbsp;|&nbsp; <i class="fas fa-envelope"></i> ${data.email}</div>`;
+      profileInfoDiv.innerHTML = `<div><i class="fas fa-id-card"></i> ${data.name || data.email} &nbsp;|&nbsp; <i class="fas fa-envelope"></i> ${data.email}</div>`;
       phoneInput.value = data.phone || '';
       // Load sales
       const sales = await apiCall('/api/sales');
-      salesLogsDiv.innerHTML = sales.map(s => `<div class="icon-text"><i class="fas fa-receipt"></i> Sold item for JMD ${s.amount} (fee JMD ${s.fee}) on ${new Date(s.timestamp).toLocaleString()}</div>`).join('') || '<div>No sales yet.</div>';
+      salesLogsDiv.innerHTML = sales.map(s => `<div><i class="fas fa-receipt"></i> Sold for JMD ${s.amount} (fee ${s.fee}) on ${new Date(s.timestamp).toLocaleString()}</div>`).join('') || '<div>No sales yet.</div>';
       loadMarketplaceListings();
     } else {
-      authDiv.innerHTML = `
-        <div style="background: white; border-radius: 1rem; padding: 1rem; width: 280px;">
-          <input type="email" id="loginEmail" placeholder="Email" style="margin-bottom: 0.5rem;">
-          <input type="password" id="loginPassword" placeholder="Password" style="margin-bottom: 0.5rem;">
-          <button id="loginBtn" class="btn btn-primary btn-sm"><i class="fas fa-sign-in-alt"></i> Login</button>
-          <button id="signupBtn" class="btn btn-outline btn-sm"><i class="fas fa-user-plus"></i> Signup</button>
-          <p id="authMsg" style="font-size:0.7rem; margin-top:0.3rem;"></p>
-        </div>
-      `;
-      document.getElementById('loginBtn').onclick = async () => {
-        const email = document.getElementById('loginEmail').value;
-        const pwd = document.getElementById('loginPassword').value;
-        const res = await apiCall('/api/login', { method: 'POST', body: JSON.stringify({ email, password: pwd }) });
-        if (res.error) alert(res.error); else location.reload();
-      };
-      document.getElementById('signupBtn').onclick = async () => {
-        const email = document.getElementById('loginEmail').value;
-        const pwd = document.getElementById('loginPassword').value;
-        const name = prompt('Your full name:');
-        if (!name) return;
-        const res = await apiCall('/api/signup', { method: 'POST', body: JSON.stringify({ email, password: pwd, name }) });
-        if (res.error) alert(res.error); else location.reload();
-      };
-      memberDash.classList.add('hidden');
+      renderLogin();
     }
   }
 
-  // ----------------------------- Marketplace -----------------------------
+  // Marketplace functions
   async function loadMarketplaceListings() {
     const listings = await apiCall('/api/listings');
     marketplaceDiv.innerHTML = '';
-    if (!listings.length) { marketplaceDiv.innerHTML = '<div class="icon-text"><i class="fas fa-info-circle"></i> No items yet. Be the first to sell!</div>'; return; }
+    if (!listings.length) { marketplaceDiv.innerHTML = '<div><i class="fas fa-info-circle"></i> No items yet. Be the first to sell!</div>'; return; }
     listings.forEach(l => {
       const div = document.createElement('div'); div.className = 'listing-card';
       let adminBtn = '';
       if (currentUser && currentUser.email === 'admin@example.com') {
-        adminBtn = `<button class="btn btn-danger btn-sm" onclick="deleteListing(${l.id})" style="margin-left:0.5rem;"><i class="fas fa-trash-alt"></i> Remove</button>`;
+        adminBtn = `<button class="btn btn-outline btn-sm" onclick="deleteListing(${l.id})" style="margin-left:0.5rem;"><i class="fas fa-trash-alt"></i> Remove</button>`;
       }
-      div.innerHTML = `
-        <div class="flex-between"><strong>${escapeHtml(l.title)}</strong>${adminBtn}</div>
-        <p style="margin: 0.5rem 0;">${escapeHtml(l.description)}</p>
-        <div><span class="badge"><i class="fas fa-tag"></i> JMD ${l.price}</span> <span class="badge"><i class="fas fa-percent"></i> Fee ${l.feePercent}%</span></div>
-        <button onclick="buyListing(${l.id})" class="btn btn-primary btn-sm" style="margin-top:0.75rem;"><i class="fas fa-shopping-cart"></i> Buy Now</button>
-      `;
+      div.innerHTML = `<div class="flex-between"><strong>${escapeHtml(l.title)}</strong>${adminBtn}</div>
+        <p>${escapeHtml(l.description)}</p>
+        <div><span class="badge">JMD ${l.price}</span> <span class="badge">Fee ${l.feePercent}%</span></div>
+        <button onclick="buyListing(${l.id})" class="btn btn-primary btn-sm" style="margin-top:0.5rem;"><i class="fas fa-shopping-cart"></i> Buy Now</button>`;
       marketplaceDiv.appendChild(div);
     });
   }
@@ -350,13 +282,12 @@
     if (res.error) alert(res.error); else { alert('Listing removed'); loadMarketplaceListings(); }
   };
   window.buyListing = async (id) => {
-    if (!currentUser) return alert('Please login to buy');
+    if (!currentUser) return alert('Login to buy');
     const res = await apiCall('/api/purchase', { method: 'POST', body: JSON.stringify({ listingId: id }) });
     if (res.error) alert(res.error); else { alert('Purchase recorded!'); loadMarketplaceListings(); }
   };
-  function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+  function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]; }); }
 
-  // Save phone & post listing
   document.getElementById('savePhoneBtn')?.addEventListener('click', async () => {
     await apiCall('/api/user', { method: 'POST', body: JSON.stringify({ phone: phoneInput.value }) });
     alert('Phone saved!');
@@ -373,100 +304,50 @@
     document.getElementById('itemTitle').value = ''; document.getElementById('itemDesc').value = ''; document.getElementById('itemPrice').value = '';
   });
 
-  // ----------------------------- Google Maps & Places -----------------------------
+  // Google Maps
   function initMap() {
     const defaultLocation = { lat: 18.4655, lng: -77.9223 };
-    map = new google.maps.Map(document.getElementById('map'), {
-      center: defaultLocation,
-      zoom: 14,
-      mapId: 'DEMO_MAP_ID',
-      styles: [{ featureType: 'poi', stylers: [{ visibility: 'off' }] }] // cleaner
-    });
+    map = new google.maps.Map(document.getElementById('map'), { center: defaultLocation, zoom: 14 });
     infoWindow = new google.maps.InfoWindow();
     service = new google.maps.places.PlacesService(map);
-
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const userLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          map.setCenter(userLoc);
-          searchNearbyPlaces(userLoc);
-        },
+        (pos) => { map.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }); searchNearbyPlaces({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
         () => searchNearbyPlaces(defaultLocation)
       );
     } else searchNearbyPlaces(defaultLocation);
-
-    map.addListener('idle', () => {
-      const center = map.getCenter();
-      searchNearbyPlaces({ lat: center.lat(), lng: center.lng() });
-    });
+    map.addListener('idle', () => { const c = map.getCenter(); searchNearbyPlaces({ lat: c.lat(), lng: c.lng() }); });
   }
-
   function searchNearbyPlaces(location) {
-    const request = {
-      location: location,
-      radius: 1500,
-      type: ['store', 'supermarket', 'restaurant', 'cafe', 'pharmacy', 'shopping_mall']
-    };
-    service.nearbySearch(request, (results, status) => {
+    service.nearbySearch({ location, radius: 1500, type: ['store','supermarket','restaurant','cafe','pharmacy','shopping_mall'] }, (results, status) => {
       const placesDiv = document.getElementById('places');
       if (status === google.maps.places.PlacesServiceStatus.OK && results.length) {
-        clearMarkers();
-        placesDiv.innerHTML = '';
+        clearMarkers(); placesDiv.innerHTML = '';
         results.forEach(place => {
-          createMarker(place);
-          const div = document.createElement('div');
-          div.className = 'place';
-          div.innerHTML = `<i class="fas fa-store"></i> ${place.name}`;
-          div.onclick = () => {
-            document.getElementById('storeName').value = place.name;
-            map.setCenter(place.geometry.location);
-            map.setZoom(16);
-            if (place.geometry.viewport) map.fitBounds(place.geometry.viewport);
-            new google.maps.InfoWindow({ content: place.name }).open(map, markers.find(m => m.position.equals(place.geometry.location)));
-          };
+          const marker = new google.maps.Marker({ map, position: place.geometry.location, title: place.name });
+          markers.push(marker);
+          google.maps.event.addListener(marker, 'click', () => infoWindow.setContent(`<strong>${place.name}</strong><br>${place.vicinity || ''}`) && infoWindow.open(map, marker));
+          const div = document.createElement('div'); div.className = 'place'; div.innerHTML = `<i class="fas fa-store"></i> ${place.name}`;
+          div.onclick = () => { document.getElementById('storeName').value = place.name; map.setCenter(place.geometry.location); map.setZoom(16); };
           placesDiv.appendChild(div);
         });
-      } else {
-        placesDiv.innerHTML = '<div style="padding:1rem; text-align:center;"><i class="fas fa-map-pin"></i> No shops found. Move map or zoom out.</div>';
-      }
+      } else placesDiv.innerHTML = '<div style="padding:1rem;"><i class="fas fa-map-pin"></i> No shops found. Move map.</div>';
     });
   }
-
-  function createMarker(place) {
-    const marker = new google.maps.Marker({
-      map: map,
-      position: place.geometry.location,
-      title: place.name,
-      animation: google.maps.Animation.DROP,
-      icon: { url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png' }
-    });
-    markers.push(marker);
-    google.maps.event.addListener(marker, 'click', () => {
-      infoWindow.setContent(`<strong>${place.name}</strong><br>${place.vicinity || ''}`);
-      infoWindow.open(map, marker);
-    });
-  }
-
-  function clearMarkers() {
-    markers.forEach(m => m.setMap(null));
-    markers = [];
-  }
+  function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
   window.initMap = initMap;
 
-  // ----------------------------- Delivery Requests -----------------------------
+  // Delivery requests, tracking, etc. (same as previous working version)
   document.getElementById('requestForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (!currentUser) return alert('Login to post request');
+    if (!currentUser) return alert('Login first');
     const storeName = document.getElementById('storeName').value;
     const itemDesc = document.getElementById('itemDescReq').value;
     const itemCost = parseFloat(document.getElementById('itemCost').value);
     const paymentMethod = document.getElementById('paymentMethod').value;
     await apiCall('/api/requests', { method: 'POST', body: JSON.stringify({ storeName, itemDesc, itemCost, paymentMethod }) });
-    alert('Request posted!');
-    loadRequests();
+    alert('Request posted!'); loadRequests();
   });
-
   async function loadRequests() {
     const reqs = await apiCall('/api/requests');
     const container = document.getElementById('requests');
@@ -475,7 +356,7 @@
       const div = document.createElement('div'); div.className = 'card'; div.style.marginBottom = '1rem';
       let actions = '';
       if (currentUser && currentUser.id !== r.userId && r.status === 'open') {
-        actions = `<button onclick="acceptRequest(${r.id})" class="btn btn-primary btn-sm"><i class="fas fa-check-circle"></i> Accept</button>`;
+        actions = `<button onclick="acceptRequest(${r.id})" class="btn btn-primary btn-sm"><i class="fas fa-check"></i> Accept</button>`;
         if (r.paymentMethod === 'deliverer_fronts') actions += `<button onclick="offerLoan(${r.id})" class="btn btn-outline btn-sm"><i class="fas fa-hand-holding-usd"></i> Front money</button>`;
       }
       div.innerHTML = `<div><strong>${escapeHtml(r.storeName)}</strong><br>${escapeHtml(r.itemDesc)}<br>💰 JMD ${r.itemCost}<br>💳 ${r.paymentMethod}<br>📌 Status: ${r.status}</div><div style="margin-top:0.5rem;">${actions}</div>`;
@@ -484,16 +365,14 @@
   }
   window.acceptRequest = async (id) => {
     await apiCall(`/api/accept?id=${id}`, { method: 'POST', body: JSON.stringify({ delivererId: currentUser.id, delivererName: currentUser.name }) });
-    alert('Request accepted!');
-    loadRequests();
-    loadActiveDeliveries();
+    alert('Accepted!'); loadRequests(); loadActiveDeliveries();
   };
   window.offerLoan = async (id) => {
     const amount = prompt('Amount to front (JMD):');
     if (amount) await apiCall('/api/offerLoan', { method: 'POST', body: JSON.stringify({ requestId: id, delivererId: currentUser.id, amountFronted: parseFloat(amount) }) });
   };
 
-  // ----------------------------- Tracking & Role -----------------------------
+  // Tracking
   let watchId = null;
   const startBtn = document.getElementById('startTrackingBtn');
   const stopBtn = document.getElementById('stopTrackingBtn');
@@ -510,15 +389,9 @@
         await apiCall('/api/updateLocation', { method: 'POST', body: JSON.stringify({ delivererId: currentUser.id, lat: pos.coords.latitude, lon: pos.coords.longitude, status: 'in_progress' }) });
         trackingStatus.innerHTML = `<i class="fas fa-street-view"></i> Live: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
       }, console.error, { enableHighAccuracy: true });
-      startBtn.classList.add('hidden');
-      stopBtn.classList.remove('hidden');
+      startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden');
     };
-    stopBtn.onclick = () => {
-      if (watchId) navigator.geolocation.clearWatch(watchId);
-      startBtn.classList.remove('hidden');
-      stopBtn.classList.add('hidden');
-      trackingStatus.innerHTML = '';
-    };
+    stopBtn.onclick = () => { if (watchId) navigator.geolocation.clearWatch(watchId); startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden'); trackingStatus.innerHTML = ''; };
   } else if (startBtn) { startBtn.style.display = 'none'; stopBtn.style.display = 'none'; }
 
   async function loadActiveDeliveries() {
@@ -539,13 +412,10 @@
   window.confirmDelivery = async (id) => {
     await apiCall('/api/confirmDelivery', { method: 'POST', body: JSON.stringify({ requestId: id, customerId: currentUser.id }) });
     alert('Delivery confirmed. Deliverer will be paid.');
-    loadActiveDeliveries();
-    loadRequests();
+    loadActiveDeliveries(); loadRequests();
   };
-
   setInterval(() => { if (localStorage.getItem('onroadnow_role') === 'buyer') loadActiveDeliveries(); }, 5000);
-  loadRequests();
-  if (localStorage.getItem('onroadnow_role') === 'buyer') loadActiveDeliveries();
+  loadRequests(); if (localStorage.getItem('onroadnow_role') === 'buyer') loadActiveDeliveries();
   checkAuth();
 </script>
 </body>
