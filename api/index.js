@@ -1,5 +1,6 @@
 const axios = require('axios');
 let requests = [];
+let users = []; // In-memory user store; replace with database later
 
 module.exports = async (req, res) => {
   const url = req.url;
@@ -9,17 +10,20 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (method === 'OPTIONS') return res.status(200).end();
 
+  // Nearby places (expanded to all shops, markets, restaurants)
   if (url.startsWith('/api/nearby')) {
-    const { lat, lon, radius = 500 } = req.query;
+    const { lat, lon, radius = 1000 } = req.query;
     const overpassUrl = 'https://overpass-api.de/api/interpreter';
     const query = `
       [out:json];
       (
-        node["amenity"="restaurant"](around:${radius},${lat},${lon});
         node["shop"](around:${radius},${lat},${lon});
+        node["amenity"="restaurant"](around:${radius},${lat},${lon});
         node["amenity"="cafe"](around:${radius},${lat},${lon});
         node["amenity"="pharmacy"](around:${radius},${lat},${lon});
         node["shop"="supermarket"](around:${radius},${lat},${lon});
+        node["amenity"="marketplace"](around:${radius},${lat},${lon});
+        node["shop"="mall"](around:${radius},${lat},${lon});
       );
       out body;
     `;
@@ -34,6 +38,7 @@ module.exports = async (req, res) => {
     return;
   }
 
+  // Create or list delivery requests
   if (url === '/api/requests') {
     if (method === 'POST') {
       const request = { id: Date.now(), ...req.body, status: 'open' };
@@ -47,6 +52,7 @@ module.exports = async (req, res) => {
     return;
   }
 
+  // Accept a request
   if (url.startsWith('/api/accept')) {
     const id = parseInt(req.query.id);
     const request = requests.find(r => r.id === id);
@@ -57,6 +63,21 @@ module.exports = async (req, res) => {
       request.status = 'accepted';
     }
     res.status(200).json(request);
+    return;
+  }
+
+  // Save user profile (ID, TRN, etc.)
+  if (url === '/api/user' && method === 'POST') {
+    const { uid, displayName, email, idNumber, trn, role } = req.body;
+    const existing = users.find(u => u.uid === uid);
+    if (existing) {
+      Object.assign(existing, { idNumber, trn, role });
+      res.status(200).json(existing);
+    } else {
+      const newUser = { uid, displayName, email, idNumber, trn, role, verified: false };
+      users.push(newUser);
+      res.status(200).json(newUser);
+    }
     return;
   }
 

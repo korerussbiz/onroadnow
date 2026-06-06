@@ -2,45 +2,176 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Montego Bay Delivery</title>
+  <title>OnRoadNow - Montego Bay Delivery</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2772533792093956"
+     crossorigin="anonymous"></script>
   <style>
-    body { font-family: Arial; margin:0; padding:20px; }
-    #map { height: 400px; width: 100%; margin-bottom: 20px; }
-    .place-list { margin-top: 20px; }
+    body { font-family: Arial; margin:0; padding:20px; background:#f4f4f4; }
+    #map { height: 400px; width: 100%; margin-bottom: 20px; border-radius: 10px; }
+    .place-list { margin-top: 20px; max-height: 300px; overflow-y: auto; background: white; padding: 10px; border-radius: 10px; }
     .place { cursor: pointer; padding: 8px; border-bottom: 1px solid #ccc; }
-    .place:hover { background: #f0f0f0; }
-    button { padding: 10px; margin: 5px; }
+    .place:hover { background: #e0e0e0; }
+    button, .social-btn { padding: 10px 20px; margin: 5px; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; }
+    .whatsapp { background: #25D366; color: white; }
+    .facebook { background: #1877F2; color: white; }
+    .google { background: #DB4437; color: white; }
+    .paypal { background: #00457C; color: white; }
+    .social-buttons, .auth-section, .profile-section, .donation-section { background: white; padding: 20px; margin: 20px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .ad-container { margin: 20px 0; text-align: center; }
+    input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 5px; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
-  <h1>Nearby Stores & Restaurants (Montego Bay)</h1>
+  <h1>🏍️ OnRoadNow - Montego Bay Delivery</h1>
+  
+  <!-- Authentication Section -->
+  <div class="auth-section" id="authSection">
+    <h3>Login to access all features</h3>
+    <button id="googleLoginBtn" class="social-btn google">🔐 Login with Google</button>
+    <p id="userInfo"></p>
+  </div>
+
+  <!-- Profile Section (after login) -->
+  <div class="profile-section hidden" id="profileSection">
+    <h3>Your Profile</h3>
+    <p><strong>Name:</strong> <span id="profileName"></span></p>
+    <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+    <label>Identification Number (ID):</label>
+    <input type="text" id="idNumber" placeholder="Driver's license or national ID">
+    <label>TRN (Tax Registration Number):</label>
+    <input type="text" id="trn" placeholder="TRN (for business)">
+    <label>I want to:</label>
+    <select id="role">
+      <option value="buyer">Buy goods</option>
+      <option value="deliverer">Deliver goods (earn money)</option>
+    </select>
+    <button id="saveProfileBtn">Save Profile</button>
+    <p id="profileMessage"></p>
+  </div>
+
+  <!-- Map and Places -->
   <div id="map"></div>
   <div class="place-list" id="places"></div>
+
+  <!-- AdSense Ad Unit -->
+  <div class="ad-container">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-2772533792093956"
+         data-ad-slot="YOUR_AD_SLOT_ID"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <!-- Social & Monetization -->
+  <div class="social-buttons">
+    <h3>📱 Connect & Earn</h3>
+    <a href="https://wa.me/18761234567?text=I%20need%20a%20delivery%20driver%20for%20an%20order" target="_blank" class="social-btn whatsapp">📞 Request a Driver (WhatsApp)</a>
+    <a href="#" id="shareWhatsApp" class="social-btn whatsapp">📱 Share on WhatsApp</a>
+    <a href="#" id="shareFacebook" class="social-btn facebook">📘 Share on Facebook</a>
+    <br><br>
+    <a href="https://www.uber.com/ee/earn/?utm_source=affiliate" target="_blank" class="social-btn">🚗 Become a Driver (Uber)</a>
+    <a href="https://www.doordash.com/dasher/signup/" target="_blank" class="social-btn">🛵 Deliver with DoorDash</a>
+    <a href="https://www.gigmile.com/signup" target="_blank" class="social-btn">📦 Gig Economy Apps</a>
+  </div>
+
+  <!-- Donations -->
+  <div class="donation-section">
+    <h3>💖 Support the Developer</h3>
+    <form action="https://www.paypal.com/donate" method="post" target="_top">
+      <input type="hidden" name="hosted_button_id" value="YOUR_PAYPAL_BUTTON_ID" />
+      <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" title="PayPal" alt="Donate with PayPal" />
+    </form>
+    <p>Solana (SOL) donation: <code>9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2</code></p>
+  </div>
+
   <hr>
-  <h2>Create Delivery Request</h2>
+  <h2>📦 Create Delivery Request</h2>
   <form id="requestForm">
-    <input type="text" id="storeName" placeholder="Store name" required><br>
-    <input type="text" id="itemDesc" placeholder="Item description" required><br>
-    <input type="number" id="itemCost" placeholder="Item cost (JMD)" required><br>
+    <input type="text" id="storeName" placeholder="Store name" required>
+    <input type="text" id="itemDesc" placeholder="Item description" required>
+    <input type="number" id="itemCost" placeholder="Item cost (JMD)" required>
     <select id="paymentMethod" required>
       <option value="visa_mc">Visa/Mastercard</option>
       <option value="etransfer">E-Transfer</option>
       <option value="deliverer_fronts">Deliverer Fronts Cost (22.4% fee)</option>
-    </select><br>
+    </select>
     <button type="submit">Post Request</button>
   </form>
   <hr>
-  <h2>Open Requests</h2>
+  <h2>📋 Open Requests</h2>
   <div id="requests"></div>
 
   <script>
+    // ---------- Firebase Configuration (REPLACE WITH YOUR FIREBASE PROJECT DATA) ----------
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      // Add other fields if needed (storageBucket, messagingSenderId, appId)
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    // DOM elements
+    let currentUser = null;
+
+    // Login/Logout UI
+    document.getElementById('googleLoginBtn').addEventListener('click', () => {
+      auth.signInWithPopup(provider).then((result) => {
+        currentUser = result.user;
+        document.getElementById('authSection').innerHTML = `<p>Logged in as ${currentUser.displayName} (${currentUser.email})</p><button id="logoutBtn">Logout</button>`;
+        document.getElementById('profileSection').classList.remove('hidden');
+        document.getElementById('profileName').innerText = currentUser.displayName;
+        document.getElementById('profileEmail').innerText = currentUser.email;
+        document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+        // Load saved profile from backend
+        fetch(`/api/user?uid=${currentUser.uid}`).then(r=>r.json()).then(data=>{
+          if(data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+          if(data.trn) document.getElementById('trn').value = data.trn;
+          if(data.role) document.getElementById('role').value = data.role;
+        }).catch(e=>console.log);
+      }).catch(console.error);
+    });
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        currentUser = null;
+        document.getElementById('authSection').innerHTML = '<h3>Login to access all features</h3><button id="googleLoginBtn" class="social-btn google">🔐 Login with Google</button>';
+        document.getElementById('profileSection').classList.add('hidden');
+        document.getElementById('googleLoginBtn').addEventListener('click', () => auth.signInWithPopup(provider));
+      }
+    });
+
+    // Save profile (ID, TRN, role)
+    document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+      if (!currentUser) return alert('Please login first');
+      const profile = {
+        uid: currentUser.uid,
+        displayName: currentUser.displayName,
+        email: currentUser.email,
+        idNumber: document.getElementById('idNumber').value,
+        trn: document.getElementById('trn').value,
+        role: document.getElementById('role').value
+      };
+      const res = await fetch('/api/user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile) });
+      if (res.ok) document.getElementById('profileMessage').innerText = 'Profile saved!';
+      else alert('Error saving profile');
+    });
+
+    // ---------- Map and nearby places ----------
     const map = L.map('map').setView([18.4655, -77.9223], 14);
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
     }).addTo(map);
-
     let markers = [];
 
     async function fetchNearby(lat, lon) {
@@ -66,15 +197,28 @@
         placesDiv.appendChild(div);
       });
     }
-
     map.on('moveend', () => {
       const center = map.getCenter();
       fetchNearby(center.lat, center.lng);
     });
     fetchNearby(18.4655, -77.9223);
 
+    // ---------- Social sharing ----------
+    document.getElementById('shareWhatsApp').addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = encodeURIComponent(window.location.href);
+      window.open(`https://wa.me/?text=${url}`, '_blank');
+    });
+    document.getElementById('shareFacebook').addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = encodeURIComponent(window.location.href);
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+    });
+
+    // ---------- Delivery requests ----------
     document.getElementById('requestForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!currentUser) return alert('Please login to post a request');
       const storeName = document.getElementById('storeName').value;
       const itemDesc = document.getElementById('itemDesc').value;
       const itemCost = parseFloat(document.getElementById('itemCost').value);
@@ -82,7 +226,7 @@
       const res = await fetch('/api/requests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ storeName, itemDesc, itemCost, paymentMethod })
+        body: JSON.stringify({ storeName, itemDesc, itemCost, paymentMethod, userId: currentUser.uid })
       });
       const request = await res.json();
       alert(`Request posted with ID ${request.id}`);
@@ -110,13 +254,14 @@
           Cost: ${r.itemCost} JMD<br>
           Payment: ${r.paymentMethod}<br>
           Status: ${r.status}${feeNote}
-          <button onclick="acceptRequest(${r.id})">Accept</button>
+          ${currentUser ? `<button onclick="acceptRequest(${r.id})">Accept</button>` : ''}
         `;
         container.appendChild(div);
       });
     }
 
-    async function acceptRequest(id) {
+    window.acceptRequest = async (id) => {
+      if (!currentUser) return alert('Please login to accept');
       const res = await fetch(`/api/accept?id=${id}`, { method: 'POST' });
       if (res.ok) {
         alert('Request accepted');
@@ -124,7 +269,7 @@
       } else {
         alert('Error accepting request');
       }
-    }
+    };
 
     loadRequests();
   </script>
