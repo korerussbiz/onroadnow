@@ -3,291 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>OnRoadNow – Montego Bay Delivery</title>
-  <!-- Leaflet CSS/JS -->
+  <title>OnRoadNow – Honest Delivery</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
-  <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2772533792093956"
      crossorigin="anonymous"></script>
   <style>
+    /* same modern styles as before, plus modal */
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
-      background: #f8fafc;
-      color: #1e293b;
-      padding: 1rem;
-      line-height: 1.5;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    h1, h2, h3 {
-      font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-    h1 {
-      background: linear-gradient(135deg, #0f172a, #1e3a8a);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      margin-bottom: 0.5rem;
-      font-size: 1.8rem;
-    }
-    .card {
-      background: white;
-      border-radius: 1.5rem;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      transition: all 0.2s;
-    }
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-      border-bottom: 2px solid #eef2ff;
-      padding-bottom: 0.75rem;
-    }
-    .card-header h2, .card-header h3 { margin: 0; }
-    .map-container {
-      border-radius: 1.5rem;
-      overflow: hidden;
-      box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05);
-    }
-    #map { height: 400px; width: 100%; }
-    .place-list {
-      max-height: 280px;
-      overflow-y: auto;
-      background: #ffffff;
-      border-radius: 1rem;
-      border: 1px solid #e2e8f0;
-      margin-top: 1rem;
-    }
-    .place {
-      padding: 0.9rem 1rem;
-      border-bottom: 1px solid #f1f5f9;
-      cursor: pointer;
-      transition: background 0.15s;
-      font-weight: 500;
-    }
-    .place:hover { background: #f1f5f9; }
-    .place:last-child { border-bottom: none; }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.6rem 1.2rem;
-      border-radius: 9999px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: #f1f5f9;
-      color: #1e293b;
-    }
-    .btn-primary {
-      background: #2563eb;
-      color: white;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
-    .btn-google { background: #db4437; color: white; }
-    .btn-apple { background: #000000; color: white; }
-    .btn-facebook { background: #1877f2; color: white; }
-    .btn-whatsapp { background: #25d366; color: white; }
-    .btn-outline {
-      background: transparent;
-      border: 1px solid #cbd5e1;
-    }
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    label {
-      font-weight: 500;
-      display: block;
-      margin-bottom: 0.25rem;
-      font-size: 0.9rem;
-    }
-    input, select {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid #cbd5e1;
-      border-radius: 1rem;
-      font-size: 1rem;
-      transition: border 0.2s;
-    }
-    input:focus, select:focus {
-      outline: none;
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
-    .badge {
-      background: #eef2ff;
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: #1e40af;
-    }
+    body { font-family: 'Segoe UI', Roboto, system-ui, sans-serif; background: #f8fafc; padding: 1rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .card { background: white; border-radius: 1.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 1.5rem; }
+    .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; border-bottom: 2px solid #eef2ff; padding-bottom: 0.75rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 9999px; font-weight: 600; border: none; cursor: pointer; background: #f1f5f9; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-warning { background: #eab308; color: black; }
+    .btn-danger { background: #dc2626; color: white; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .form-group { margin-bottom: 1rem; }
+    input, select { width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 1rem; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-content { background: white; max-width: 500px; width: 90%; border-radius: 1.5rem; padding: 1.5rem; }
     .hidden { display: none; }
-    .auth-tabs {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    .tab {
-      padding: 0.5rem 1.2rem;
-      border-radius: 9999px;
-      cursor: pointer;
-      background: #f1f5f9;
-      font-weight: 500;
-    }
-    .tab.active {
-      background: #2563eb;
-      color: white;
-    }
-    .flex-between {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    @media (max-width: 640px) {
-      body { padding: 0.75rem; }
-      .card { padding: 1rem; }
-      h1 { font-size: 1.5rem; }
-    }
+    .badge { background: #eef2ff; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; }
   </style>
 </head>
 <body>
-<div class="container">
-  <!-- Header -->
-  <div class="flex-between" style="margin-bottom: 1.5rem;">
-    <h1>🏍️ OnRoadNow<br><span style="font-size: 0.9rem; font-weight: normal;">Montego Bay – Fast, Fair Delivery</span></h1>
-  </div>
-
-  <!-- Authentication Card -->
-  <div class="card" id="authCard">
-    <div class="card-header">
-      <span>🔐</span>
-      <h3>Customer Access</h3>
-    </div>
-    <div id="authSection">
-      <!-- dynamic content from JS -->
-    </div>
-  </div>
-
-  <!-- Profile Card (hidden until logged in) -->
-  <div class="card hidden" id="profileCard">
-    <div class="card-header">
-      <span>👤</span>
-      <h3>Your Profile</h3>
-    </div>
-    <div id="profileContent"></div>
-  </div>
-
-  <!-- Map & Nearby Shops -->
-  <div class="card">
-    <div class="card-header">
-      <span>📍</span>
-      <h3>Find Stores & Markets</h3>
-    </div>
-    <div class="map-container"><div id="map"></div></div>
-    <div id="places" class="place-list"><div style="padding: 1rem; text-align: center;">Loading nearby places...</div></div>
-  </div>
-
-  <!-- AdSense (optional) -->
-  <div class="card" style="text-align: center;">
-    <ins class="adsbygoogle"
-         style="display:block"
-         data-ad-client="ca-pub-2772533792093956"
-         data-ad-slot="YOUR_AD_SLOT_ID"
-         data-ad-format="auto"
-         data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-  </div>
-
-  <!-- Two columns: Request form & Social/Monetization -->
-  <div class="grid-2">
-    <!-- Create Request -->
-    <div class="card">
-      <div class="card-header">
-        <span>📦</span>
-        <h3>Post a Delivery Request</h3>
-      </div>
-      <form id="requestForm">
-        <div class="form-group"><label>Store name</label><input type="text" id="storeName" placeholder="e.g., MegaMart" required></div>
-        <div class="form-group"><label>Item description</label><input type="text" id="itemDesc" placeholder="What to buy?" required></div>
-        <div class="form-group"><label>Item cost (JMD)</label><input type="number" id="itemCost" placeholder="0.00" required></div>
-        <div class="form-group"><label>Payment method</label>
-          <select id="paymentMethod" required>
-            <option value="visa_mc">💳 Visa/Mastercard</option>
-            <option value="etransfer">📧 E-Transfer</option>
-            <option value="deliverer_fronts">🛵 Deliverer Fronts Cost (+22.4% fee)</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary">Post Request →</button>
-      </form>
-    </div>
-
-    <!-- Social & Earnings -->
-    <div class="card">
-      <div class="card-header">
-        <span>📱</span>
-        <h3>Connect & Earn</h3>
-      </div>
-      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-        <a href="https://wa.me/18761234567?text=I%20need%20a%20delivery%20driver%20for%20an%20order" target="_blank" class="btn btn-whatsapp">📞 Request Driver (WhatsApp)</a>
-        <a href="#" id="shareWhatsApp" class="btn btn-whatsapp">📱 Share via WhatsApp</a>
-        <a href="#" id="shareFacebook" class="btn btn-facebook">📘 Share on Facebook</a>
-      </div>
-      <hr style="margin: 1rem 0;">
-      <div>
-        <p><strong>🚚 Become a delivery partner</strong></p>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-          <a href="https://www.uber.com/ee/earn/?utm_source=affiliate" target="_blank" class="btn btn-outline">Uber Driver</a>
-          <a href="https://www.doordash.com/dasher/signup/" target="_blank" class="btn btn-outline">DoorDash</a>
-          <a href="https://www.gigmile.com/signup" target="_blank" class="btn btn-outline">GigMile</a>
-        </div>
-      </div>
-      <hr style="margin: 1rem 0;">
-      <div>
-        <p><strong>💖 Support OnRoadNow</strong></p>
-        <form action="https://www.paypal.com/donate" method="post" target="_top" style="display: inline-block;">
-          <input type="hidden" name="hosted_button_id" value="YOUR_PAYPAL_BUTTON_ID" />
-          <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" title="PayPal" alt="Donate with PayPal" />
-        </form>
-        <p style="font-size: 0.8rem; margin-top: 0.5rem;">Solana: <code>9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2</code></p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Open Requests -->
-  <div class="card">
-    <div class="card-header">
-      <span>📋</span>
-      <h3>Open Delivery Requests</h3>
-    </div>
-    <div id="requests" style="max-height: 400px; overflow-y: auto;">Loading...</div>
-  </div>
-</div>
+<div class="container" id="app"></div>
 
 <script>
-  // ---------- Firebase config (REPLACE WITH YOUR ACTUAL FIREBASE CONFIG) ----------
+  // Firebase config (REPLACE WITH YOURS)
   const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "YOUR_AUTH_DOMAIN",
@@ -296,241 +43,269 @@
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
 
-  // DOM elements
-  const authSectionDiv = document.getElementById('authSection');
-  const profileCard = document.getElementById('profileCard');
-  const profileContent = document.getElementById('profileContent');
+  // Global state
+  let currentUser = null;
+  let watchId = null;  // geolocation watcher
 
-  // Helper: render auth UI (login/signup tabs)
-  function renderAuthUI() {
-    authSectionDiv.innerHTML = `
-      <div class="auth-tabs">
-        <div class="tab active" id="loginTab">Login</div>
-        <div class="tab" id="signupTab">Signup</div>
-      </div>
-      <div id="loginForm">
-        <div class="form-group"><input type="email" id="loginEmail" placeholder="Email" required></div>
-        <div class="form-group"><input type="password" id="loginPassword" placeholder="Password" required></div>
-        <button id="emailLoginBtn" class="btn btn-primary">Login with Email</button>
-        <button id="googleLoginBtn" class="btn btn-google">Login with Google</button>
-        <button id="appleLoginBtn" class="btn btn-apple" disabled>Apple (soon)</button>
-        <button id="facebookLoginBtn" class="btn btn-facebook" disabled>Facebook (soon)</button>
-        <p id="authMessage" style="margin-top: 1rem;"></p>
-      </div>
-      <div id="signupForm" style="display: none;">
-        <div class="form-group"><input type="text" id="signupName" placeholder="Full Name" required></div>
-        <div class="form-group"><input type="email" id="signupEmail" placeholder="Email" required></div>
-        <div class="form-group"><input type="password" id="signupPassword" placeholder="Password" required></div>
-        <button id="emailSignupBtn" class="btn btn-primary">Create account</button>
-        <button id="googleSignupBtn" class="btn btn-google">Signup with Google</button>
+  // Disclaimer / honesty policy (show once)
+  if (!localStorage.getItem('disclaimerAccepted')) {
+    document.body.innerHTML = `
+      <div class="modal" id="disclaimerModal">
+        <div class="modal-content">
+          <h2>📜 Legal Disclaimer & Honesty Policy</h2>
+          <p>By using OnRoadNow, you agree to the following:</p>
+          <ul>
+            <li>All parties must act honestly. Any theft, fraud, or misrepresentation will result in reporting to local authorities.</li>
+            <li>If funds are stolen, the responsible party must reimburse the full amount plus penalties. Personal information may be forwarded to the police.</li>
+            <li>Deliverers who front money for goods are entitled to repayment + 22.4% fee upon successful delivery.</li>
+            <li>Misuse of location tracking or harassment will lead to permanent ban and legal action.</li>
+          </ul>
+          <p><strong>By clicking "I Agree", you confirm that you have read and accept this policy.</strong></p>
+          <button id="acceptDisclaimer" class="btn btn-primary">I Agree</button>
+        </div>
       </div>
     `;
-    // Tab switching
-    const loginTab = document.getElementById('loginTab');
-    const signupTab = document.getElementById('signupTab');
-    const loginFormDiv = document.getElementById('loginForm');
-    const signupFormDiv = document.getElementById('signupForm');
-    loginTab.addEventListener('click', () => {
-      loginTab.classList.add('active'); signupTab.classList.remove('active');
-      loginFormDiv.style.display = 'block'; signupFormDiv.style.display = 'none';
-    });
-    signupTab.addEventListener('click', () => {
-      signupTab.classList.add('active'); loginTab.classList.remove('active');
-      loginFormDiv.style.display = 'none'; signupFormDiv.style.display = 'block';
-    });
-    // Auth actions
-    document.getElementById('emailLoginBtn').addEventListener('click', () => {
-      const email = document.getElementById('loginEmail').value;
-      const pwd = document.getElementById('loginPassword').value;
-      auth.signInWithEmailAndPassword(email, pwd).catch(e => document.getElementById('authMessage').innerText = e.message);
-    });
-    document.getElementById('emailSignupBtn').addEventListener('click', () => {
-      const name = document.getElementById('signupName').value;
-      const email = document.getElementById('signupEmail').value;
-      const pwd = document.getElementById('signupPassword').value;
-      auth.createUserWithEmailAndPassword(email, pwd).then(cred => {
-        cred.user.updateProfile({ displayName: name });
-      }).catch(e => document.getElementById('authMessage').innerText = e.message);
-    });
-    document.getElementById('googleLoginBtn').addEventListener('click', () => {
-      auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-    });
-    document.getElementById('googleSignupBtn').addEventListener('click', () => {
-      auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-    });
+    document.getElementById('acceptDisclaimer').onclick = () => {
+      localStorage.setItem('disclaimerAccepted', 'true');
+      location.reload();
+    };
+  } else {
+    // Render the main app after auth state
+    renderApp();
   }
 
-  // Show profile after login
-  function showProfile(user) {
-    profileCard.classList.remove('hidden');
-    profileContent.innerHTML = `
-      <p><strong>Name:</strong> ${user.displayName || 'Set your name'}</p>
-      <p><strong>Email:</strong> ${user.email}</p>
-      <div class="form-group"><label>Identification Number</label><input type="text" id="idNumber" placeholder="Driver's license / national ID"></div>
-      <div class="form-group"><label>TRN (Tax Reg. Number)</label><input type="text" id="trn" placeholder="For business"></div>
-      <div class="form-group"><label>I am a</label>
-        <select id="role">
-          <option value="buyer">👤 Customer (buy goods)</option>
-          <option value="deliverer">🛵 Deliverer (earn money)</option>
-        </select>
+  function renderApp() {
+    const appDiv = document.getElementById('app');
+    appDiv.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h1>🏍️ OnRoadNow</h1>
+        <div id="authStatus"></div>
       </div>
-      <button id="saveProfileBtn" class="btn btn-primary">Save Profile</button>
-      <p id="profileMsg" style="margin-top: 0.5rem;"></p>
+      <div id="authCard" class="card"></div>
+      <div id="profileCard" class="card hidden"></div>
+      <div class="card">
+        <div class="card-header"><span>📍</span><h3>Find Stores</h3></div>
+        <div id="map" style="height: 400px;"></div>
+        <div id="places" class="place-list" style="margin-top: 1rem;"></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="card-header"><span>📦</span><h3>Post Request</h3></div>
+          <form id="requestForm">
+            <div class="form-group"><input type="text" id="storeName" placeholder="Store name" required></div>
+            <div class="form-group"><input type="text" id="itemDesc" placeholder="Item description" required></div>
+            <div class="form-group"><input type="number" id="itemCost" placeholder="Item cost (JMD)" required></div>
+            <div class="form-group"><select id="paymentMethod" required>
+              <option value="visa_mc">Visa/Mastercard</option>
+              <option value="etransfer">E-Transfer</option>
+              <option value="deliverer_fronts">Deliverer Fronts Cost (+22.4% fee)</option>
+            </select></div>
+            <button type="submit" class="btn btn-primary">Post Request</button>
+          </form>
+        </div>
+        <div class="card"><div class="card-header"><span>📱</span><h3>Deliverer Tools</h3></div>
+          <div id="delivererControls">
+            <button id="startTrackingBtn" class="btn btn-primary">📍 Start Tracking (go online)</button>
+            <button id="stopTrackingBtn" class="btn btn-warning hidden">🛑 Stop Tracking (offline)</button>
+            <p id="trackingStatus"></p>
+          </div>
+          <hr>
+          <div><strong>Available Deliverers:</strong> <span id="availableCount">0</span></div>
+          <div id="acceptRequestSection" style="margin-top: 1rem;"></div>
+        </div>
+      </div>
+      <div class="card"><div class="card-header"><span>📋</span><h3>Open Requests</h3></div><div id="requests"></div></div>
+      <div class="card"><div class="card-header"><span>🔄</span><h3>My Active Deliveries (Customer view)</h3></div><div id="activeDeliveries"></div></div>
     `;
-    // Load existing profile from backend
-    fetch(`/api/user?uid=${user.uid}`).then(r => r.json()).then(data => {
-      if (data.idNumber) document.getElementById('idNumber').value = data.idNumber;
-      if (data.trn) document.getElementById('trn').value = data.trn;
-      if (data.role) document.getElementById('role').value = data.role;
-    }).catch(()=>{});
-    document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-      const profile = {
-        uid: user.uid,
-        displayName: user.displayName,
-        email: user.email,
-        idNumber: document.getElementById('idNumber').value,
-        trn: document.getElementById('trn').value,
-        role: document.getElementById('role').value
-      };
-      const res = await fetch('/api/user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile) });
-      if (res.ok) document.getElementById('profileMsg').innerText = 'Profile saved!';
-      else alert('Error');
-    });
-    // Add logout button to auth card
-    const authCard = document.getElementById('authCard');
-    const oldHeader = authCard.querySelector('.card-header');
-    const logoutBtn = document.createElement('button');
-    logoutBtn.innerText = 'Logout';
-    logoutBtn.className = 'btn btn-outline';
-    logoutBtn.style.marginLeft = 'auto';
-    logoutBtn.onclick = () => auth.signOut();
-    oldHeader.appendChild(logoutBtn);
-    authSectionDiv.innerHTML = `<p>✅ Logged in as ${user.email}</p>`;
+    // Initialize map and other functions later
+    initMapAndFeatures();
   }
 
-  // Listen to auth state
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      showProfile(user);
-    } else {
-      profileCard.classList.add('hidden');
-      renderAuthUI();
-      // reset auth card header (remove extra logout button)
-      const header = document.getElementById('authCard').querySelector('.card-header');
-      if (header && header.contains(header.querySelector('.btn-outline'))) header.removeChild(header.querySelector('.btn-outline'));
-    }
-  });
+  // Global variables
+  let map, markers = [], placeListDiv, requestForm, requestsDiv, activeDeliveriesDiv;
 
-  // --- Map & places (same as before, but with better error handling) ---
-  const map = L.map('map').setView([18.4655, -77.9223], 14);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-  }).addTo(map);
-  let markers = [];
+  function initMapAndFeatures() {
+    map = L.map('map').setView([18.4655, -77.9223], 14);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OSM' }).addTo(map);
+    placeListDiv = document.getElementById('places');
+    requestForm = document.getElementById('requestForm');
+    requestsDiv = document.getElementById('requests');
+    activeDeliveriesDiv = document.getElementById('activeDeliveries');
 
-  async function fetchNearby(lat, lon) {
-    try {
+    // Nearby places
+    async function fetchNearby(lat, lon) {
       const res = await fetch(`/api/nearby?lat=${lat}&lon=${lon}&radius=1000`);
       const data = await res.json();
-      markers.forEach(m => map.removeLayer(m));
-      markers = [];
-      const placesDiv = document.getElementById('places');
-      placesDiv.innerHTML = '';
-      if (data.elements && data.elements.length) {
+      markers.forEach(m => map.removeLayer(m)); markers = [];
+      placeListDiv.innerHTML = '';
+      if (data.elements?.length) {
         data.elements.forEach(el => {
-          const name = el.tags?.name || 'Unnamed shop';
+          const name = el.tags?.name || 'Unnamed';
           const latlng = [el.lat, el.lon];
           const marker = L.marker(latlng).addTo(map).bindPopup(name);
           markers.push(marker);
-          const div = document.createElement('div');
-          div.className = 'place';
-          div.innerText = name;
-          div.onclick = () => {
-            document.getElementById('storeName').value = name;
-            map.setView(latlng, 16);
-            marker.openPopup();
-          };
-          placesDiv.appendChild(div);
+          const div = document.createElement('div'); div.className = 'place'; div.innerText = name;
+          div.onclick = () => { document.getElementById('storeName').value = name; map.setView(latlng, 16); marker.openPopup(); };
+          placeListDiv.appendChild(div);
         });
-      } else {
-        placesDiv.innerHTML = '<div style="padding:1rem; text-align:center;">No shops found. Try moving the map.</div>';
-      }
-    } catch(e) {
-      document.getElementById('places').innerHTML = '<div style="padding:1rem;">Error loading shops</div>';
+      } else placeListDiv.innerHTML = '<div style="padding:1rem;">No shops. Move map.</div>';
     }
-  }
-  map.on('moveend', () => {
-    const center = map.getCenter();
-    fetchNearby(center.lat, center.lng);
-  });
-  fetchNearby(18.4655, -77.9223);
+    map.on('moveend', () => fetchNearby(map.getCenter().lat, map.getCenter().lng));
+    fetchNearby(18.4655, -77.9223);
 
-  // Social sharing
-  document.getElementById('shareWhatsApp').addEventListener('click', (e) => {
-    e.preventDefault();
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://wa.me/?text=${url}`, '_blank');
-  });
-  document.getElementById('shareFacebook').addEventListener('click', (e) => {
-    e.preventDefault();
-    const url = encodeURIComponent(window.location.href);
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-  });
-
-  // Delivery requests
-  document.getElementById('requestForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const user = auth.currentUser;
-    if (!user) return alert('Please login to post a request');
-    const storeName = document.getElementById('storeName').value;
-    const itemDesc = document.getElementById('itemDesc').value;
-    const itemCost = parseFloat(document.getElementById('itemCost').value);
-    const paymentMethod = document.getElementById('paymentMethod').value;
-    const res = await fetch('/api/requests', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ storeName, itemDesc, itemCost, paymentMethod, userId: user.uid })
-    });
-    const request = await res.json();
-    alert(`Request posted! ID: ${request.id}`);
-    loadRequests();
-  });
-
-  async function loadRequests() {
-    const res = await fetch('/api/requests');
-    const requests = await res.json();
-    const container = document.getElementById('requests');
-    if (!requests.length) { container.innerHTML = '<div style="padding: 1rem;">No open requests yet.</div>'; return; }
-    container.innerHTML = '';
-    requests.forEach(r => {
-      const div = document.createElement('div');
-      div.style.border = '1px solid #e2e8f0';
-      div.style.borderRadius = '1rem';
-      div.style.padding = '1rem';
-      div.style.marginBottom = '1rem';
-      let feeNote = '';
-      if (r.paymentMethod === 'deliverer_fronts') {
-        const fee = r.itemCost * 0.224;
-        feeNote = `<br><span class="badge">Deliverer fronts cost – you receive JMD ${(r.itemCost + fee).toFixed(2)} (fee ${fee.toFixed(2)})</span>`;
+    // ---- Authentication UI ----
+    const authCard = document.getElementById('authCard');
+    const profileCard = document.getElementById('profileCard');
+    function renderAuthUI() {
+      if (currentUser) {
+        authCard.innerHTML = `<div class="card-header"><span>✅</span><h3>Logged in as ${currentUser.email}</h3><button id="logoutBtn" class="btn">Logout</button></div>`;
+        document.getElementById('logoutBtn').onclick = () => auth.signOut();
+        profileCard.classList.remove('hidden');
+        profileCard.innerHTML = `
+          <div class="card-header"><span>👤</span><h3>Your Profile</h3></div>
+          <p><strong>Name:</strong> ${currentUser.displayName || 'Set name'}</p>
+          <p><strong>Email:</strong> ${currentUser.email}</p>
+          <div class="form-group"><label>ID Number</label><input type="text" id="idNumber" placeholder="Driver's license/ID"></div>
+          <div class="form-group"><label>TRN</label><input type="text" id="trn" placeholder="Tax number"></div>
+          <div class="form-group"><label>Role</label><select id="role"><option value="buyer">👤 Customer</option><option value="deliverer">🛵 Deliverer</option></select></div>
+          <button id="saveProfileBtn" class="btn btn-primary">Save Profile</button>
+          <div id="profileMsg"></div>
+        `;
+        fetch(`/api/user?uid=${currentUser.uid}`).then(r=>r.json()).then(data=>{
+          if(data.idNumber) document.getElementById('idNumber').value = data.idNumber;
+          if(data.trn) document.getElementById('trn').value = data.trn;
+          if(data.role) document.getElementById('role').value = data.role;
+        });
+        document.getElementById('saveProfileBtn').onclick = async () => {
+          const profile = { uid: currentUser.uid, displayName: currentUser.displayName, email: currentUser.email, idNumber: document.getElementById('idNumber').value, trn: document.getElementById('trn').value, role: document.getElementById('role').value };
+          await fetch('/api/user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profile) });
+          document.getElementById('profileMsg').innerText = 'Saved!';
+          location.reload(); // refresh UI
+        };
+        // Deliverer availability toggle
+        if (document.getElementById('role').value === 'deliverer') {
+          document.getElementById('delivererControls').classList.remove('hidden');
+        }
+      } else {
+        authCard.innerHTML = `
+          <div class="card-header"><span>🔐</span><h3>Login / Signup</h3></div>
+          <div class="auth-tabs"><div class="tab active" id="loginTab">Login</div><div class="tab" id="signupTab">Signup</div></div>
+          <div id="loginForm"><div class="form-group"><input type="email" id="loginEmail" placeholder="Email"></div><div class="form-group"><input type="password" id="loginPassword" placeholder="Password"></div><button id="emailLoginBtn" class="btn btn-primary">Login</button><button id="googleLoginBtn" class="btn">Google</button><p id="authMsg"></p></div>
+          <div id="signupForm" style="display:none"><div class="form-group"><input type="text" id="signupName" placeholder="Full Name"></div><div class="form-group"><input type="email" id="signupEmail" placeholder="Email"></div><div class="form-group"><input type="password" id="signupPassword" placeholder="Password"></div><button id="emailSignupBtn" class="btn btn-primary">Signup</button><button id="googleSignupBtn" class="btn">Google</button></div>
+        `;
+        // attach events ...
+        document.getElementById('loginTab').onclick = () => { document.getElementById('loginForm').style.display='block'; document.getElementById('signupForm').style.display='none'; };
+        document.getElementById('signupTab').onclick = () => { document.getElementById('signupForm').style.display='block'; document.getElementById('loginForm').style.display='none'; };
+        document.getElementById('emailLoginBtn').onclick = () => { const email=document.getElementById('loginEmail').value, pwd=document.getElementById('loginPassword').value; auth.signInWithEmailAndPassword(email,pwd).catch(e=>document.getElementById('authMsg').innerText=e.message); };
+        document.getElementById('emailSignupBtn').onclick = () => { const name=document.getElementById('signupName').value, email=document.getElementById('signupEmail').value, pwd=document.getElementById('signupPassword').value; auth.createUserWithEmailAndPassword(email,pwd).then(cred=>cred.user.updateProfile({displayName:name})).catch(e=>document.getElementById('authMsg').innerText=e.message); };
+        document.getElementById('googleLoginBtn').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+        document.getElementById('googleSignupBtn').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+        profileCard.classList.add('hidden');
       }
-      div.innerHTML = `
-        <div style="font-weight: 600;">${r.storeName}</div>
-        <div>${r.itemDesc}</div>
-        <div>💰 JMD ${r.itemCost}</div>
-        <div>💳 ${r.paymentMethod}</div>
-        <div>Status: ${r.status}${feeNote}</div>
-        ${auth.currentUser ? `<button class="btn btn-outline" style="margin-top: 0.75rem;" onclick="acceptRequest(${r.id})">Accept this request</button>` : ''}
-      `;
-      container.appendChild(div);
-    });
+    }
+    auth.onAuthStateChanged(user => { currentUser = user; renderAuthUI(); if (user) loadRequests(); else requestsDiv.innerHTML = ''; });
+    renderAuthUI();
+
+    // ---- Request posting ----
+    requestForm.onsubmit = async (e) => {
+      e.preventDefault();
+      if (!currentUser) return alert('Login first');
+      const storeName = document.getElementById('storeName').value;
+      const itemDesc = document.getElementById('itemDesc').value;
+      const itemCost = parseFloat(document.getElementById('itemCost').value);
+      const paymentMethod = document.getElementById('paymentMethod').value;
+      const res = await fetch('/api/requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ storeName, itemDesc, itemCost, paymentMethod, userId: currentUser.uid }) });
+      const data = await res.json();
+      alert(`Request posted #${data.id}`);
+      loadRequests();
+    };
+
+    // ---- Load and display requests, with accept/loan options ----
+    async function loadRequests() {
+      const res = await fetch('/api/requests');
+      const reqs = await res.json();
+      requestsDiv.innerHTML = '';
+      for (const r of reqs) {
+        const div = document.createElement('div'); div.className = 'card'; div.style.marginBottom = '1rem';
+        let actions = '';
+        if (currentUser && r.status === 'open' && currentUser.uid !== r.userId) {
+          // deliverer can accept
+          actions = `<button onclick="acceptRequest(${r.id})" class="btn btn-primary">Accept this request</button>`;
+          if (r.paymentMethod === 'deliverer_fronts') {
+            actions += `<button onclick="offerLoan(${r.id})" class="btn btn-warning">💰 Front money for this order</button>`;
+          }
+        }
+        div.innerHTML = `<div><strong>${r.storeName}</strong><br>${r.itemDesc}<br>Cost: JMD ${r.itemCost}<br>Payment: ${r.paymentMethod}<br>Status: ${r.status}</div><div style="margin-top:0.5rem;">${actions}</div>`;
+        requestsDiv.appendChild(div);
+      }
+    }
+
+    window.acceptRequest = async (requestId) => {
+      if (!currentUser) return alert('Login to accept');
+      const delivererId = currentUser.uid;
+      const delivererName = currentUser.displayName || 'Deliverer';
+      await fetch(`/api/accept?id=${requestId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ delivererId, delivererName }) });
+      alert('Request accepted. Customer notified.');
+      loadRequests();
+      loadActiveDeliveries();
+    };
+
+    window.offerLoan = async (requestId) => {
+      if (!currentUser) return;
+      const amount = prompt('Enter amount you will front (JMD):');
+      if (!amount) return;
+      await fetch('/api/offerLoan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId, delivererId: currentUser.uid, amountFronted: parseFloat(amount) }) });
+      alert('Loan offer recorded. Customer will repay upon delivery confirmation.');
+    };
+
+    // ---- Tracking: deliverer geolocation ----
+    const startBtn = document.getElementById('startTrackingBtn');
+    const stopBtn = document.getElementById('stopTrackingBtn');
+    const trackingStatus = document.getElementById('trackingStatus');
+    if (startBtn) {
+      startBtn.onclick = () => {
+        if (!currentUser) return alert('Login first');
+        if (!navigator.geolocation) return alert('Geolocation not supported');
+        watchId = navigator.geolocation.watchPosition(async (pos) => {
+          const { latitude, longitude } = pos.coords;
+          await fetch('/api/updateLocation', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ delivererId: currentUser.uid, lat: latitude, lon: longitude, status: 'in_progress' }) });
+          trackingStatus.innerText = `Tracking active: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+        }, (err) => console.error(err), { enableHighAccuracy: true, maximumAge: 5000 });
+        startBtn.classList.add('hidden');
+        stopBtn.classList.remove('hidden');
+      };
+      stopBtn.onclick = () => {
+        if (watchId) navigator.geolocation.clearWatch(watchId);
+        startBtn.classList.remove('hidden');
+        stopBtn.classList.add('hidden');
+        trackingStatus.innerText = 'Tracking stopped.';
+      };
+    }
+
+    // ---- Customer view: active deliveries with location ----
+    async function loadActiveDeliveries() {
+      if (!currentUser) return;
+      const res = await fetch('/api/requests');
+      const myRequests = (await res.json()).filter(r => r.userId === currentUser.uid && (r.status === 'accepted' || r.status === 'in_progress'));
+      activeDeliveriesDiv.innerHTML = '';
+      for (const req of myRequests) {
+        const locRes = await fetch(`/api/getLocation?requestId=${req.id}`);
+        const locData = await locRes.json();
+        const div = document.createElement('div'); div.className = 'card';
+        div.innerHTML = `<div><strong>${req.storeName}</strong><br>Deliverer: ${req.delivererName}<br>Status: ${locData.status || 'unknown'}<br>Location: ${locData.location ? `${locData.location.lat.toFixed(5)}, ${locData.location.lon.toFixed(5)}` : 'Not yet available'}</div>
+          ${locData.status === 'in_progress' ? `<button onclick="confirmDelivery(${req.id})" class="btn btn-primary">Confirm Delivery & Release Payment</button>` : ''}
+        `;
+        activeDeliveriesDiv.appendChild(div);
+      }
+    }
+    window.confirmDelivery = async (requestId) => {
+      await fetch('/api/confirmDelivery', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId, customerId: currentUser.uid }) });
+      alert('Delivery confirmed. Deliverer will be paid (including fee). Thank you for using honest service.');
+      loadActiveDeliveries();
+      loadRequests();
+    };
+    setInterval(() => { loadActiveDeliveries(); }, 5000);
+    loadActiveDeliveries();
   }
-  window.acceptRequest = async (id) => {
-    if (!auth.currentUser) return alert('Please login to accept');
-    const res = await fetch(`/api/accept?id=${id}`, { method: 'POST' });
-    if (res.ok) { alert('Request accepted!'); loadRequests(); }
-    else alert('Error accepting');
-  };
-  loadRequests();
 </script>
 </body>
 </html>
