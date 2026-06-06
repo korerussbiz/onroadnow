@@ -8,14 +8,12 @@
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTd4-1QDwlwGxdI22VXpnRop48glDBT0E&libraries=places&callback=initMap" async defer></script>
   <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    /* (keep the same styles as the previous professional version) */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e6f0fa 100%); color: #0f172a; }
     .hero { background: linear-gradient(120deg, #1e3a8a, #2563eb); color: white; padding: 2rem 1.5rem; border-radius: 0 0 2rem 2rem; text-align: center; margin-bottom: 2rem; }
-    .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .hero h1 { font-size: 2.5rem; }
     .container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
     .card { background: white; border-radius: 1.75rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.08); padding: 1.5rem; margin-bottom: 1.8rem; transition: transform 0.2s; }
     .card:hover { transform: translateY(-3px); }
@@ -26,21 +24,19 @@
     .btn-outline { background: transparent; border: 1px solid #cbd5e1; }
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.8rem; }
     .form-group { margin-bottom: 1.2rem; }
-    input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 1rem; font-size: 0.95rem; }
-    #map { height: 450px; border-radius: 1.5rem; margin-top: 0.5rem; box-shadow: 0 4px 10px -2px rgba(0,0,0,0.05); }
+    input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 1rem; }
+    #map { height: 450px; border-radius: 1.5rem; margin-top: 0.5rem; }
     .place-list { max-height: 280px; overflow-y: auto; background: white; border-radius: 1rem; border: 1px solid #e2e8f0; margin-top: 1rem; }
-    .place { padding: 0.8rem 1rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-weight: 500; }
-    .place:hover { background: #f8fafc; }
+    .place { padding: 0.8rem 1rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
     .listing-card { border: 1px solid #e2e8f0; border-radius: 1.2rem; padding: 1.2rem; margin-bottom: 1rem; }
-    .badge { background: #eef2ff; padding: 0.25rem 0.75rem; border-radius: 40px; font-size: 0.7rem; font-weight: 600; color: #1e40af; display: inline-block; }
+    .badge { background: #eef2ff; padding: 0.25rem 0.75rem; border-radius: 40px; font-size: 0.7rem; font-weight: 600; color: #1e40af; }
     .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
     .hidden { display: none; }
     .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-    .modal-content { background: white; max-width: 500px; width: 90%; border-radius: 1.8rem; padding: 1.8rem; }
+    .modal-content { background: white; max-width: 500px; border-radius: 1.8rem; padding: 1.8rem; }
     .tutorial-steps { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
     .step { flex: 1; min-width: 180px; background: #f8fafc; border-radius: 1rem; padding: 1rem; text-align: center; }
     .footer { text-align: center; padding: 1.5rem; color: #64748b; font-size: 0.8rem; }
-    @media (max-width: 640px) { .hero h1 { font-size: 1.8rem; } }
   </style>
 </head>
 <body>
@@ -50,370 +46,118 @@
 </div>
 <div class="container">
   <div id="authSection"></div>
-
-  <!-- Business & Tutorial Card -->
   <div class="card">
     <div class="card-header"><i class="fas fa-info-circle"></i> How It Works</div>
     <div class="tutorial-steps">
-      <div class="step"><i class="fas fa-user-plus fa-2x" style="color:#2563eb;"></i><h4>1. Sign Up</h4><p>Google or Email</p></div>
-      <div class="step"><i class="fas fa-map-marker-alt fa-2x" style="color:#2563eb;"></i><h4>2. Find Store</h4><p>Move the map, click a shop</p></div>
-      <div class="step"><i class="fas fa-clipboard-list fa-2x" style="color:#2563eb;"></i><h4>3. Post Request</h4><p>Describe item & payment</p></div>
-      <div class="step"><i class="fas fa-hand-holding-usd fa-2x" style="color:#2563eb;"></i><h4>4. Earn Money</h4><p>Deliver, get paid +22.4% fee</p></div>
+      <div class="step"><i class="fas fa-user-plus fa-2x"></i><h4>1. Sign Up</h4><p>Google or Email</p></div>
+      <div class="step"><i class="fas fa-map-marker-alt fa-2x"></i><h4>2. Find Store</h4><p>Move map, click a shop</p></div>
+      <div class="step"><i class="fas fa-clipboard-list fa-2x"></i><h4>3. Post Request</h4><p>Describe item & payment</p></div>
+      <div class="step"><i class="fas fa-hand-holding-usd fa-2x"></i><h4>4. Earn Money</h4><p>Deliver, get paid +22.4% fee</p></div>
     </div>
     <p><strong>💰 Fees:</strong> Normal delivery – set your own fee. <strong>Deliverer Fronts Cost</strong> – deliverer pays for item, receives reimbursement +22.4% on delivery confirmation.</p>
   </div>
-
-  <!-- Member Dashboard (after login) -->
   <div id="memberDashboard" class="card hidden">
     <div class="card-header"><i class="fas fa-user-circle"></i> Your Dashboard</div>
-    <div id="profileInfo" style="margin-bottom: 1rem;"></div>
-    <div class="form-group"><label><i class="fas fa-phone-alt"></i> Phone Number (for job contacts)</label><input type="tel" id="phoneInput" placeholder="+1234567890"></div>
-    <button id="savePhoneBtn" class="btn btn-primary"><i class="fas fa-save"></i> Save Phone</button>
-    <hr style="margin: 1rem 0;">
-    <h4><i class="fas fa-chart-line"></i> Your Sales History</h4>
-    <div id="salesLogs" style="max-height: 200px; overflow-y: auto;"></div>
-    <hr>
-    <h4><i class="fas fa-store"></i> Sell an Item</h4>
+    <div id="profileInfo" style="margin-bottom:1rem;"></div>
+    <div class="form-group"><label><i class="fas fa-phone-alt"></i> Phone Number</label><input type="tel" id="phoneInput" placeholder="+1234567890"></div>
+    <button id="savePhoneBtn" class="btn btn-primary">Save Phone</button>
+    <hr><h4>Your Sales History</h4><div id="salesLogs"></div><hr>
+    <h4>Sell an Item</h4>
     <div class="form-group"><input type="text" id="itemTitle" placeholder="Title"></div>
     <div class="form-group"><textarea id="itemDesc" placeholder="Description" rows="2"></textarea></div>
     <div class="form-group"><input type="number" id="itemPrice" placeholder="Price (JMD)"></div>
-    <div class="form-group"><input type="number" id="itemFee" placeholder="Your listing fee % (1-3.8)" value="2"></div>
-    <button id="postListingBtn" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Post Listing</button>
+    <div class="form-group"><input type="number" id="itemFee" placeholder="Fee % (1-3.8)" value="2"></div>
+    <button id="postListingBtn" class="btn btn-primary">Post Listing</button>
   </div>
-
-  <!-- Map Card -->
   <div class="card">
-    <div class="card-header"><i class="fas fa-map-marked-alt"></i> Find Stores & Shops (Google Maps)</div>
+    <div class="card-header"><i class="fas fa-map-marked-alt"></i> Find Stores & Shops</div>
     <div id="map"></div>
-    <div id="places" class="place-list"><div style="padding:1rem;"><i class="fas fa-spinner fa-pulse"></i> Move map to load shops...</div></div>
+    <div id="places" class="place-list"></div>
   </div>
-
-  <!-- Two Columns: Request & Deliverer Tools -->
   <div class="grid-2">
     <div class="card">
       <div class="card-header"><i class="fas fa-truck"></i> Post a Delivery Request</div>
       <form id="requestForm">
-        <div class="form-group"><input type="text" id="storeName" placeholder="Store name" required></div>
-        <div class="form-group"><input type="text" id="itemDescReq" placeholder="Item description" required></div>
-        <div class="form-group"><input type="number" id="itemCost" placeholder="Item cost (JMD)" required></div>
-        <div class="form-group"><select id="paymentMethod" required>
-          <option value="visa_mc">💳 Visa/Mastercard</option>
-          <option value="etransfer">📧 E-Transfer</option>
-          <option value="deliverer_fronts">🛵 Deliverer Fronts Cost (+22.4% fee)</option>
-        </select></div>
-        <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Post Request</button>
+        <div class="form-group"><input type="text" id="storeName" placeholder="Store name"></div>
+        <div class="form-group"><input type="text" id="itemDescReq" placeholder="Item description"></div>
+        <div class="form-group"><input type="number" id="itemCost" placeholder="Item cost (JMD)"></div>
+        <div class="form-group"><select id="paymentMethod"><option value="visa_mc">Visa/Mastercard</option><option value="etransfer">E-Transfer</option><option value="deliverer_fronts">Deliverer Fronts Cost (+22.4% fee)</option></select></div>
+        <button type="submit" class="btn btn-primary">Post Request</button>
       </form>
     </div>
     <div class="card">
       <div class="card-header"><i class="fas fa-tools"></i> Deliverer Tools</div>
       <div id="delivererControls">
-        <button id="startTrackingBtn" class="btn btn-primary"><i class="fas fa-location-dot"></i> Start Tracking (online)</button>
-        <button id="stopTrackingBtn" class="btn btn-outline hidden">🛑 Stop Tracking</button>
-        <p id="trackingStatus" style="margin-top:0.5rem;"></p>
+        <button id="startTrackingBtn" class="btn btn-primary">Start Tracking</button>
+        <button id="stopTrackingBtn" class="btn btn-outline hidden">Stop Tracking</button>
+        <p id="trackingStatus"></p>
       </div>
-      <hr>
-      <p><strong>Your Role:</strong> <select id="roleSelect" style="width: auto;"><option value="buyer">👤 Customer</option><option value="deliverer">🛵 Deliverer</option></select></p>
+      <hr><p>Your Role: <select id="roleSelect"><option value="buyer">Customer</option><option value="deliverer">Deliverer</option></select></p>
     </div>
   </div>
-
-  <!-- Marketplace Listings -->
-  <div class="card">
-    <div class="card-header"><i class="fas fa-shopping-cart"></i> Newest Items for Sale</div>
-    <div id="marketplaceListings"></div>
-  </div>
-
-  <!-- Open Delivery Requests -->
-  <div class="card">
-    <div class="card-header"><i class="fas fa-clipboard-list"></i> Open Delivery Requests</div>
-    <div id="requests"></div>
-  </div>
-
-  <!-- Active Deliveries (Customer view) -->
-  <div class="card">
-    <div class="card-header"><i class="fas fa-sync-alt"></i> Your Active Deliveries</div>
-    <div id="activeDeliveries"></div>
-  </div>
-
-  <div class="footer">
-    <i class="fas fa-shield-alt"></i> OnRoadNow by KorerussBiz – Users assume all liability. <a href="#" id="showDisclaimerLink" style="color:#2563eb;">Legal Disclaimer</a>
-  </div>
+  <div class="card"><div class="card-header"><i class="fas fa-shopping-cart"></i> Newest Items for Sale</div><div id="marketplaceListings"></div></div>
+  <div class="card"><div class="card-header"><i class="fas fa-clipboard-list"></i> Open Delivery Requests</div><div id="requests"></div></div>
+  <div class="card"><div class="card-header"><i class="fas fa-sync-alt"></i> Your Active Deliveries</div><div id="activeDeliveries"></div></div>
+  <div class="footer"><i class="fas fa-shield-alt"></i> OnRoadNow by KorerussBiz – Users assume all liability. <a href="#" id="showDisclaimerLink">Legal Disclaimer</a></div>
 </div>
-
-<!-- Legal Disclaimer Modal -->
-<div id="disclaimerModal" class="modal">
-  <div class="modal-content">
-    <h2><i class="fas fa-gavel"></i> Legal Disclaimer</h2>
-    <p style="margin:1rem 0;">OnRoadNow is a platform connecting users. We are not responsible for illegal or wrongful activities. All transactions are between buyers and sellers/deliverers. By using this site, you agree to follow local laws and assume all risks. <strong>KorerussBiz is not liable for any loss, damage, or dispute.</strong></p>
-    <button id="acceptDisclaimerBtn" class="btn btn-primary">I Understand & Accept</button>
-  </div>
-</div>
-
+<div id="disclaimerModal" class="modal"><div class="modal-content"><h2>Legal Disclaimer</h2><p>OnRoadNow is a platform connecting users. We are not responsible for illegal activities. All transactions are between users. By using this site, you agree to follow local laws and assume all risks. <strong>KorerussBiz is not liable for any loss or dispute.</strong></p><button id="acceptDisclaimerBtn" class="btn btn-primary">I Understand & Accept</button></div></div>
 <script>
-  // Helper API call (credentials included)
   async function apiCall(url, options = {}) {
     const res = await fetch(url, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
     return res.json();
   }
-
   let currentUser = null;
   let map, service, infoWindow, markers = [];
-
-  // DOM elements
-  const authDiv = document.getElementById('authSection');
-  const memberDash = document.getElementById('memberDashboard');
-  const profileInfoDiv = document.getElementById('profileInfo');
-  const phoneInput = document.getElementById('phoneInput');
-  const salesLogsDiv = document.getElementById('salesLogs');
-  const marketplaceDiv = document.getElementById('marketplaceListings');
-
-  // Disclaimer modal
+  const authDiv = document.getElementById('authSection'), memberDash = document.getElementById('memberDashboard'), profileInfoDiv = document.getElementById('profileInfo'), phoneInput = document.getElementById('phoneInput'), salesLogsDiv = document.getElementById('salesLogs'), marketplaceDiv = document.getElementById('marketplaceListings');
   const disclaimerModal = document.getElementById('disclaimerModal');
-  if (!localStorage.getItem('disclaimerAccepted')) {
-    disclaimerModal.style.display = 'flex';
-    document.getElementById('acceptDisclaimerBtn').onclick = () => {
-      localStorage.setItem('disclaimerAccepted', 'true');
-      disclaimerModal.style.display = 'none';
-    };
-  } else disclaimerModal.style.display = 'none';
+  if (!localStorage.getItem('disclaimerAccepted')) { disclaimerModal.style.display = 'flex'; document.getElementById('acceptDisclaimerBtn').onclick = () => { localStorage.setItem('disclaimerAccepted', 'true'); disclaimerModal.style.display = 'none'; }; } else disclaimerModal.style.display = 'none';
   document.getElementById('showDisclaimerLink').onclick = (e) => { e.preventDefault(); disclaimerModal.style.display = 'flex'; };
-
-  // ---- Google Sign-In callback ----
   function handleCredentialResponse(response) {
-    fetch('/api/auth/google', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ credential: response.credential })
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.user) location.reload();
-      else alert('Google login failed');
-    });
+    fetch('/api/auth/google', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ credential: response.credential }) })
+    .then(res => res.json()).then(data => { if (data.user) location.reload(); else alert('Google login failed'); });
   }
-
-  // Render login UI (Google + email/password)
   function renderLogin() {
-    authDiv.innerHTML = `
-      <div style="background: white; border-radius: 1.5rem; padding: 1.2rem;">
-        <div id="g_id_onload"
-             data-client_id="143959632064-fckvs74sau6obig3fun6kdokfj5t2p3f.apps.googleusercontent.com"
-             data-callback="handleCredentialResponse"
-             data-auto_prompt="false">
-        </div>
-        <div class="g_id_signin"
-             data-type="standard"
-             data-size="large"
-             data-theme="outline"
-             data-text="sign_in_with"
-             data-shape="rectangular"
-             data-logo_alignment="left">
-        </div>
-        <div style="margin: 1rem 0; text-align: center;">or</div>
-        <div class="flex-between" style="gap:0.5rem;">
-          <input type="email" id="loginEmail" placeholder="Email" style="flex:1;">
-          <input type="password" id="loginPassword" placeholder="Password" style="flex:1;">
-          <button id="emailLoginBtn" class="btn btn-primary">Login</button>
-          <button id="emailSignupBtn" class="btn btn-outline">Signup</button>
-        </div>
-        <p id="authMsg" style="font-size:0.7rem; margin-top:0.5rem;"></p>
-      </div>
-    `;
-    document.getElementById('emailLoginBtn').onclick = async () => {
-      const email = document.getElementById('loginEmail').value;
-      const pwd = document.getElementById('loginPassword').value;
-      const res = await apiCall('/api/login', { method: 'POST', body: JSON.stringify({ email, password: pwd }) });
-      if (res.error) document.getElementById('authMsg').innerText = res.error;
-      else location.reload();
-    };
-    document.getElementById('emailSignupBtn').onclick = async () => {
-      const email = document.getElementById('loginEmail').value;
-      const pwd = document.getElementById('loginPassword').value;
-      const name = prompt('Your full name:');
-      if (!name) return;
-      const res = await apiCall('/api/signup', { method: 'POST', body: JSON.stringify({ email, password: pwd, name }) });
-      if (res.error) document.getElementById('authMsg').innerText = res.error;
-      else location.reload();
-    };
+    authDiv.innerHTML = `<div style="background:white;border-radius:1.5rem;padding:1.2rem;"><div id="g_id_onload" data-client_id="143959632064-fckvs74sau6obig3fun6kdokfj5t2p3f.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div><div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with" data-shape="rectangular"></div><div style="margin:1rem 0;text-align:center;">or</div><div class="flex-between"><input type="email" id="loginEmail" placeholder="Email"><input type="password" id="loginPassword" placeholder="Password"><button id="emailLoginBtn" class="btn btn-primary">Login</button><button id="emailSignupBtn" class="btn btn-outline">Signup</button></div><p id="authMsg"></p></div>`;
+    document.getElementById('emailLoginBtn').onclick = async () => { const email = document.getElementById('loginEmail').value, pwd = document.getElementById('loginPassword').value; const res = await apiCall('/api/login', { method: 'POST', body: JSON.stringify({ email, password: pwd }) }); if (res.error) document.getElementById('authMsg').innerText = res.error; else location.reload(); };
+    document.getElementById('emailSignupBtn').onclick = async () => { const email = document.getElementById('loginEmail').value, pwd = document.getElementById('loginPassword').value, name = prompt('Your full name:'); if (!name) return; const res = await apiCall('/api/signup', { method: 'POST', body: JSON.stringify({ email, password: pwd, name }) }); if (res.error) document.getElementById('authMsg').innerText = res.error; else location.reload(); };
   }
-
-  // Check if user is already authenticated via our backend
   async function checkAuth() {
     const data = await apiCall('/api/me');
     if (data.id) {
       currentUser = data;
-      authDiv.innerHTML = `<div class="flex-between"><span><i class="fas fa-user-check"></i> ${data.email}</span><button id="logoutBtn" class="btn btn-outline"><i class="fas fa-sign-out-alt"></i> Logout</button></div>`;
-      document.getElementById('logoutBtn').onclick = async () => {
-        await apiCall('/api/logout', { method: 'POST' });
-        location.reload();
-      };
+      authDiv.innerHTML = `<div class="flex-between"><span><i class="fas fa-user-check"></i> ${data.email}</span><button id="logoutBtn" class="btn btn-outline">Logout</button></div>`;
+      document.getElementById('logoutBtn').onclick = async () => { await apiCall('/api/logout', { method: 'POST' }); location.reload(); };
       memberDash.classList.remove('hidden');
-      profileInfoDiv.innerHTML = `<div><i class="fas fa-id-card"></i> ${data.name || data.email} &nbsp;|&nbsp; <i class="fas fa-envelope"></i> ${data.email}</div>`;
+      profileInfoDiv.innerHTML = `<div><i class="fas fa-id-card"></i> ${data.name || data.email} &nbsp;|&nbsp; ${data.email}</div>`;
       phoneInput.value = data.phone || '';
-      // Load sales
       const sales = await apiCall('/api/sales');
       salesLogsDiv.innerHTML = sales.map(s => `<div><i class="fas fa-receipt"></i> Sold for JMD ${s.amount} (fee ${s.fee}) on ${new Date(s.timestamp).toLocaleString()}</div>`).join('') || '<div>No sales yet.</div>';
       loadMarketplaceListings();
-    } else {
-      renderLogin();
-    }
+    } else renderLogin();
   }
-
-  // Marketplace functions
   async function loadMarketplaceListings() {
     const listings = await apiCall('/api/listings');
     marketplaceDiv.innerHTML = '';
-    if (!listings.length) { marketplaceDiv.innerHTML = '<div><i class="fas fa-info-circle"></i> No items yet. Be the first to sell!</div>'; return; }
-    listings.forEach(l => {
-      const div = document.createElement('div'); div.className = 'listing-card';
-      let adminBtn = '';
-      if (currentUser && currentUser.email === 'admin@example.com') {
-        adminBtn = `<button class="btn btn-outline btn-sm" onclick="deleteListing(${l.id})" style="margin-left:0.5rem;"><i class="fas fa-trash-alt"></i> Remove</button>`;
-      }
-      div.innerHTML = `<div class="flex-between"><strong>${escapeHtml(l.title)}</strong>${adminBtn}</div>
-        <p>${escapeHtml(l.description)}</p>
-        <div><span class="badge">JMD ${l.price}</span> <span class="badge">Fee ${l.feePercent}%</span></div>
-        <button onclick="buyListing(${l.id})" class="btn btn-primary btn-sm" style="margin-top:0.5rem;"><i class="fas fa-shopping-cart"></i> Buy Now</button>`;
-      marketplaceDiv.appendChild(div);
-    });
+    if (!listings.length) { marketplaceDiv.innerHTML = '<div>No items yet. Be the first to sell!</div>'; return; }
+    listings.forEach(l => { let adminBtn = ''; if (currentUser && currentUser.email === 'admin@example.com') adminBtn = `<button onclick="deleteListing(${l.id})" class="btn btn-outline btn-sm">Remove</button>`; const div = document.createElement('div'); div.className = 'listing-card'; div.innerHTML = `<div class="flex-between"><strong>${escapeHtml(l.title)}</strong>${adminBtn}</div><p>${escapeHtml(l.description)}</p><div><span class="badge">JMD ${l.price}</span> <span class="badge">Fee ${l.feePercent}%</span></div><button onclick="buyListing(${l.id})" class="btn btn-primary btn-sm">Buy Now</button>`; marketplaceDiv.appendChild(div); });
   }
-  window.deleteListing = async (id) => {
-    if (!confirm('Remove this listing?')) return;
-    const res = await apiCall('/api/listings', { method: 'DELETE', body: JSON.stringify({ id }) });
-    if (res.error) alert(res.error); else { alert('Listing removed'); loadMarketplaceListings(); }
-  };
-  window.buyListing = async (id) => {
-    if (!currentUser) return alert('Login to buy');
-    const res = await apiCall('/api/purchase', { method: 'POST', body: JSON.stringify({ listingId: id }) });
-    if (res.error) alert(res.error); else { alert('Purchase recorded!'); loadMarketplaceListings(); }
-  };
-  function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m) { return { '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m]; }); }
-
-  document.getElementById('savePhoneBtn')?.addEventListener('click', async () => {
-    await apiCall('/api/user', { method: 'POST', body: JSON.stringify({ phone: phoneInput.value }) });
-    alert('Phone saved!');
-  });
-  document.getElementById('postListingBtn')?.addEventListener('click', async () => {
-    if (!currentUser) return alert('Login first');
-    const title = document.getElementById('itemTitle').value;
-    const description = document.getElementById('itemDesc').value;
-    const price = parseFloat(document.getElementById('itemPrice').value);
-    const feePercent = parseFloat(document.getElementById('itemFee').value);
-    if (!title || !description || isNaN(price)) return alert('Fill all fields');
-    await apiCall('/api/listings', { method: 'POST', body: JSON.stringify({ title, description, price, feePercent }) });
-    alert('Listing posted!'); loadMarketplaceListings();
-    document.getElementById('itemTitle').value = ''; document.getElementById('itemDesc').value = ''; document.getElementById('itemPrice').value = '';
-  });
-
-  // Google Maps
-  function initMap() {
-    const defaultLocation = { lat: 18.4655, lng: -77.9223 };
-    map = new google.maps.Map(document.getElementById('map'), { center: defaultLocation, zoom: 14 });
-    infoWindow = new google.maps.InfoWindow();
-    service = new google.maps.places.PlacesService(map);
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => { map.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }); searchNearbyPlaces({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
-        () => searchNearbyPlaces(defaultLocation)
-      );
-    } else searchNearbyPlaces(defaultLocation);
-    map.addListener('idle', () => { const c = map.getCenter(); searchNearbyPlaces({ lat: c.lat(), lng: c.lng() }); });
-  }
-  function searchNearbyPlaces(location) {
-    service.nearbySearch({ location, radius: 1500, type: ['store','supermarket','restaurant','cafe','pharmacy','shopping_mall'] }, (results, status) => {
-      const placesDiv = document.getElementById('places');
-      if (status === google.maps.places.PlacesServiceStatus.OK && results.length) {
-        clearMarkers(); placesDiv.innerHTML = '';
-        results.forEach(place => {
-          const marker = new google.maps.Marker({ map, position: place.geometry.location, title: place.name });
-          markers.push(marker);
-          google.maps.event.addListener(marker, 'click', () => infoWindow.setContent(`<strong>${place.name}</strong><br>${place.vicinity || ''}`) && infoWindow.open(map, marker));
-          const div = document.createElement('div'); div.className = 'place'; div.innerHTML = `<i class="fas fa-store"></i> ${place.name}`;
-          div.onclick = () => { document.getElementById('storeName').value = place.name; map.setCenter(place.geometry.location); map.setZoom(16); };
-          placesDiv.appendChild(div);
-        });
-      } else placesDiv.innerHTML = '<div style="padding:1rem;"><i class="fas fa-map-pin"></i> No shops found. Move map.</div>';
-    });
-  }
+  window.deleteListing = async (id) => { if (!confirm('Remove this listing?')) return; const res = await apiCall('/api/listings', { method: 'DELETE', body: JSON.stringify({ id }) }); if (res.error) alert(res.error); else { alert('Listing removed'); loadMarketplaceListings(); } };
+  window.buyListing = async (id) => { if (!currentUser) return alert('Login to buy'); const res = await apiCall('/api/purchase', { method: 'POST', body: JSON.stringify({ listingId: id }) }); if (res.error) alert(res.error); else { alert('Purchase recorded!'); loadMarketplaceListings(); } };
+  function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])) : ''; }
+  document.getElementById('savePhoneBtn')?.addEventListener('click', async () => { await apiCall('/api/user', { method: 'POST', body: JSON.stringify({ phone: phoneInput.value }) }); alert('Phone saved!'); });
+  document.getElementById('postListingBtn')?.addEventListener('click', async () => { if (!currentUser) return alert('Login first'); const title = document.getElementById('itemTitle').value, description = document.getElementById('itemDesc').value, price = parseFloat(document.getElementById('itemPrice').value), feePercent = parseFloat(document.getElementById('itemFee').value); if (!title || !description || isNaN(price)) return alert('Fill all fields'); await apiCall('/api/listings', { method: 'POST', body: JSON.stringify({ title, description, price, feePercent }) }); alert('Listing posted!'); loadMarketplaceListings(); document.getElementById('itemTitle').value = ''; document.getElementById('itemDesc').value = ''; document.getElementById('itemPrice').value = ''; });
+  function initMap() { const defaultLocation = { lat: 18.4655, lng: -77.9223 }; map = new google.maps.Map(document.getElementById('map'), { center: defaultLocation, zoom: 14 }); infoWindow = new google.maps.InfoWindow(); service = new google.maps.places.PlacesService(map); if (navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => { map.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }); searchNearbyPlaces({ lat: pos.coords.latitude, lng: pos.coords.longitude }); }, () => searchNearbyPlaces(defaultLocation)); else searchNearbyPlaces(defaultLocation); map.addListener('idle', () => { const c = map.getCenter(); searchNearbyPlaces({ lat: c.lat(), lng: c.lng() }); }); }
+  function searchNearbyPlaces(location) { service.nearbySearch({ location, radius: 1500, type: ['store','supermarket','restaurant','cafe','pharmacy'] }, (results, status) => { const placesDiv = document.getElementById('places'); if (status === google.maps.places.PlacesServiceStatus.OK && results.length) { clearMarkers(); placesDiv.innerHTML = ''; results.forEach(place => { const marker = new google.maps.Marker({ map, position: place.geometry.location, title: place.name }); markers.push(marker); google.maps.event.addListener(marker, 'click', () => infoWindow.setContent(`<strong>${place.name}</strong><br>${place.vicinity || ''}`) && infoWindow.open(map, marker)); const div = document.createElement('div'); div.className = 'place'; div.innerHTML = `<i class="fas fa-store"></i> ${place.name}`; div.onclick = () => { document.getElementById('storeName').value = place.name; map.setCenter(place.geometry.location); map.setZoom(16); }; placesDiv.appendChild(div); }); } else placesDiv.innerHTML = '<div style="padding:1rem;">No shops found. Move map.</div>'; }); }
   function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
   window.initMap = initMap;
-
-  // Delivery requests, tracking, etc. (same as previous working version)
-  document.getElementById('requestForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!currentUser) return alert('Login first');
-    const storeName = document.getElementById('storeName').value;
-    const itemDesc = document.getElementById('itemDescReq').value;
-    const itemCost = parseFloat(document.getElementById('itemCost').value);
-    const paymentMethod = document.getElementById('paymentMethod').value;
-    await apiCall('/api/requests', { method: 'POST', body: JSON.stringify({ storeName, itemDesc, itemCost, paymentMethod }) });
-    alert('Request posted!'); loadRequests();
-  });
-  async function loadRequests() {
-    const reqs = await apiCall('/api/requests');
-    const container = document.getElementById('requests');
-    container.innerHTML = '';
-    reqs.forEach(r => {
-      const div = document.createElement('div'); div.className = 'card'; div.style.marginBottom = '1rem';
-      let actions = '';
-      if (currentUser && currentUser.id !== r.userId && r.status === 'open') {
-        actions = `<button onclick="acceptRequest(${r.id})" class="btn btn-primary btn-sm"><i class="fas fa-check"></i> Accept</button>`;
-        if (r.paymentMethod === 'deliverer_fronts') actions += `<button onclick="offerLoan(${r.id})" class="btn btn-outline btn-sm"><i class="fas fa-hand-holding-usd"></i> Front money</button>`;
-      }
-      div.innerHTML = `<div><strong>${escapeHtml(r.storeName)}</strong><br>${escapeHtml(r.itemDesc)}<br>💰 JMD ${r.itemCost}<br>💳 ${r.paymentMethod}<br>📌 Status: ${r.status}</div><div style="margin-top:0.5rem;">${actions}</div>`;
-      container.appendChild(div);
-    });
-  }
-  window.acceptRequest = async (id) => {
-    await apiCall(`/api/accept?id=${id}`, { method: 'POST', body: JSON.stringify({ delivererId: currentUser.id, delivererName: currentUser.name }) });
-    alert('Accepted!'); loadRequests(); loadActiveDeliveries();
-  };
-  window.offerLoan = async (id) => {
-    const amount = prompt('Amount to front (JMD):');
-    if (amount) await apiCall('/api/offerLoan', { method: 'POST', body: JSON.stringify({ requestId: id, delivererId: currentUser.id, amountFronted: parseFloat(amount) }) });
-  };
-
-  // Tracking
-  let watchId = null;
-  const startBtn = document.getElementById('startTrackingBtn');
-  const stopBtn = document.getElementById('stopTrackingBtn');
-  const trackingStatus = document.getElementById('trackingStatus');
-  const roleSelect = document.getElementById('roleSelect');
-  if (roleSelect) {
-    roleSelect.value = localStorage.getItem('onroadnow_role') || 'buyer';
-    roleSelect.onchange = (e) => { localStorage.setItem('onroadnow_role', e.target.value); location.reload(); };
-  }
-  if (startBtn && currentUser && localStorage.getItem('onroadnow_role') === 'deliverer') {
-    startBtn.onclick = () => {
-      if (!navigator.geolocation) return alert('Geolocation not supported');
-      watchId = navigator.geolocation.watchPosition(async (pos) => {
-        await apiCall('/api/updateLocation', { method: 'POST', body: JSON.stringify({ delivererId: currentUser.id, lat: pos.coords.latitude, lon: pos.coords.longitude, status: 'in_progress' }) });
-        trackingStatus.innerHTML = `<i class="fas fa-street-view"></i> Live: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
-      }, console.error, { enableHighAccuracy: true });
-      startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden');
-    };
-    stopBtn.onclick = () => { if (watchId) navigator.geolocation.clearWatch(watchId); startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden'); trackingStatus.innerHTML = ''; };
-  } else if (startBtn) { startBtn.style.display = 'none'; stopBtn.style.display = 'none'; }
-
-  async function loadActiveDeliveries() {
-    if (localStorage.getItem('onroadnow_role') !== 'buyer') return;
-    if (!currentUser) return;
-    const reqs = await apiCall('/api/requests');
-    const myRequests = reqs.filter(r => r.userId === currentUser.id && (r.status === 'accepted' || r.status === 'in_progress'));
-    const container = document.getElementById('activeDeliveries');
-    container.innerHTML = '';
-    for (const req of myRequests) {
-      const locData = await apiCall(`/api/getLocation?requestId=${req.id}`);
-      const div = document.createElement('div'); div.className = 'card';
-      div.innerHTML = `<div><strong>${escapeHtml(req.storeName)}</strong><br><i class="fas fa-user"></i> Deliverer: ${req.delivererName}<br><i class="fas fa-map-marker-alt"></i> Status: ${locData.status}<br><i class="fas fa-location-dot"></i> Location: ${locData.location ? `${locData.location.lat.toFixed(5)}, ${locData.location.lon.toFixed(5)}` : 'Not yet'}</div>
-        ${locData.status === 'in_progress' ? `<button onclick="confirmDelivery(${req.id})" class="btn btn-primary btn-sm"><i class="fas fa-check-double"></i> Confirm Delivery & Release Payment</button>` : ''}`;
-      container.appendChild(div);
-    }
-  }
-  window.confirmDelivery = async (id) => {
-    await apiCall('/api/confirmDelivery', { method: 'POST', body: JSON.stringify({ requestId: id, customerId: currentUser.id }) });
-    alert('Delivery confirmed. Deliverer will be paid.');
-    loadActiveDeliveries(); loadRequests();
-  };
+  document.getElementById('requestForm').addEventListener('submit', async (e) => { e.preventDefault(); if (!currentUser) return alert('Login first'); await apiCall('/api/requests', { method: 'POST', body: JSON.stringify({ storeName: document.getElementById('storeName').value, itemDesc: document.getElementById('itemDescReq').value, itemCost: parseFloat(document.getElementById('itemCost').value), paymentMethod: document.getElementById('paymentMethod').value }) }); alert('Request posted!'); loadRequests(); });
+  async function loadRequests() { const reqs = await apiCall('/api/requests'); const container = document.getElementById('requests'); container.innerHTML = ''; reqs.forEach(r => { const div = document.createElement('div'); div.className = 'card'; let actions = ''; if (currentUser && currentUser.id !== r.userId && r.status === 'open') { actions = `<button onclick="acceptRequest(${r.id})" class="btn btn-primary btn-sm">Accept</button>`; if (r.paymentMethod === 'deliverer_fronts') actions += `<button onclick="offerLoan(${r.id})" class="btn btn-outline btn-sm">Front money</button>`; } div.innerHTML = `<div><strong>${escapeHtml(r.storeName)}</strong><br>${escapeHtml(r.itemDesc)}<br>💰 JMD ${r.itemCost}<br>💳 ${r.paymentMethod}<br>📌 ${r.status}</div><div>${actions}</div>`; container.appendChild(div); }); }
+  window.acceptRequest = async (id) => { await apiCall(`/api/accept?id=${id}`, { method: 'POST', body: JSON.stringify({ delivererId: currentUser.id, delivererName: currentUser.name }) }); alert('Accepted!'); loadRequests(); loadActiveDeliveries(); };
+  window.offerLoan = async (id) => { const amount = prompt('Amount to front (JMD):'); if (amount) await apiCall('/api/offerLoan', { method: 'POST', body: JSON.stringify({ requestId: id, delivererId: currentUser.id, amountFronted: parseFloat(amount) }) }); };
+  let watchId = null; const startBtn = document.getElementById('startTrackingBtn'), stopBtn = document.getElementById('stopTrackingBtn'), trackingStatus = document.getElementById('trackingStatus'), roleSelect = document.getElementById('roleSelect'); if (roleSelect) { roleSelect.value = localStorage.getItem('onroadnow_role') || 'buyer'; roleSelect.onchange = (e) => { localStorage.setItem('onroadnow_role', e.target.value); location.reload(); }; }
+  if (startBtn && currentUser && localStorage.getItem('onroadnow_role') === 'deliverer') { startBtn.onclick = () => { if (!navigator.geolocation) return alert('Geolocation not supported'); watchId = navigator.geolocation.watchPosition(async (pos) => { await apiCall('/api/updateLocation', { method: 'POST', body: JSON.stringify({ delivererId: currentUser.id, lat: pos.coords.latitude, lon: pos.coords.longitude, status: 'in_progress' }) }); trackingStatus.innerHTML = `<i class="fas fa-street-view"></i> Live: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`; }, console.error, { enableHighAccuracy: true }); startBtn.classList.add('hidden'); stopBtn.classList.remove('hidden'); }; stopBtn.onclick = () => { if (watchId) navigator.geolocation.clearWatch(watchId); startBtn.classList.remove('hidden'); stopBtn.classList.add('hidden'); trackingStatus.innerHTML = ''; }; } else if (startBtn) { startBtn.style.display = 'none'; stopBtn.style.display = 'none'; }
+  async function loadActiveDeliveries() { if (localStorage.getItem('onroadnow_role') !== 'buyer' || !currentUser) return; const reqs = await apiCall('/api/requests'); const myRequests = reqs.filter(r => r.userId === currentUser.id && (r.status === 'accepted' || r.status === 'in_progress')); const container = document.getElementById('activeDeliveries'); container.innerHTML = ''; for (const req of myRequests) { const locData = await apiCall(`/api/getLocation?requestId=${req.id}`); const div = document.createElement('div'); div.className = 'card'; div.innerHTML = `<div><strong>${escapeHtml(req.storeName)}</strong><br>Deliverer: ${req.delivererName}<br>Status: ${locData.status}<br>Location: ${locData.location ? `${locData.location.lat.toFixed(5)}, ${locData.location.lon.toFixed(5)}` : 'Not yet'}</div>${locData.status === 'in_progress' ? `<button onclick="confirmDelivery(${req.id})" class="btn btn-primary btn-sm">Confirm Delivery & Release Payment</button>` : ''}`; container.appendChild(div); } }
+  window.confirmDelivery = async (id) => { await apiCall('/api/confirmDelivery', { method: 'POST', body: JSON.stringify({ requestId: id, customerId: currentUser.id }) }); alert('Delivery confirmed. Deliverer will be paid.'); loadActiveDeliveries(); loadRequests(); };
   setInterval(() => { if (localStorage.getItem('onroadnow_role') === 'buyer') loadActiveDeliveries(); }, 5000);
   loadRequests(); if (localStorage.getItem('onroadnow_role') === 'buyer') loadActiveDeliveries();
   checkAuth();
