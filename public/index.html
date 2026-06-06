@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>OnRoadNow – Global Delivery</title>
-  <link rel="stylesheet" href="https://maps.googleapis.com/maps/api/js?key=AIzaSyCL8gl-udgvUL12xUdluxQKggzR-p9YNAE&libraries=places&callback=initMap" async defer>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OnRoadNow – Delivery</title>
   <style>
-    /* same styles as before */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 1rem; }
     .container { max-width: 1200px; margin: 0 auto; }
@@ -21,8 +19,8 @@
     .place-list { max-height: 300px; overflow-y: auto; background: white; border-radius: 1rem; border: 1px solid #e2e8f0; margin-top: 1rem; }
     .place { padding: 0.9rem 1rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
     .place:hover { background: #f1f5f9; }
-    #map { height: 400px; border-radius: 1rem; margin-bottom: 1rem; width: 100%; }
-    .badge { background: #eef2ff; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; }
+    #map { height: 400px; border-radius: 1rem; margin-bottom: 1rem; width: 100%; background: #eef2ff; display: flex; align-items: center; justify-content: center; }
+    .error-message { color: red; text-align: center; padding: 2rem; }
     .hidden { display: none; }
     .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
     .tutorial-step { margin-bottom: 1rem; padding-left: 1.5rem; border-left: 3px solid #2563eb; }
@@ -35,65 +33,35 @@
     <div>👤 <span id="userIdDisplay">Guest</span> <button id="changeUserIdBtn" class="btn">Change ID</button></div>
   </div>
 
-  <!-- Business Description & Tutorial Card -->
+  <!-- Business Info Card -->
   <div class="card">
-    <div class="card-header">
-      <span>💼</span>
-      <h3>How OnRoadNow Works – Earn Money as a Deliverer</h3>
-    </div>
+    <div class="card-header"><span>💼</span><h3>How OnRoadNow Works – Earn Money as a Deliverer</h3></div>
     <p><strong>OnRoadNow</strong> connects people who need items from local stores with deliverers who can pick up and deliver them. It's a simple way to earn extra cash using your own time and vehicle.</p>
     <br>
     <h4>💰 Fees & Earnings</h4>
-    <ul>
-      <li><strong>Standard delivery</strong>: Buyer pays the delivery fee (set by deliverer).</li>
-      <li><strong>"Deliverer Fronts Cost"</strong> – If the buyer doesn't have a card or e‑transfer, the deliverer can pay for the item upfront. The buyer reimburses the item cost <strong>+ 22.4% fee</strong> upon delivery confirmation.</li>
-      <li><strong>Example</strong>: Item costs JMD 1000. Deliverer fronts JMD 1000. Upon delivery, buyer pays JMD 1224 (1000 + 224 fee). Deliverer recovers JMD 1000 + JMD 224 profit.</li>
-    </ul>
+    <ul><li><strong>Standard delivery</strong>: Buyer pays delivery fee.</li><li><strong>"Deliverer Fronts Cost"</strong> – Deliverer pays upfront, receives +22.4% fee upon delivery.</li><li><strong>Example</strong>: Item JMD 1000 → Deliverer fronts JMD 1000 → upon confirmation receives JMD 1224.</li></ul>
     <br>
     <h4>📱 Step‑by‑Step Tutorial</h4>
-    <div class="tutorial-step">
-      <strong>1. Sign up / Change User ID</strong><br>
-      Click "Change ID" (top right) to set a unique nickname. This identifies you in the system.
-    </div>
-    <div class="tutorial-step">
-      <strong>2. Choose your role</strong><br>
-      In "Deliverer Tools" set your role to <strong>Customer</strong> (to request deliveries) or <strong>Deliverer</strong> (to earn money).
-    </div>
-    <div class="tutorial-step">
-      <strong>3. Find a store</strong><br>
-      Move the Google Map to any location worldwide. It will automatically show nearby shops, restaurants, and markets. Click any place to pre‑fill the store name.
-    </div>
-    <div class="tutorial-step">
-      <strong>4. Post a request (as Customer)</strong><br>
-      Fill in the item description and cost, choose payment method, and submit. Your request will appear in "Open Requests".
-    </div>
-    <div class="tutorial-step">
-      <strong>5. Accept a request (as Deliverer)</strong><br>
-      Browse open requests. If you accept, you agree to buy and deliver the item. For "Deliverer Fronts Cost", you also offer to pay the store upfront. After delivery, the customer confirms, and you receive the item cost + 22.4% fee.
-    </div>
-    <div class="tutorial-step">
-      <strong>6. Track your delivery</strong><br>
-      Deliverers can share their live location (Start Tracking). Customers can see where the deliverer is on the map (in "Your Active Deliveries").
-    </div>
-    <div class="tutorial-step">
-      <strong>7. Confirm delivery & get paid</strong><br>
-      When the item reaches the customer, they click "Confirm Delivery". Funds are automatically released to the deliverer (simulated). In real implementation, this would trigger a payment transfer.
-    </div>
-    <br>
-    <p><em>OnRoadNow is operated by KorerussBiz. We charge a small platform fee (included in the 22.4% rate) to cover costs.</em></p>
+    <div class="tutorial-step"><strong>1.</strong> Change User ID (top right) to set a nickname.</div>
+    <div class="tutorial-step"><strong>2.</strong> Choose role: Customer or Deliverer.</div>
+    <div class="tutorial-step"><strong>3.</strong> Move the map to any location – nearby stores appear.</div>
+    <div class="tutorial-step"><strong>4.</strong> Click a store to pre‑fill, post a request.</div>
+    <div class="tutorial-step"><strong>5.</strong> Deliverers accept requests; for "Fronts Cost", offer to pay upfront.</div>
+    <div class="tutorial-step"><strong>6.</strong> Deliverer shares live location (Start Tracking). Customer sees location.</div>
+    <div class="tutorial-step"><strong>7.</strong> Customer confirms delivery → deliverer gets paid (item + fee).</div>
+    <p><em>OnRoadNow by KorerussBiz. Platform fee included in 22.4%.</em></p>
   </div>
 
-  <!-- Map Card -->
+  <!-- Map Card with Fallback -->
   <div class="card">
     <div class="card-header"><span>📍</span><h3>Find Stores & Shops Worldwide</h3></div>
     <div id="map"></div>
-    <div id="places" class="place-list"><div style="padding:1rem;">Move map to load shops...</div></div>
+    <div id="places" class="place-list"><div style="padding:1rem;">Loading nearby shops...</div></div>
   </div>
 
-  <!-- Two columns: Request form & Deliverer tools -->
+  <!-- Two columns -->
   <div class="grid-2">
-    <div class="card">
-      <div class="card-header"><span>📦</span><h3>Post a Request</h3></div>
+    <div class="card"><div class="card-header"><span>📦</span><h3>Post a Request</h3></div>
       <form id="requestForm">
         <div class="form-group"><input type="text" id="storeName" placeholder="Store name" required></div>
         <div class="form-group"><input type="text" id="itemDesc" placeholder="Item description" required></div>
@@ -106,34 +74,23 @@
         <button type="submit" class="btn btn-primary">Post Request</button>
       </form>
     </div>
-    <div class="card">
-      <div class="card-header"><span>📱</span><h3>Deliverer Tools</h3></div>
+    <div class="card"><div class="card-header"><span>📱</span><h3>Deliverer Tools</h3></div>
       <div id="delivererControls">
-        <button id="startTrackingBtn" class="btn btn-primary">📍 Start Tracking (go online)</button>
-        <button id="stopTrackingBtn" class="btn btn-warning hidden">🛑 Stop Tracking (offline)</button>
+        <button id="startTrackingBtn" class="btn btn-primary">📍 Start Tracking</button>
+        <button id="stopTrackingBtn" class="btn btn-warning hidden">🛑 Stop Tracking</button>
         <p id="trackingStatus"></p>
       </div>
       <hr>
       <p><strong>Your Role:</strong> <select id="roleSelect"><option value="buyer">Customer</option><option value="deliverer">Deliverer</option></select></p>
-      <p>Available deliverers: <span id="availCount">0</span></p>
     </div>
   </div>
 
-  <!-- Open Requests -->
-  <div class="card">
-    <div class="card-header"><span>📋</span><h3>Open Requests</h3></div>
-    <div id="requests"></div>
-  </div>
-
-  <!-- Active Deliveries -->
-  <div class="card">
-    <div class="card-header"><span>🔄</span><h3>Your Active Deliveries (Customer view)</h3></div>
-    <div id="activeDeliveries"></div>
-  </div>
+  <div class="card"><div class="card-header"><span>📋</span><h3>Open Requests</h3></div><div id="requests"></div></div>
+  <div class="card"><div class="card-header"><span>🔄</span><h3>Your Active Deliveries</h3></div><div id="activeDeliveries"></div></div>
 </div>
 
 <script>
-  // Simple user ID (no Firebase)
+  // User ID
   let currentUserId = localStorage.getItem('onroadnow_userId') || 'user_' + Math.random().toString(36).substr(2, 8);
   localStorage.setItem('onroadnow_userId', currentUserId);
   document.getElementById('userIdDisplay').innerText = currentUserId.substr(0, 8);
@@ -150,17 +107,19 @@
     location.reload();
   };
 
+  // Google Maps initialization with error handling
   let map, service, infowindow;
   let markers = [];
   const placesDiv = document.getElementById('places');
+  const mapDiv = document.getElementById('map');
 
   function initMap() {
+    if (!window.google || !window.google.maps) {
+      mapDiv.innerHTML = '<div class="error-message">⚠️ Google Maps failed to load. Check API key and billing.</div>';
+      return;
+    }
     const defaultLocation = { lat: 18.4655, lng: -77.9223 };
-    map = new google.maps.Map(document.getElementById('map'), {
-      center: defaultLocation,
-      zoom: 14,
-      mapId: 'DEMO_MAP_ID'
-    });
+    map = new google.maps.Map(mapDiv, { center: defaultLocation, zoom: 14 });
     infowindow = new google.maps.InfoWindow();
     service = new google.maps.places.PlacesService(map);
 
@@ -184,6 +143,7 @@
   }
 
   function searchNearbyPlaces(location) {
+    if (!service) return;
     const request = {
       location: location,
       radius: 1500,
@@ -231,7 +191,7 @@
 
   window.initMap = initMap;
 
-  // --- Request logic (same as before) ---
+  // Request logic (same as before)
   document.getElementById('requestForm').onsubmit = async (e) => {
     e.preventDefault();
     const storeName = document.getElementById('storeName').value;
@@ -257,11 +217,9 @@
       let actions = '';
       if (currentRole === 'deliverer' && r.status === 'open' && r.userId !== currentUserId) {
         actions = `<button onclick="acceptRequest(${r.id})" class="btn btn-primary">Accept</button>`;
-        if (r.paymentMethod === 'deliverer_fronts') {
-          actions += `<button onclick="offerLoan(${r.id})" class="btn btn-warning">💰 Front money</button>`;
-        }
+        if (r.paymentMethod === 'deliverer_fronts') actions += `<button onclick="offerLoan(${r.id})" class="btn btn-warning">💰 Front money</button>`;
       }
-      div.innerHTML = `<div><strong>${r.storeName}</strong><br>${r.itemDesc}<br>Cost: JMD ${r.itemCost}<br>Payment: ${r.paymentMethod}<br>Status: ${r.status}</div><div style="margin-top:0.5rem;">${actions}</div>`;
+      div.innerHTML = `<div><strong>${r.storeName}</strong><br>${r.itemDesc}<br>Cost: JMD ${r.itemCost}<br>Payment: ${r.paymentMethod}<br>Status: ${r.status}</div><div>${actions}</div>`;
       container.appendChild(div);
     }
   }
@@ -273,13 +231,9 @@
   };
   window.offerLoan = async (id) => {
     const amount = prompt('Amount to front (JMD):');
-    if (amount) {
-      await fetch('/api/offerLoan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: id, delivererId: currentUserId, amountFronted: parseFloat(amount) }) });
-      alert('Loan offer recorded');
-    }
+    if (amount) await fetch('/api/offerLoan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requestId: id, delivererId: currentUserId, amountFronted: parseFloat(amount) }) });
   };
 
-  // Tracking
   let watchId = null;
   const startBtn = document.getElementById('startTrackingBtn');
   const stopBtn = document.getElementById('stopTrackingBtn');
@@ -331,5 +285,7 @@
   loadRequests();
   if (currentRole === 'buyer') loadActiveDeliveries();
 </script>
+<!-- Google Maps API (key updated) -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCL8gl-udgvUL12xUdluxQKggzR-p9YNAE&libraries=places&callback=initMap&v=weekly"></script>
 </body>
 </html>
