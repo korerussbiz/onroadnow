@@ -1,0 +1,12 @@
+{
+  "name": "onroadnow",
+  "version": "1.0.0",
+  "description": "Montego Bay delivery request system",
+  "main": "api/index.js",
+  "scripts": {
+    "vercel-build": "echo done"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
