@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>OnRoadNow – Global Delivery with Google Maps</title>
+  <title>OnRoadNow – Global Delivery</title>
+  <link rel="stylesheet" href="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places&callback=initMap" async defer>
   <style>
+    /* same styles as before */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 1rem; }
     .container { max-width: 1200px; margin: 0 auto; }
@@ -23,9 +25,8 @@
     .badge { background: #eef2ff; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; }
     .hidden { display: none; }
     .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+    .tutorial-step { margin-bottom: 1rem; padding-left: 1.5rem; border-left: 3px solid #2563eb; }
   </style>
-  <!-- Google Maps API (replace YOUR_API_KEY) -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places&callback=initMap" async defer></script>
 </head>
 <body>
 <div class="container">
@@ -33,11 +34,63 @@
     <h1>🏍️ OnRoadNow</h1>
     <div>👤 <span id="userIdDisplay">Guest</span> <button id="changeUserIdBtn" class="btn">Change ID</button></div>
   </div>
+
+  <!-- Business Description & Tutorial Card -->
   <div class="card">
-    <div class="card-header"><span>📍</span><h3>Find Stores & Shops Worldwide (Google Maps)</h3></div>
-    <div id="map"></div>
-    <div id="places" class="place-list"><div style="padding:1rem; text-align:center;">Loading nearby shops...</div></div>
+    <div class="card-header">
+      <span>💼</span>
+      <h3>How OnRoadNow Works – Earn Money as a Deliverer</h3>
+    </div>
+    <p><strong>OnRoadNow</strong> connects people who need items from local stores with deliverers who can pick up and deliver them. It's a simple way to earn extra cash using your own time and vehicle.</p>
+    <br>
+    <h4>💰 Fees & Earnings</h4>
+    <ul>
+      <li><strong>Standard delivery</strong>: Buyer pays the delivery fee (set by deliverer).</li>
+      <li><strong>"Deliverer Fronts Cost"</strong> – If the buyer doesn't have a card or e‑transfer, the deliverer can pay for the item upfront. The buyer reimburses the item cost <strong>+ 22.4% fee</strong> upon delivery confirmation.</li>
+      <li><strong>Example</strong>: Item costs JMD 1000. Deliverer fronts JMD 1000. Upon delivery, buyer pays JMD 1224 (1000 + 224 fee). Deliverer recovers JMD 1000 + JMD 224 profit.</li>
+    </ul>
+    <br>
+    <h4>📱 Step‑by‑Step Tutorial</h4>
+    <div class="tutorial-step">
+      <strong>1. Sign up / Change User ID</strong><br>
+      Click "Change ID" (top right) to set a unique nickname. This identifies you in the system.
+    </div>
+    <div class="tutorial-step">
+      <strong>2. Choose your role</strong><br>
+      In "Deliverer Tools" set your role to <strong>Customer</strong> (to request deliveries) or <strong>Deliverer</strong> (to earn money).
+    </div>
+    <div class="tutorial-step">
+      <strong>3. Find a store</strong><br>
+      Move the Google Map to any location worldwide. It will automatically show nearby shops, restaurants, and markets. Click any place to pre‑fill the store name.
+    </div>
+    <div class="tutorial-step">
+      <strong>4. Post a request (as Customer)</strong><br>
+      Fill in the item description and cost, choose payment method, and submit. Your request will appear in "Open Requests".
+    </div>
+    <div class="tutorial-step">
+      <strong>5. Accept a request (as Deliverer)</strong><br>
+      Browse open requests. If you accept, you agree to buy and deliver the item. For "Deliverer Fronts Cost", you also offer to pay the store upfront. After delivery, the customer confirms, and you receive the item cost + 22.4% fee.
+    </div>
+    <div class="tutorial-step">
+      <strong>6. Track your delivery</strong><br>
+      Deliverers can share their live location (Start Tracking). Customers can see where the deliverer is on the map (in "Your Active Deliveries").
+    </div>
+    <div class="tutorial-step">
+      <strong>7. Confirm delivery & get paid</strong><br>
+      When the item reaches the customer, they click "Confirm Delivery". Funds are automatically released to the deliverer (simulated). In real implementation, this would trigger a payment transfer.
+    </div>
+    <br>
+    <p><em>OnRoadNow is operated by KorerussBiz. We charge a small platform fee (included in the 22.4% rate) to cover costs.</em></p>
   </div>
+
+  <!-- Map Card -->
+  <div class="card">
+    <div class="card-header"><span>📍</span><h3>Find Stores & Shops Worldwide</h3></div>
+    <div id="map"></div>
+    <div id="places" class="place-list"><div style="padding:1rem;">Move map to load shops...</div></div>
+  </div>
+
+  <!-- Two columns: Request form & Deliverer tools -->
   <div class="grid-2">
     <div class="card">
       <div class="card-header"><span>📦</span><h3>Post a Request</h3></div>
@@ -65,10 +118,14 @@
       <p>Available deliverers: <span id="availCount">0</span></p>
     </div>
   </div>
+
+  <!-- Open Requests -->
   <div class="card">
     <div class="card-header"><span>📋</span><h3>Open Requests</h3></div>
     <div id="requests"></div>
   </div>
+
+  <!-- Active Deliveries -->
   <div class="card">
     <div class="card-header"><span>🔄</span><h3>Your Active Deliveries (Customer view)</h3></div>
     <div id="activeDeliveries"></div>
@@ -98,7 +155,6 @@
   const placesDiv = document.getElementById('places');
 
   function initMap() {
-    // Try to get user's location, fallback to Montego Bay
     const defaultLocation = { lat: 18.4655, lng: -77.9223 };
     map = new google.maps.Map(document.getElementById('map'), {
       center: defaultLocation,
@@ -146,7 +202,6 @@
             document.getElementById('storeName').value = place.name;
             map.setCenter(place.geometry.location);
             map.setZoom(16);
-            google.maps.event.trigger(map, 'resize');
           };
           placesDiv.appendChild(div);
         });
@@ -174,10 +229,9 @@
     markers = [];
   }
 
-  // Global callback for Google Maps
   window.initMap = initMap;
 
-  // --- Request logic (same as before, unchanged) ---
+  // --- Request logic (same as before) ---
   document.getElementById('requestForm').onsubmit = async (e) => {
     e.preventDefault();
     const storeName = document.getElementById('storeName').value;
