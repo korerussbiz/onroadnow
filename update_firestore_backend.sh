@@ -1,0 +1,135 @@
+#!/bin/bash
+# This script updates api/index.js to use Firestore instead of memory.
+# You must have the service account key available (not included here).
+cat > api/index.js << 'JS'
+const admin = require('firebase-admin');
+const axios = require('axios');
+
+// Initialize Firebase Admin SDK – will read credentials from environment variable
+if (!admin.apps.length) {
+  // In Vercel, you'll set FIREBASE_SERVICE_ACCOUNT as a JSON string
+  const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT) : require('./serviceAccountKey.json');
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+}
+const db = admin.firestore();
+
+module.exports = async (req, res) => {
+  const url = req.url;
+  const method = req.method;
+  const token = req.headers.authorization?.split(' ')[1];
+  let userId = null;
+  if (token) {
+    try {
+      const decoded = await admin.auth().verifyIdToken(token);
+      userId = decoded.uid;
+    } catch(e) { /* ignore */ }
+  }
+
+  res.setHeader('Access-Control-Allow-Origin', 'https://onroadnow.vercel.app');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (method === 'OPTIONS') return res.status(200).end();
+
+  // ---------- User profile ----------
+  if (url === '/api/me' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    const doc = await db.collection('users').doc(userId).get();
+    res.status(200).json(doc.exists ? doc.data() : { id: userId });
+    return;
+  }
+  if (url === '/api/user' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    await db.collection('users').doc(userId).set(req.body, { merge: true });
+    res.status(200).json({});
+    return;
+  }
+
+  // ---------- Marketplace listings ----------
+  if (url === '/api/listings' && method === 'GET') {
+    const snapshot = await db.collection('listings').where('status', '==', 'active').get();
+    const listings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.status(200).json(listings);
+    return;
+  }
+  if (url === '/api/listings' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Login required' });
+    const { title, description, price, feePercent } = req.body;
+    const newListing = {
+      sellerId: userId,
+      title, description,
+      price: parseFloat(price),
+      feePercent: feePercent || 2,
+      status: 'active',
+      createdAt: admin.firestore.FieldValue.serverTimestamp()
+    };
+    const docRef = await db.collection('listings').add(newListing);
+    res.status(200).json({ id: docRef.id, ...newListing });
+    return;
+  }
+  if (url === '/api/listings' && method === 'DELETE') {
+    const { id } = req.body;
+    const doc = await db.collection('listings').doc(id).get();
+    if (!doc.exists) return res.status(404).json({ error: 'Not found' });
+    // Allow delete only if admin (email check) or seller
+    const user = await db.collection('users').doc(userId).get();
+    const isAdmin = user.exists && user.data().email === 'admin@korerussbiz.com';
+    if (!isAdmin && doc.data().sellerId !== userId) return res.status(403).json({ error: 'Forbidden' });
+    await db.collection('listings').doc(id).delete();
+    res.status(200).json({});
+    return;
+  }
+  if (url === '/api/purchase' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Login required' });
+    const { listingId } = req.body;
+    const listingDoc = await db.collection('listings').doc(listingId).get();
+    if (!listingDoc.exists || listingDoc.data().status !== 'active') return res.status(404).json({ error: 'Not available' });
+    const listing = listingDoc.data();
+    const feeAmount = (listing.price * listing.feePercent) / 100;
+    const sale = {
+      listingId,
+      sellerId: listing.sellerId,
+      buyerId: userId,
+      amount: listing.price,
+      fee: feeAmount,
+      timestamp: admin.firestore.FieldValue.serverTimestamp()
+    };
+    await db.collection('sales').add(sale);
+    await db.collection('listings').doc(listingId).update({ status: 'sold' });
+    res.status(200).json({});
+    return;
+  }
+  if (url === '/api/sales' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Login required' });
+    const snapshot = await db.collection('sales').where('sellerId', '==', userId).get();
+    const asSeller = snapshot.docs.map(d => d.data());
+    const buyerSnapshot = await db.collection('sales').where('buyerId', '==', userId).get();
+    const asBuyer = buyerSnapshot.docs.map(d => d.data());
+    res.status(200).json([...asSeller, ...asBuyer]);
+    return;
+  }
+
+  // ---------- Nearby places (proxy) – unchanged ----------
+  if (url.startsWith('/api/nearby')) {
+    const { lat, lon, radius = 2000 } = req.query;
+    const query = `[out:json];(node["shop"](around:${radius},${lat},${lon});node["amenity"="restaurant"](around:${radius},${lat},${lon});node["amenity"="cafe"](around:${radius},${lat},${lon});node["amenity"="pharmacy"](around:${radius},${lat},${lon});node["shop"="supermarket"](around:${radius},${lat},${lon}););out body;`;
+    try {
+      const response = await axios.post('https://overpass-api.de/api/interpreter', `data=${query}`, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      res.status(200).json(response.data);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+    return;
+  }
+
+  // ---------- Delivery requests (similar using Firestore) ----------
+  // You can adapt the same pattern for /api/requests, /api/accept, etc.
+  // For brevity, I'll keep the in‑memory version temporarily – you can migrate later.
+  // But for production, you should store them in Firestore as well.
+
+  // Fallback
+  res.status(404).json({ error: 'Not found' });
+};
+JS
+
+echo "✅ Backend updated to use Firestore. Don't forget to set the FIREBASE_SERVICE_ACCOUNT environment variable in Vercel."

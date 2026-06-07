@@ -1,0 +1,406 @@
+#!/bin/bash
+
+# Create koreruss40.env with all keys
+cat > koreruss40.env << 'ENV'
+# Google Maps API key
+GOOGLE_MAPS_API_KEY=AIzaSyCTd4-1QDwlwGxdI22VXpnRop48glDBT0E
+# Firebase Web Client ID (OAuth)
+FIREBASE_WEB_CLIENT_ID=134628093591-61nk4mneo6d1o6of5da3e3fijgtd5dd0.apps.googleusercontent.com
+# Firebase Browser API Key
+FIREBASE_API_KEY=AIzaSyBrldf3h28e9_Dwjrp2zZL21EJzxp_1MSk
+# Firebase OAuth Client ID (alternative, not used but saved)
+GOOGLE_OAUTH_CLIENT_ID=143959632064-fckvs74sau6obig3fun6kdokfj5t2p3f.apps.googleusercontent.com
+# JWT secret for backend (random)
+JWT_SECRET=onroadnow_super_secret_key_2025
+# Admin email
+ADMIN_EMAIL=admin@korerussbiz.com
+ENV
+
+# Backup old files
+[ -f public/index.html ] && cp public/index.html public/index.html.bak
+[ -f api/index.js ] && cp api/index.js api/index.js.bak
+
+# Write public/index.html with all keys embedded
+cat > public/index.html << 'HTML'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OnRoadNow – Delivery & Marketplace</title>
+  <!-- Google Maps (using your key) -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTd4-1QDwlwGxdI22VXpnRop48glDBT0E&libraries=places&callback=initMap" async defer></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* same styles as before – keep */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #f3f6fc; color: #1e293b; }
+    .hero { background: linear-gradient(135deg, #0f2b5e, #1e4a8a); color: white; padding: 3rem 1.5rem; text-align: center; margin-bottom: 2rem; }
+    .hero h1 { font-size: 2.5rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
+    .card { background: white; border-radius: 1.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 2rem; }
+    .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 2px solid #e0e7ff; padding-bottom: 0.75rem; font-weight: 700; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-google { background: #db4437; color: white; }
+    .btn-outline { background: transparent; border: 1px solid #cbd5e1; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+    .form-group { margin-bottom: 1rem; }
+    input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 1rem; }
+    #map { height: 400px; border-radius: 1rem; margin-top: 1rem; background: #e2e8f0; }
+    .place-list { max-height: 250px; overflow-y: auto; background: white; border-radius: 1rem; border: 1px solid #e2e8f0; margin-top: 1rem; }
+    .place { padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+    .listing-card { border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; }
+    .badge { background: #eef2ff; padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 600; color: #1e40af; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .hidden { display: none; }
+    .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
+    .tab { padding: 0.5rem 1rem; cursor: pointer; border-radius: 2rem; }
+    .tab.active { background: #2563eb; color: white; }
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; margin-top: -40px; margin-left: 1rem; }
+    .footer { text-align: center; margin-top: 2rem; padding: 1rem; color: #64748b; }
+    .tutorial-steps { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+    .step { flex: 1; min-width: 180px; background: #f8fafc; border-radius: 1rem; padding: 1rem; text-align: center; }
+  </style>
+</head>
+<body>
+<div class="hero">
+  <h1>🏍️ OnRoadNow</h1>
+  <p>Jamaica's delivery & marketplace – earn, sell, connect</p>
+</div>
+<div class="container">
+  <div id="authSection"></div>
+
+  <!-- Business Description & Tutorial -->
+  <div class="card">
+    <div class="card-header"><i class="fas fa-info-circle"></i> How It Works</div>
+    <p><strong>OnRoadNow</strong> connects people who need items delivered with local deliverers. Post a request, accept jobs, sell items, and earn money.</p>
+    <div class="tutorial-steps">
+      <div class="step"><i class="fas fa-user-plus fa-2x"></i><h4>1. Sign Up</h4><p>Google or Email</p></div>
+      <div class="step"><i class="fas fa-map-marker-alt fa-2x"></i><h4>2. Find Store</h4><p>Move the map</p></div>
+      <div class="step"><i class="fas fa-clipboard-list fa-2x"></i><h4>3. Post Request</h4><p>Describe item & location</p></div>
+      <div class="step"><i class="fas fa-hand-holding-usd fa-2x"></i><h4>4. Earn Money</h4><p>Accept & deliver</p></div>
+    </div>
+  </div>
+
+  <div id="memberDashboard" class="card hidden">
+    <div style="background: linear-gradient(45deg, #1e3a8a, #2563eb); height: 100px; border-radius: 1rem 1rem 0 0; margin: -1.5rem -1.5rem 0 -1.5rem;"></div>
+    <div class="flex-between" style="margin-top: -40px; padding: 0 1rem;">
+      <img id="profileAvatar" class="profile-avatar" src="https://via.placeholder.com/80">
+      <div><button id="changeAvatarBtn" class="btn btn-outline btn-sm">Change Avatar</button></div>
+    </div>
+    <div id="profileInfo" style="margin: 1rem 1rem 0 1rem;"></div>
+    <div class="tabs">
+      <div class="tab active" data-tab="profile">Profile</div>
+      <div class="tab" data-tab="sales">Sales</div>
+      <div class="tab" data-tab="deliveries">Deliveries</div>
+      <div class="tab" id="adminTab">Admin</div>
+    </div>
+    <div id="profileTab" class="tab-content">
+      <div class="form-group"><label>📞 Phone</label><input type="tel" id="phoneInput" placeholder="+1234567890"></div>
+      <div class="form-group"><label>👤 Full Name</label><input type="text" id="fullNameInput" placeholder="Your name"></div>
+      <button id="saveProfileBtn" class="btn btn-primary">Save Profile</button>
+    </div>
+    <div id="salesTab" class="tab-content hidden"><div id="salesLogs"></div></div>
+    <div id="deliveriesTab" class="tab-content hidden"><div id="activeDeliveries"></div></div>
+    <div id="adminTabContent" class="tab-content hidden"><h4>Admin Controls</h4><div id="adminListings"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><i class="fas fa-map-marker-alt"></i> Nearby Stores (Google Maps)</div>
+    <div id="map"></div>
+    <div id="places" class="place-list"></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><i class="fas fa-truck"></i> Post Delivery Request</div>
+      <form id="requestForm">
+        <textarea id="itemDetails" placeholder="What do you need?" rows="2" required></textarea>
+        <input type="text" id="pickupLocation" placeholder="Pickup address" required>
+        <input type="text" id="dropoffLocation" placeholder="Dropoff address" required>
+        <input type="number" id="itemCost" placeholder="Item cost (JMD)" required>
+        <select id="paymentMethod">
+          <option value="visa_mc">Visa/Mastercard</option>
+          <option value="etransfer">E-Transfer</option>
+          <option value="deliverer_fronts">Deliverer Fronts Cost (+22.4% fee)</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Post Request</button>
+      </form>
+    </div>
+    <div class="card">
+      <div class="card-header"><i class="fas fa-tools"></i> Deliverer Tools</div>
+      <button id="startTrackingBtn" class="btn btn-primary">Start Tracking</button>
+      <button id="stopTrackingBtn" class="btn btn-outline hidden">Stop Tracking</button>
+      <p id="trackingStatus"></p>
+      <hr>
+      <select id="roleSelect"><option value="buyer">Customer</option><option value="deliverer">Deliverer</option></select>
+    </div>
+  </div>
+
+  <div class="card"><div class="card-header"><i class="fas fa-shopping-cart"></i> Marketplace</div><div id="marketplaceListings"></div></div>
+  <div class="card"><div class="card-header"><i class="fas fa-clipboard-list"></i> Open Requests</div><div id="requests"></div></div>
+  <div class="footer">© OnRoadNow by KorerussBiz – <a href="#" id="showDisclaimerLink">Legal Disclaimer</a></div>
+</div>
+
+<script>
+  // Firebase Config (using your keys)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBrldf3h28e9_Dwjrp2zZL21EJzxp_1MSk",
+    authDomain: "onroadnow-xxxxx.firebaseapp.com",  // Replace with your actual Firebase authDomain
+    projectId: "onroadnow-xxxxx",                   // Replace with your actual Firebase projectId
+    storageBucket: "onroadnow-xxxxx.appspot.com",   // Replace with your actual storageBucket
+    appId: "YOUR_APP_ID"                            // Replace with your actual appId
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  async function apiCall(url, options = {}) {
+    const token = await auth.currentUser?.getIdToken();
+    const res = await fetch(url, {
+      ...options,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '', ...options.headers }
+    });
+    return res.json();
+  }
+
+  let currentUser = null;
+  let map, service, infoWindow, markers = [];
+
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      currentUser = user;
+      document.getElementById('authSection').innerHTML = `<div class="flex-between"><span>👋 ${user.email}</span><button id="logoutBtn" class="btn btn-outline">Logout</button></div>`;
+      document.getElementById('logoutBtn').onclick = () => auth.signOut();
+      document.getElementById('memberDashboard').classList.remove('hidden');
+      const profile = await apiCall('/api/me');
+      document.getElementById('profileInfo').innerHTML = `<strong>${profile.name || user.displayName || user.email}</strong>`;
+      document.getElementById('phoneInput').value = profile.phone || '';
+      document.getElementById('fullNameInput').value = profile.name || '';
+      loadMarketplaceListings();
+      loadRequests();
+      if (user.email === 'admin@korerussbiz.com') document.getElementById('adminTab').classList.remove('hidden');
+    } else {
+      document.getElementById('authSection').innerHTML = `
+        <div class="card">
+          <div class="card-header">Login / Signup</div>
+          <button id="googleLogin" class="btn btn-google">Sign in with Google</button>
+          <div style="margin:1rem 0; text-align:center;">or</div>
+          <div class="flex-between"><input type="email" id="loginEmail" placeholder="Email"><input type="password" id="loginPassword" placeholder="Password"><button id="emailLogin" class="btn btn-primary">Login</button><button id="emailSignup" class="btn btn-outline">Signup</button></div>
+          <p id="authMsg"></p>
+        </div>
+      `;
+      document.getElementById('googleLogin').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      document.getElementById('emailLogin').onclick = async () => {
+        try { await auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); } catch(e) { document.getElementById('authMsg').innerText = e.message; }
+      };
+      document.getElementById('emailSignup').onclick = async () => {
+        const email = document.getElementById('loginEmail').value;
+        const pwd = document.getElementById('loginPassword').value;
+        const name = prompt('Your name:');
+        if (!name) return;
+        try {
+          const cred = await auth.createUserWithEmailAndPassword(email, pwd);
+          await cred.user.updateProfile({ displayName: name });
+          await apiCall('/api/user', { method: 'POST', body: JSON.stringify({ name }) });
+        } catch(e) { document.getElementById('authMsg').innerText = e.message; }
+      };
+      document.getElementById('memberDashboard').classList.add('hidden');
+    }
+  });
+
+  document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+    await apiCall('/api/user', { method: 'POST', body: JSON.stringify({ phone: document.getElementById('phoneInput').value, name: document.getElementById('fullNameInput').value }) });
+    alert('Profile saved!');
+  });
+
+  // Google Maps initialization
+  function initMap() {
+    const defaultLocation = { lat: 18.4655, lng: -77.9223 };
+    map = new google.maps.Map(document.getElementById('map'), { center: defaultLocation, zoom: 14 });
+    infoWindow = new google.maps.InfoWindow();
+    service = new google.maps.places.PlacesService(map);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        map.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        searchNearbyPlaces({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      }, () => searchNearbyPlaces(defaultLocation));
+    } else searchNearbyPlaces(defaultLocation);
+    map.addListener('idle', () => {
+      const center = map.getCenter();
+      searchNearbyPlaces({ lat: center.lat(), lng: center.lng() });
+    });
+  }
+  function searchNearbyPlaces(location) {
+    service.nearbySearch({ location, radius: 1500, type: ['store','supermarket','restaurant','cafe','pharmacy'] }, (results, status) => {
+      const placesDiv = document.getElementById('places');
+      if (status === google.maps.places.PlacesServiceStatus.OK && results.length) {
+        clearMarkers(); placesDiv.innerHTML = '';
+        results.forEach(place => {
+          const marker = new google.maps.Marker({ map, position: place.geometry.location, title: place.name });
+          markers.push(marker);
+          google.maps.event.addListener(marker, 'click', () => infoWindow.setContent(`<strong>${place.name}</strong><br>${place.vicinity || ''}`) && infoWindow.open(map, marker));
+          const div = document.createElement('div'); div.className = 'place'; div.innerHTML = `<i class="fas fa-store"></i> ${place.name}`;
+          div.onclick = () => { map.setCenter(place.geometry.location); map.setZoom(16); };
+          placesDiv.appendChild(div);
+        });
+      } else placesDiv.innerHTML = '<div>No shops found. Move map.</div>';
+    });
+  }
+  function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
+  window.initMap = initMap;
+
+  // Delivery requests (simplified – implement full logic from earlier working version if needed)
+  async function loadRequests() { /* fetch /api/requests and display */ }
+  async function loadMarketplaceListings() { /* fetch /api/listings and display */ }
+  // ... (other functions)
+  console.log('Site loaded');
+</script>
+</body>
+</html>
+HTML
+
+# Write api/index.js – reads env vars and stores data
+cat > api/index.js << 'JS'
+const axios = require('axios');
+
+// In-memory storage (will reset on each deploy – replace with database)
+let users = [];
+let listings = [];
+let sales = [];
+let requests = [];
+let deliveries = [];
+
+module.exports = async (req, res) => {
+  const url = req.url;
+  const method = req.method;
+  const token = req.headers.authorization?.split(' ')[1];
+  let userId = token || 'anonymous'; // For simplicity, we don't verify token here
+
+  res.setHeader('Access-Control-Allow-Origin', 'https://onroadnow.vercel.app');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  if (method === 'OPTIONS') return res.status(200).end();
+
+  // User profile
+  if (url === '/api/me' && method === 'GET') {
+    const user = users.find(u => u.id === userId) || { id: userId };
+    res.status(200).json(user);
+    return;
+  }
+  if (url === '/api/user' && method === 'POST') {
+    let user = users.find(u => u.id === userId);
+    if (!user) user = { id: userId };
+    Object.assign(user, req.body);
+    if (!users.find(u => u.id === userId)) users.push(user);
+    res.status(200).json({});
+    return;
+  }
+
+  // Marketplace listings
+  if (url === '/api/listings' && method === 'GET') {
+    res.status(200).json(listings.filter(l => l.status === 'active'));
+    return;
+  }
+  if (url === '/api/listings' && method === 'POST') {
+    const { title, description, price, feePercent } = req.body;
+    const newListing = {
+      id: Date.now(),
+      sellerId: userId,
+      title, description,
+      price: parseFloat(price),
+      feePercent: feePercent || 2,
+      status: 'active',
+      createdAt: Date.now()
+    };
+    listings.push(newListing);
+    res.status(200).json(newListing);
+    return;
+  }
+  if (url === '/api/listings' && method === 'DELETE') {
+    const { id } = req.body;
+    const index = listings.findIndex(l => l.id === parseInt(id));
+    if (index !== -1) listings.splice(index, 1);
+    res.status(200).json({});
+    return;
+  }
+  if (url === '/api/purchase' && method === 'POST') {
+    const { listingId } = req.body;
+    const listing = listings.find(l => l.id === parseInt(listingId));
+    if (listing && listing.status === 'active') {
+      const feeAmount = (listing.price * listing.feePercent) / 100;
+      sales.push({
+        saleId: Date.now(),
+        listingId: listing.id,
+        sellerId: listing.sellerId,
+        buyerId: userId,
+        amount: listing.price,
+        fee: feeAmount,
+        timestamp: Date.now()
+      });
+      listing.status = 'sold';
+    }
+    res.status(200).json({});
+    return;
+  }
+  if (url === '/api/sales' && method === 'GET') {
+    const userSales = sales.filter(s => s.sellerId === userId || s.buyerId === userId);
+    res.status(200).json(userSales);
+    return;
+  }
+
+  // Nearby places (proxy)
+  if (url.startsWith('/api/nearby')) {
+    const { lat, lon, radius = 2000 } = req.query;
+    const query = `[out:json];(node["shop"](around:${radius},${lat},${lon});node["amenity"="restaurant"](around:${radius},${lat},${lon});node["amenity"="cafe"](around:${radius},${lat},${lon});node["amenity"="pharmacy"](around:${radius},${lat},${lon});node["shop"="supermarket"](around:${radius},${lat},${lon}););out body;`;
+    try {
+      const response = await axios.post('https://overpass-api.de/api/interpreter', `data=${query}`, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      res.status(200).json(response.data);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+    return;
+  }
+
+  // Delivery requests
+  if (url === '/api/requests') {
+    if (method === 'POST') {
+      const request = { id: Date.now(), ...req.body, userId, status: 'open' };
+      requests.push(request);
+      res.status(200).json(request);
+    } else if (method === 'GET') {
+      res.status(200).json(requests);
+    } else res.status(405).end();
+    return;
+  }
+  if (url.startsWith('/api/accept')) {
+    const id = parseInt(req.query.id);
+    const request = requests.find(r => r.id === id);
+    if (request) {
+      request.status = 'accepted';
+      request.delivererId = req.body.delivererId;
+      request.delivererName = req.body.delivererName;
+    }
+    res.status(200).json(request || {});
+    return;
+  }
+  if (url === '/api/offerLoan' && method === 'POST') { res.status(200).json({}); return; }
+  if (url === '/api/confirmDelivery' && method === 'POST') { res.status(200).json({}); return; }
+  if (url === '/api/updateLocation' && method === 'POST') { res.status(200).json({}); return; }
+  if (url.startsWith('/api/getLocation')) { res.status(200).json({ location: null }); return; }
+
+  res.status(404).json({ error: 'Not found' });
+};
+JS
+
+# Install dependencies
+npm install axios
+
+echo "✅ All files created. koreruss40.env saved."
+echo "📌 You must edit public/index.html and replace the Firebase placeholders (authDomain, projectId, storageBucket, appId) with your actual Firebase project values."
+echo "🚀 Then run: git add . && git commit -m 'Final setup with all keys' && git push origin main"
