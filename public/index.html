@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OnRoadNow – Jamaica's Delivery & Marketplace</title>
+  <title>onroadnow – Delivery & Marketplace</title>
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2772533792093956"
      crossorigin="anonymous"></script>
-  <!-- Google Maps Advanced Components (exact code from user) -->
+  <!-- Google Maps Advanced Components with new key -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"></script>
   <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    /* All existing styles remain same */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; }
     .hero { background: linear-gradient(135deg, #0f2b5e, #1e4a8a); color: white; padding: 4rem 2rem; text-align: center; }
@@ -59,8 +58,8 @@
 </head>
 <body>
 <div class="hero">
-  <h1>🏍️ OnRoadNow</h1>
-  <p>Jamaica's first all‑in‑one delivery & marketplace platform. Get what you need, delivered fast. Earn money as a deliverer. Sell your items.</p>
+  <h1>🏍️ onroadnow</h1>
+  <p>Jamaica's premier delivery & marketplace platform. Get what you need, delivered fast. Earn money as a deliverer. Sell your items.</p>
   <div class="stats">
     <div class="stat"><div class="stat-number">500+</div><div class="stat-label">Active Deliverers</div></div>
     <div class="stat"><div class="stat-number">10k+</div><div class="stat-label">Deliveries Completed</div></div>
@@ -72,8 +71,8 @@
 
   <!-- Business Description & Tutorial -->
   <div class="card">
-    <div class="card-header"><i class="fas fa-info-circle"></i> How OnRoadNow Works</div>
-    <p>OnRoadNow connects you with trusted local deliverers. Whether you need groceries, medicine, food, or packages – post a request and a deliverer will pick up and deliver. Earn money by delivering items or selling goods in our marketplace.</p>
+    <div class="card-header"><i class="fas fa-info-circle"></i> How onroadnow Works</div>
+    <p>onroadnow connects you with trusted local deliverers. Whether you need groceries, medicine, food, or packages – post a request and a deliverer will pick up and deliver. Earn money by delivering items or selling goods in our marketplace.</p>
     <div class="tutorial-steps" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
       <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-user-plus fa-2x"></i><h4>1. Sign Up</h4><p>Google, Email, Apple, Telegram</p></div>
       <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-map-marker-alt fa-2x"></i><h4>2. Find Store</h4><p>Search or move map</p></div>
@@ -110,7 +109,7 @@
       </div>
       <div>
         <strong>🤝 Etiquette for All Roles</strong>
-        <ul><li>Always be respectful and punctual</li><li>Wear identifiable attire (OnRoadNow badge)</li><li>Keep customer data confidential</li><li>Resolve issues politely or escalate to support</li></ul>
+        <ul><li>Always be respectful and punctual</li><li>Wear identifiable attire (onroadnow badge)</li><li>Keep customer data confidential</li><li>Resolve issues politely or escalate to support</li></ul>
       </div>
     </div>
   </div>
@@ -172,7 +171,7 @@
     <div id="adminTabContent" class="tab-content hidden"><h4>Admin Controls</h4><div id="adminListings"></div></div>
   </div>
 
-  <!-- ***** EXACT MAP FROM USER – FORCED EMBED ***** -->
+  <!-- ***** MAP WITH NEW KEY ***** -->
   <div class="card">
     <div class="card-header"><i class="fas fa-map-marked-alt"></i> Find Stores & Shops – Search or move map</div>
     <div id="map-container">
@@ -199,7 +198,7 @@
 
   <!-- Payment & Donations -->
   <div class="card">
-    <div class="card-header"><i class="fas fa-credit-card"></i> Support OnRoadNow</div>
+    <div class="card-header"><i class="fas fa-credit-card"></i> Support onroadnow</div>
     <div class="payment-buttons">
       <form action="https://www.paypal.com/donate" method="post" target="_top">
         <input type="hidden" name="hosted_button_id" value="YOUR_PAYPAL_BUTTON_ID" />
@@ -211,7 +210,7 @@
   </div>
 
   <div class="footer">
-    <span>© 2025 OnRoadNow by KorerussBiz</span> |
+    <span>© 2025 onroadnow by KorerussBiz</span> |
     <a href="#">About</a> |
     <a href="#">Terms</a> |
     <a href="#">Privacy</a> |
@@ -219,8 +218,8 @@
   </div>
 </div>
 
-<!-- Google Maps API loader (exact from user) -->
-<gmpx-api-loader key="AIzaSyBrldf3h28e9_Dwjrp2zZL21EJzxp_1MSk" solution-channel="GMP_GE_mapsandplacesautocomplete_v2"></gmpx-api-loader>
+<!-- Google Maps API loader with NEW KEY -->
+<gmpx-api-loader key="AIzaSyB9RTVhBfAtrFET-YyMLK5f2v4tQ-uT2w0" solution-channel="GMP_GE_mapsandplacesautocomplete_v2"></gmpx-api-loader>
 
 <script>
   // Ensure map components are loaded and handle place picker events
@@ -253,12 +252,10 @@
         if (marker) marker.position = place.location;
         infowindow.setContent(`<strong>${place.displayName}</strong><br><span>${place.formattedAddress}</span>`);
         infowindow.open(map.innerMap, marker);
-        // Optionally fetch nearby shops
         fetchNearbyPlaces(place.location.lat, place.location.lng);
       });
     }
 
-    // Fetch nearby shops on map idle
     if (map && map.innerMap) {
       map.innerMap.addListener('idle', () => {
         const center = map.innerMap.getCenter();
@@ -266,7 +263,6 @@
       });
     }
 
-    // Initial load
     fetchNearbyPlaces(18.4655, -77.9223);
   })();
 
