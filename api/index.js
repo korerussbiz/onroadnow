@@ -1,64 +1,298 @@
 const admin = require('firebase-admin');
 const axios = require('axios');
+const { OAuth2Client } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const cookie = require('cookie');
-const { OAuth2Client } = require('google-auth-library');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'onroadnow-super-secret-2025';
 const GOOGLE_CLIENT_ID = '134628093591-61nk4mneo6d1o6of5da3e3fijgtd5dd0.apps.googleusercontent.com';
-const client = new OAuth2Client(GOOGLE_CLIENT_ID);
+const oauthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-// Initialize Firestore
-if (!admin.apps.length) {
+// Initialize Firestore Admin SDK
+let db = null;
+try {
   let serviceAccount;
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   } else {
-    // For local development, place serviceAccountKey.json in project root
-    try {
-      serviceAccount = require('./serviceAccountKey.json');
-    } catch(e) { console.log('No service account key found'); }
+    // For local development: use the file we just created
+    serviceAccount = require('./serviceAccountKey.json');
   }
-  if (serviceAccount) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-  }
+  admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+  db = admin.firestore();
+  console.log('Firestore initialized');
+} catch(e) {
+  console.error('Firestore not available, using in-memory fallback', e.message);
 }
-const db = admin.firestore();
 
-let users = []; // fallback in-memory if Firestore not available
+// In-memory fallback
+let memoryUsers = [];
+let memoryListings = [];
+let memorySales = [];
+let memoryRequests = [];
 
-// Helper: get user from Firestore or memory
 async function getUser(uid) {
   if (db) {
     const doc = await db.collection('users').doc(uid).get();
-    return doc.exists ? doc.data() : null;
-  } else {
-    return users.find(u => u.id === uid);
+    return doc.exists ? { id: doc.id, ...doc.data() } : null;
   }
+  return memoryUsers.find(u => u.id === uid);
 }
 async function setUser(uid, data) {
   if (db) {
     await db.collection('users').doc(uid).set(data, { merge: true });
   } else {
-    const existing = users.find(u => u.id === uid);
-    if (existing) Object.assign(existing, data);
-    else users.push({ id: uid, ...data });
+    let user = memoryUsers.find(u => u.id === uid);
+    if (user) Object.assign(user, data);
+    else memoryUsers.push({ id: uid, ...data });
   }
 }
 async function getAllUsers() {
   if (db) {
     const snapshot = await db.collection('users').get();
-    return snapshot.docs.map(d => d.data());
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  return memoryUsers;
+}
+async function getListings() {
+  if (db) {
+    const snapshot = await db.collection('listings').where('status', '==', 'active').get();
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  return memoryListings.filter(l => l.status === 'active');
+}
+async function addListing(data) {
+  if (db) {
+    const ref = await db.collection('listings').add(data);
+    return { id: ref.id, ...data };
   } else {
-    return users;
+    const id = Date.now().toString();
+    memoryListings.push({ id, ...data });
+    return { id, ...data };
   }
 }
-// Similar helpers for listings, sales, requests (same pattern)
-// For brevity, I'll implement Firestore versions – full code in next messages.
+async function deleteListing(id) {
+  if (db) {
+    await db.collection('listings').doc(id).delete();
+  } else {
+    const index = memoryListings.findIndex(l => l.id === id);
+    if (index !== -1) memoryListings.splice(index, 1);
+  }
+}
+async function addSale(sale) {
+  if (db) {
+    await db.collection('sales').add(sale);
+  } else {
+    memorySales.push(sale);
+  }
+}
+async function getSalesForUser(userId) {
+  if (db) {
+    const snapshot = await db.collection('sales').where('sellerId', '==', userId).get();
+    const asSeller = snapshot.docs.map(d => d.data());
+    const buyerSnapshot = await db.collection('sales').where('buyerId', '==', userId).get();
+    const asBuyer = buyerSnapshot.docs.map(d => d.data());
+    return [...asSeller, ...asBuyer];
+  }
+  return memorySales.filter(s => s.sellerId === userId || s.buyerId === userId);
+}
+async function addRequest(req) {
+  if (db) {
+    const ref = await db.collection('requests').add(req);
+    return { id: ref.id, ...req };
+  } else {
+    const id = Date.now().toString();
+    memoryRequests.push({ id, ...req });
+    return { id, ...req };
+  }
+}
+async function getRequests() {
+  if (db) {
+    const snapshot = await db.collection('requests').get();
+    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  }
+  return memoryRequests;
+}
+async function updateRequest(id, data) {
+  if (db) {
+    await db.collection('requests').doc(id).update(data);
+  } else {
+    const req = memoryRequests.find(r => r.id === id);
+    if (req) Object.assign(req, data);
+  }
+}
 
-// For now, use in-memory arrays (you already have working code). We'll replace with Firestore later.
-// But to keep this answer manageable, I'll provide the full Firestore backend as a separate script.
+function getUserFromCookies(cookies) {
+  if (!cookies.token) return null;
+  try {
+    return jwt.verify(cookies.token, JWT_SECRET);
+  } catch(e) { return null; }
+}
 
-console.log('Backend ready');
+module.exports = async (req, res) => {
+  const url = req.url;
+  const method = req.method;
+  const cookies = cookie.parse(req.headers.cookie || '');
+  const tokenData = getUserFromCookies(cookies);
+  let userId = tokenData ? tokenData.userId : null;
+
+  res.setHeader('Access-Control-Allow-Origin', 'https://onroadnow.vercel.app');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (method === 'OPTIONS') return res.status(200).end();
+
+  // Google OAuth
+  if (url === '/api/auth/google' && method === 'POST') {
+    const { credential } = req.body;
+    try {
+      const ticket = await oauthClient.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
+      const payload = ticket.getPayload();
+      const email = payload.email;
+      const name = payload.name;
+      let user = await getUser(email);
+      if (!user) {
+        const newUser = { id: email, email, name, phone: '', role: 'customer', createdAt: Date.now() };
+        await setUser(email, newUser);
+        user = newUser;
+      }
+      const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+      res.setHeader('Set-Cookie', cookie.serialize('token', token, { httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: 604800 }));
+      res.status(200).json({ user });
+    } catch (err) {
+      res.status(401).json({ error: 'Invalid token' });
+    }
+    return;
+  }
+
+  // Email/password fallback (simplified)
+  if (url === '/api/signup' && method === 'POST') {
+    const { email, name } = req.body;
+    let user = await getUser(email);
+    if (user) return res.status(400).json({ error: 'User exists' });
+    await setUser(email, { id: email, email, name, phone: '', role: 'customer', createdAt: Date.now() });
+    const token = jwt.sign({ userId: email }, JWT_SECRET, { expiresIn: '7d' });
+    res.setHeader('Set-Cookie', cookie.serialize('token', token, { httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: 604800 }));
+    res.status(200).json({ user: { id: email, email, name } });
+    return;
+  }
+  if (url === '/api/login' && method === 'POST') {
+    const { email } = req.body;
+    let user = await getUser(email);
+    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
+    res.setHeader('Set-Cookie', cookie.serialize('token', token, { httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: 604800 }));
+    res.status(200).json({ user });
+    return;
+  }
+  if (url === '/api/logout' && method === 'POST') {
+    res.setHeader('Set-Cookie', cookie.serialize('token', '', { httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: 0 }));
+    res.status(200).json({ message: 'Logged out' });
+    return;
+  }
+
+  // User profile
+  if (url === '/api/me' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    const user = await getUser(userId);
+    res.status(200).json(user || { id: userId });
+    return;
+  }
+  if (url === '/api/user' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    await setUser(userId, req.body);
+    res.status(200).json({});
+    return;
+  }
+
+  // Marketplace
+  if (url === '/api/listings' && method === 'GET') {
+    const listings = await getListings();
+    res.status(200).json(listings);
+    return;
+  }
+  if (url === '/api/listings' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Login required' });
+    const { title, description, price, feePercent } = req.body;
+    const listing = await addListing({
+      sellerId: userId, title, description,
+      price: parseFloat(price), feePercent: feePercent || 2,
+      status: 'active', createdAt: Date.now()
+    });
+    res.status(200).json(listing);
+    return;
+  }
+  if (url === '/api/listings' && method === 'DELETE') {
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+    const user = await getUser(userId);
+    if (user?.email !== 'admin@korerussbiz.com') return res.status(403).json({ error: 'Admin only' });
+    const { id } = req.body;
+    await deleteListing(id);
+    res.status(200).json({});
+    return;
+  }
+  if (url === '/api/purchase' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Login required' });
+    const { listingId } = req.body;
+    const listings = await getListings();
+    const listing = listings.find(l => l.id === listingId);
+    if (!listing || listing.status !== 'active') return res.status(404).json({ error: 'Not available' });
+    const feeAmount = (listing.price * listing.feePercent) / 100;
+    await addSale({
+      listingId, sellerId: listing.sellerId, buyerId: userId,
+      amount: listing.price, fee: feeAmount, timestamp: Date.now()
+    });
+    if (db) {
+      await db.collection('listings').doc(listingId).update({ status: 'sold' });
+    } else {
+      const idx = memoryListings.findIndex(l => l.id === listingId);
+      if (idx !== -1) memoryListings[idx].status = 'sold';
+    }
+    res.status(200).json({});
+    return;
+  }
+  if (url === '/api/sales' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Login required' });
+    const sales = await getSalesForUser(userId);
+    res.status(200).json(sales);
+    return;
+  }
+
+  // Delivery requests
+  if (url === '/api/requests' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Login required' });
+    const request = { ...req.body, userId, status: 'open', createdAt: Date.now() };
+    const newReq = await addRequest(request);
+    res.status(200).json(newReq);
+    return;
+  }
+  if (url === '/api/requests' && method === 'GET') {
+    const requests = await getRequests();
+    res.status(200).json(requests);
+    return;
+  }
+  if (url.startsWith('/api/accept')) {
+    const id = req.query.id;
+    const { delivererId, delivererName } = req.body;
+    await updateRequest(id, { status: 'accepted', delivererId, delivererName });
+    res.status(200).json({});
+    return;
+  }
+  if (url === '/api/offerLoan' && method === 'POST') { res.status(200).json({}); return; }
+  if (url === '/api/confirmDelivery' && method === 'POST') { res.status(200).json({}); return; }
+  if (url === '/api/updateLocation' && method === 'POST') { res.status(200).json({}); return; }
+  if (url.startsWith('/api/getLocation')) { res.status(200).json({ location: null }); return; }
+
+  // Nearby places proxy
+  if (url.startsWith('/api/nearby')) {
+    const { lat, lon, radius = 2000 } = req.query;
+    const query = `[out:json];(node["shop"](around:${radius},${lat},${lon});node["amenity"="restaurant"](around:${radius},${lat},${lon});node["amenity"="cafe"](around:${radius},${lat},${lon});node["amenity"="pharmacy"](around:${radius},${lat},${lon});node["shop"="supermarket"](around:${radius},${lat},${lon}););out body;`;
+    try {
+      const response = await axios.post('https://overpass-api.de/api/interpreter', `data=${query}`, { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+      res.status(200).json(response.data);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+    return;
+  }
+
+  res.status(404).json({ error: 'Not found' });
+};

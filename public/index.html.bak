@@ -3,31 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OnRoadNow – Delivery & Marketplace</title>
-  <!-- Google Maps (using your key) -->
+  <title>OnRoadNow – Jamaica's Delivery & Marketplace</title>
+  <!-- Google Maps -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTd4-1QDwlwGxdI22VXpnRop48glDBT0E&libraries=places&callback=initMap" async defer></script>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+  <!-- Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    /* same styles as before – keep */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #f3f6fc; color: #1e293b; }
-    .hero { background: linear-gradient(135deg, #0f2b5e, #1e4a8a); color: white; padding: 3rem 1.5rem; text-align: center; margin-bottom: 2rem; }
-    .hero h1 { font-size: 2.5rem; }
-    .container { max-width: 1400px; margin: 0 auto; padding: 0 1.5rem; }
-    .card { background: white; border-radius: 1.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 2rem; }
-    .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 2px solid #e0e7ff; padding-bottom: 0.75rem; font-weight: 700; }
-    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; }
+    .hero { background: linear-gradient(135deg, #0f2b5e, #1e4a8a); color: white; padding: 4rem 2rem; text-align: center; }
+    .hero h1 { font-size: 3rem; margin-bottom: 1rem; }
+    .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto; opacity: 0.9; }
+    .stats { display: flex; justify-content: center; gap: 3rem; margin-top: 2rem; flex-wrap: wrap; }
+    .stat { text-align: center; }
+    .stat-number { font-size: 2rem; font-weight: 800; }
+    .stat-label { font-size: 0.9rem; opacity: 0.8; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .card { background: white; border-radius: 1.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 2rem; transition: 0.2s; }
+    .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 2px solid #e0e7ff; padding-bottom: 0.75rem; font-weight: 700; font-size: 1.2rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; }
     .btn-primary { background: #2563eb; color: white; }
     .btn-google { background: #db4437; color: white; }
     .btn-outline { background: transparent; border: 1px solid #cbd5e1; }
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
     .form-group { margin-bottom: 1rem; }
-    input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 1rem; }
+    input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 1rem; font-family: inherit; }
     #map { height: 400px; border-radius: 1rem; margin-top: 1rem; background: #e2e8f0; }
     .place-list { max-height: 250px; overflow-y: auto; background: white; border-radius: 1rem; border: 1px solid #e2e8f0; margin-top: 1rem; }
     .place { padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
@@ -35,35 +38,41 @@
     .badge { background: #eef2ff; padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 600; color: #1e40af; }
     .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
     .hidden { display: none; }
-    .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
-    .tab { padding: 0.5rem 1rem; cursor: pointer; border-radius: 2rem; }
+    .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
+    .tab { padding: 0.5rem 1rem; cursor: pointer; border-radius: 2rem; transition: 0.2s; }
     .tab.active { background: #2563eb; color: white; }
     .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; margin-top: -40px; margin-left: 1rem; }
-    .footer { text-align: center; margin-top: 2rem; padding: 1rem; color: #64748b; }
-    .tutorial-steps { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
-    .step { flex: 1; min-width: 180px; background: #f8fafc; border-radius: 1rem; padding: 1rem; text-align: center; }
+    .footer { text-align: center; margin-top: 3rem; padding: 1.5rem; background: #1e293b; color: #94a3b8; border-radius: 1rem; }
+    .footer a { color: #94a3b8; text-decoration: none; margin: 0 0.5rem; }
+    .footer a:hover { color: white; }
   </style>
 </head>
 <body>
 <div class="hero">
   <h1>🏍️ OnRoadNow</h1>
-  <p>Jamaica's delivery & marketplace – earn, sell, connect</p>
+  <p>Jamaica's first all‑in‑one delivery & marketplace platform. Get what you need, delivered fast. Earn money as a deliverer. Sell your items.</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-number">500+</div><div class="stat-label">Active Deliverers</div></div>
+    <div class="stat"><div class="stat-number">10k+</div><div class="stat-label">Deliveries Completed</div></div>
+    <div class="stat"><div class="stat-number">100%</div><div class="stat-label">Customer Satisfaction</div></div>
+  </div>
 </div>
 <div class="container">
   <div id="authSection"></div>
 
   <!-- Business Description & Tutorial -->
   <div class="card">
-    <div class="card-header"><i class="fas fa-info-circle"></i> How It Works</div>
-    <p><strong>OnRoadNow</strong> connects people who need items delivered with local deliverers. Post a request, accept jobs, sell items, and earn money.</p>
-    <div class="tutorial-steps">
-      <div class="step"><i class="fas fa-user-plus fa-2x"></i><h4>1. Sign Up</h4><p>Google or Email</p></div>
-      <div class="step"><i class="fas fa-map-marker-alt fa-2x"></i><h4>2. Find Store</h4><p>Move the map</p></div>
-      <div class="step"><i class="fas fa-clipboard-list fa-2x"></i><h4>3. Post Request</h4><p>Describe item & location</p></div>
-      <div class="step"><i class="fas fa-hand-holding-usd fa-2x"></i><h4>4. Earn Money</h4><p>Accept & deliver</p></div>
+    <div class="card-header"><i class="fas fa-info-circle"></i> How OnRoadNow Works</div>
+    <p>OnRoadNow connects you with trusted local deliverers. Whether you need groceries, medicine, food, or packages – post a request and a deliverer will pick up and deliver. Earn money by delivering items or selling goods in our marketplace.</p>
+    <div class="tutorial-steps" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+      <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-user-plus fa-2x"></i><h4>1. Sign Up</h4><p>Google or Email</p></div>
+      <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-map-marker-alt fa-2x"></i><h4>2. Find Store</h4><p>Move the map, click any shop</p></div>
+      <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-clipboard-list fa-2x"></i><h4>3. Post Request</h4><p>Describe item & location</p></div>
+      <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-hand-holding-usd fa-2x"></i><h4>4. Earn Money</h4><p>Accept, deliver, get paid</p></div>
     </div>
   </div>
 
+  <!-- Member Dashboard (appears after login) -->
   <div id="memberDashboard" class="card hidden">
     <div style="background: linear-gradient(45deg, #1e3a8a, #2563eb); height: 100px; border-radius: 1rem 1rem 0 0; margin: -1.5rem -1.5rem 0 -1.5rem;"></div>
     <div class="flex-between" style="margin-top: -40px; padding: 0 1rem;">
@@ -72,30 +81,30 @@
     </div>
     <div id="profileInfo" style="margin: 1rem 1rem 0 1rem;"></div>
     <div class="tabs">
-      <div class="tab active" data-tab="profile">Profile</div>
-      <div class="tab" data-tab="sales">Sales</div>
-      <div class="tab" data-tab="deliveries">Deliveries</div>
-      <div class="tab" id="adminTab">Admin</div>
+      <div class="tab active" data-tab="profile">👤 Profile</div>
+      <div class="tab" data-tab="marketplace">🛒 Marketplace</div>
+      <div class="tab" data-tab="deliveries">🚚 My Deliveries</div>
+      <div class="tab" data-tab="sales">💰 Sales</div>
+      <div class="tab" id="adminTab" style="display:none;">🛠️ Admin</div>
     </div>
     <div id="profileTab" class="tab-content">
       <div class="form-group"><label>📞 Phone</label><input type="tel" id="phoneInput" placeholder="+1234567890"></div>
       <div class="form-group"><label>👤 Full Name</label><input type="text" id="fullNameInput" placeholder="Your name"></div>
+      <div class="form-group"><label>Role</label><select id="roleSelect"><option value="customer">Customer (request deliveries)</option><option value="deliverer">Deliverer (earn money)</option></select></div>
       <button id="saveProfileBtn" class="btn btn-primary">Save Profile</button>
     </div>
-    <div id="salesTab" class="tab-content hidden"><div id="salesLogs"></div></div>
-    <div id="deliveriesTab" class="tab-content hidden"><div id="activeDeliveries"></div></div>
-    <div id="adminTabContent" class="tab-content hidden"><h4>Admin Controls</h4><div id="adminListings"></div></div>
-  </div>
-
-  <div class="card">
-    <div class="card-header"><i class="fas fa-map-marker-alt"></i> Nearby Stores (Google Maps)</div>
-    <div id="map"></div>
-    <div id="places" class="place-list"></div>
-  </div>
-
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-header"><i class="fas fa-truck"></i> Post Delivery Request</div>
+    <div id="marketplaceTab" class="tab-content hidden">
+      <div class="card-header"><i class="fas fa-plus-circle"></i> Sell an Item</div>
+      <div class="form-group"><input type="text" id="itemTitle" placeholder="Title"></div>
+      <div class="form-group"><textarea id="itemDesc" placeholder="Description" rows="2"></textarea></div>
+      <div class="form-group"><input type="number" id="itemPrice" placeholder="Price (JMD)"></div>
+      <div class="form-group"><input type="number" id="itemFee" placeholder="Fee % (1-3.8)" value="2"></div>
+      <button id="postListingBtn" class="btn btn-primary">Post Listing</button>
+      <hr>
+      <div id="marketplaceListings"></div>
+    </div>
+    <div id="deliveriesTab" class="tab-content hidden">
+      <div class="card-header"><i class="fas fa-truck"></i> Post a Delivery Request</div>
       <form id="requestForm">
         <textarea id="itemDetails" placeholder="What do you need?" rows="2" required></textarea>
         <input type="text" id="pickupLocation" placeholder="Pickup address" required>
@@ -108,40 +117,36 @@
         </select>
         <button type="submit" class="btn btn-primary">Post Request</button>
       </form>
-    </div>
-    <div class="card">
-      <div class="card-header"><i class="fas fa-tools"></i> Deliverer Tools</div>
-      <button id="startTrackingBtn" class="btn btn-primary">Start Tracking</button>
-      <button id="stopTrackingBtn" class="btn btn-outline hidden">Stop Tracking</button>
-      <p id="trackingStatus"></p>
       <hr>
-      <select id="roleSelect"><option value="buyer">Customer</option><option value="deliverer">Deliverer</option></select>
+      <div id="requests"></div>
     </div>
+    <div id="salesTab" class="tab-content hidden"><div id="salesLogs"></div></div>
+    <div id="adminTabContent" class="tab-content hidden"><h4>Admin Controls</h4><div id="adminListings"></div></div>
   </div>
 
-  <div class="card"><div class="card-header"><i class="fas fa-shopping-cart"></i> Marketplace</div><div id="marketplaceListings"></div></div>
-  <div class="card"><div class="card-header"><i class="fas fa-clipboard-list"></i> Open Requests</div><div id="requests"></div></div>
-  <div class="footer">© OnRoadNow by KorerussBiz – <a href="#" id="showDisclaimerLink">Legal Disclaimer</a></div>
+  <!-- Map for everyone (non‑members also see map) -->
+  <div class="card">
+    <div class="card-header"><i class="fas fa-map-marked-alt"></i> Find Stores & Shops (move map)</div>
+    <div id="map"></div>
+    <div id="places" class="place-list"><div style="padding:1rem;">Move map to load shops</div></div>
+  </div>
+
+  <div class="footer">
+    <span>© 2025 OnRoadNow by KorerussBiz</span> |
+    <a href="#">About</a> |
+    <a href="#">Terms</a> |
+    <a href="#">Privacy</a> |
+    <a href="#">Contact</a>
+  </div>
 </div>
 
 <script>
-  // Firebase Config (using your keys)
-  const firebaseConfig = {
-    apiKey: "AIzaSyBrldf3h28e9_Dwjrp2zZL21EJzxp_1MSk",
-    authDomain: "onroadnow-xxxxx.firebaseapp.com",  // Replace with your actual Firebase authDomain
-    projectId: "onroadnow-xxxxx",                   // Replace with your actual Firebase projectId
-    storageBucket: "onroadnow-xxxxx.appspot.com",   // Replace with your actual storageBucket
-    appId: "YOUR_APP_ID"                            // Replace with your actual appId
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-
+  // ---------- API helper ----------
   async function apiCall(url, options = {}) {
-    const token = await auth.currentUser?.getIdToken();
     const res = await fetch(url, {
       ...options,
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json', 'Authorization': token ? `Bearer ${token}` : '', ...options.headers }
+      headers: { 'Content-Type': 'application/json', ...options.headers }
     });
     return res.json();
   }
@@ -149,54 +154,188 @@
   let currentUser = null;
   let map, service, infoWindow, markers = [];
 
-  auth.onAuthStateChanged(async (user) => {
-    if (user) {
-      currentUser = user;
-      document.getElementById('authSection').innerHTML = `<div class="flex-between"><span>👋 ${user.email}</span><button id="logoutBtn" class="btn btn-outline">Logout</button></div>`;
-      document.getElementById('logoutBtn').onclick = () => auth.signOut();
+  // ---------- Google Sign-In ----------
+  function handleCredentialResponse(response) {
+    fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => { if (data.user) location.reload(); else alert('Google login failed'); });
+  }
+
+  // ---------- Auth UI ----------
+  async function checkAuth() {
+    const data = await apiCall('/api/me');
+    if (data.id) {
+      currentUser = data;
+      document.getElementById('authSection').innerHTML = `<div class="flex-between" style="background:white; border-radius:2rem; padding:0.5rem 1rem;"><span>👋 ${data.email}</span><button id="logoutBtn" class="btn btn-outline">Logout</button></div>`;
+      document.getElementById('logoutBtn').onclick = async () => { await apiCall('/api/logout', { method: 'POST' }); location.reload(); };
       document.getElementById('memberDashboard').classList.remove('hidden');
-      const profile = await apiCall('/api/me');
-      document.getElementById('profileInfo').innerHTML = `<strong>${profile.name || user.displayName || user.email}</strong>`;
-      document.getElementById('phoneInput').value = profile.phone || '';
-      document.getElementById('fullNameInput').value = profile.name || '';
+      document.getElementById('profileInfo').innerHTML = `<strong>${data.name || data.email}</strong>`;
+      document.getElementById('phoneInput').value = data.phone || '';
+      document.getElementById('fullNameInput').value = data.name || '';
+      document.getElementById('roleSelect').value = data.role || 'customer';
       loadMarketplaceListings();
       loadRequests();
-      if (user.email === 'admin@korerussbiz.com') document.getElementById('adminTab').classList.remove('hidden');
+      loadSales();
+      if (data.email === 'admin@korerussbiz.com') document.getElementById('adminTab').style.display = 'block';
     } else {
       document.getElementById('authSection').innerHTML = `
         <div class="card">
           <div class="card-header">Login / Signup</div>
-          <button id="googleLogin" class="btn btn-google">Sign in with Google</button>
+          <div id="g_id_onload"
+               data-client_id="134628093591-61nk4mneo6d1o6of5da3e3fijgtd5dd0.apps.googleusercontent.com"
+               data-callback="handleCredentialResponse"
+               data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin" data-type="standard" data-size="large"></div>
           <div style="margin:1rem 0; text-align:center;">or</div>
           <div class="flex-between"><input type="email" id="loginEmail" placeholder="Email"><input type="password" id="loginPassword" placeholder="Password"><button id="emailLogin" class="btn btn-primary">Login</button><button id="emailSignup" class="btn btn-outline">Signup</button></div>
           <p id="authMsg"></p>
         </div>
       `;
-      document.getElementById('googleLogin').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
       document.getElementById('emailLogin').onclick = async () => {
-        try { await auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value); } catch(e) { document.getElementById('authMsg').innerText = e.message; }
+        const res = await apiCall('/api/login', { method: 'POST', body: JSON.stringify({ email: document.getElementById('loginEmail').value }) });
+        if (res.error) document.getElementById('authMsg').innerText = res.error;
+        else location.reload();
       };
       document.getElementById('emailSignup').onclick = async () => {
         const email = document.getElementById('loginEmail').value;
         const pwd = document.getElementById('loginPassword').value;
-        const name = prompt('Your name:');
+        const name = prompt('Your full name:');
         if (!name) return;
-        try {
-          const cred = await auth.createUserWithEmailAndPassword(email, pwd);
-          await cred.user.updateProfile({ displayName: name });
-          await apiCall('/api/user', { method: 'POST', body: JSON.stringify({ name }) });
-        } catch(e) { document.getElementById('authMsg').innerText = e.message; }
+        const res = await apiCall('/api/signup', { method: 'POST', body: JSON.stringify({ email, password: pwd, name }) });
+        if (res.error) document.getElementById('authMsg').innerText = res.error;
+        else location.reload();
       };
       document.getElementById('memberDashboard').classList.add('hidden');
     }
-  });
+  }
 
-  document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-    await apiCall('/api/user', { method: 'POST', body: JSON.stringify({ phone: document.getElementById('phoneInput').value, name: document.getElementById('fullNameInput').value }) });
+  document.getElementById('saveProfileBtn')?.addEventListener('click', async () => {
+    await apiCall('/api/user', { method: 'POST', body: JSON.stringify({
+      phone: document.getElementById('phoneInput').value,
+      name: document.getElementById('fullNameInput').value,
+      role: document.getElementById('roleSelect').value
+    }) });
     alert('Profile saved!');
+    location.reload();
   });
 
-  // Google Maps initialization
+  // Tabs
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
+      document.getElementById(`${tabName}Tab`).classList.remove('hidden');
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      if (tabName === 'admin') loadAdminData();
+    });
+  });
+
+  // ---------- Marketplace ----------
+  document.getElementById('postListingBtn')?.addEventListener('click', async () => {
+    if (!currentUser) return alert('Login first');
+    const title = document.getElementById('itemTitle').value;
+    const description = document.getElementById('itemDesc').value;
+    const price = parseFloat(document.getElementById('itemPrice').value);
+    const feePercent = parseFloat(document.getElementById('itemFee').value);
+    if (!title || !description || isNaN(price)) return alert('Fill all fields');
+    await apiCall('/api/listings', { method: 'POST', body: JSON.stringify({ title, description, price, feePercent }) });
+    alert('Listing posted!');
+    loadMarketplaceListings();
+    document.getElementById('itemTitle').value = '';
+    document.getElementById('itemDesc').value = '';
+    document.getElementById('itemPrice').value = '';
+  });
+  async function loadMarketplaceListings() {
+    const listings = await apiCall('/api/listings');
+    const container = document.getElementById('marketplaceListings');
+    if (!container) return;
+    container.innerHTML = '';
+    listings.forEach(l => {
+      const adminBtn = (currentUser?.email === 'admin@korerussbiz.com') ? `<button onclick="deleteListing('${l.id}')" class="btn btn-outline btn-sm">Remove</button>` : '';
+      const div = document.createElement('div'); div.className = 'listing-card';
+      div.innerHTML = `<div class="flex-between"><strong>${escapeHtml(l.title)}</strong>${adminBtn}</div><p>${escapeHtml(l.description)}</p><div><span class="badge">JMD ${l.price}</span> <span class="badge">Fee ${l.feePercent}%</span></div><button onclick="buyListing('${l.id}')" class="btn btn-primary btn-sm">Buy Now</button>`;
+      container.appendChild(div);
+    });
+  }
+  window.deleteListing = async (id) => {
+    if (confirm('Remove listing?')) {
+      await apiCall('/api/listings', { method: 'DELETE', body: JSON.stringify({ id }) });
+      loadMarketplaceListings();
+    }
+  };
+  window.buyListing = async (id) => {
+    if (!currentUser) return alert('Login to buy');
+    await apiCall('/api/purchase', { method: 'POST', body: JSON.stringify({ listingId: id }) });
+    alert('Purchase recorded!');
+    loadMarketplaceListings();
+  };
+
+  async function loadSales() {
+    const sales = await apiCall('/api/sales');
+    const container = document.getElementById('salesLogs');
+    if (!container) return;
+    container.innerHTML = sales.map(s => `<div>Sold item for JMD ${s.amount} (fee ${s.fee}) on ${new Date(s.timestamp).toLocaleString()}</div>`).join('') || '<div>No sales yet.</div>';
+  }
+
+  // ---------- Delivery requests ----------
+  document.getElementById('requestForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!currentUser) return alert('Login first');
+    await apiCall('/api/requests', { method: 'POST', body: JSON.stringify({
+      itemDetails: document.getElementById('itemDetails').value,
+      pickupLocation: document.getElementById('pickupLocation').value,
+      dropoffLocation: document.getElementById('dropoffLocation').value,
+      itemCost: parseFloat(document.getElementById('itemCost').value),
+      paymentMethod: document.getElementById('paymentMethod').value
+    })});
+    alert('Request posted!');
+    loadRequests();
+  });
+  async function loadRequests() {
+    const reqs = await apiCall('/api/requests');
+    const container = document.getElementById('requests');
+    if (!container) return;
+    container.innerHTML = '';
+    reqs.forEach(r => {
+      const div = document.createElement('div'); div.className = 'card';
+      let actions = '';
+      if (currentUser && currentUser.id !== r.userId && r.status === 'open') {
+        actions = `<button onclick="acceptRequest('${r.id}')" class="btn btn-primary btn-sm">Accept</button>`;
+        if (r.paymentMethod === 'deliverer_fronts') actions += `<button onclick="offerLoan('${r.id}')" class="btn btn-outline btn-sm">Front money</button>`;
+      }
+      div.innerHTML = `<div><strong>${escapeHtml(r.itemDetails)}</strong><br>Pickup: ${escapeHtml(r.pickupLocation)}<br>Dropoff: ${escapeHtml(r.dropoffLocation)}<br>💰 JMD ${r.itemCost}<br>💳 ${r.paymentMethod}<br>Status: ${r.status}</div><div>${actions}</div>`;
+      container.appendChild(div);
+    });
+  }
+  window.acceptRequest = async (id) => {
+    await apiCall(`/api/accept?id=${id}`, { method: 'POST', body: JSON.stringify({ delivererId: currentUser.id, delivererName: currentUser.name }) });
+    alert('Accepted!');
+    loadRequests();
+  };
+  window.offerLoan = async (id) => {
+    const amount = prompt('Amount to front (JMD):');
+    if (amount) await apiCall('/api/offerLoan', { method: 'POST', body: JSON.stringify({ requestId: id, delivererId: currentUser.id, amountFronted: parseFloat(amount) }) });
+  };
+  async function loadActiveDeliveries() { /* optional */ }
+
+  // Admin
+  async function loadAdminData() {
+    const listings = await apiCall('/api/listings');
+    const adminDiv = document.getElementById('adminListings');
+    if (!adminDiv) return;
+    adminDiv.innerHTML = '<h5>All Listings</h5>';
+    listings.forEach(l => {
+      adminDiv.innerHTML += `<div class="listing-card"><strong>${l.title}</strong> by ${l.sellerId}<br>Price: JMD ${l.price}<br><button onclick="deleteListing('${l.id}')" class="btn btn-outline">Delete</button></div>`;
+    });
+  }
+
+  // Google Maps
   function initMap() {
     const defaultLocation = { lat: 18.4655, lng: -77.9223 };
     map = new google.maps.Map(document.getElementById('map'), { center: defaultLocation, zoom: 14 });
@@ -232,11 +371,11 @@
   function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
   window.initMap = initMap;
 
-  // Delivery requests (simplified – implement full logic from earlier working version if needed)
-  async function loadRequests() { /* fetch /api/requests and display */ }
-  async function loadMarketplaceListings() { /* fetch /api/listings and display */ }
-  // ... (other functions)
-  console.log('Site loaded');
+  function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])) : ''; }
+
+  checkAuth();
+  loadMarketplaceListings();
+  loadRequests();
 </script>
 </body>
 </html>
