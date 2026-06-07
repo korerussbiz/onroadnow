@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OnRoadNow – Jamaica's Delivery & Marketplace</title>
-  <!-- Google Maps -->
+  <!-- Google Maps API (ensure key is unrestricted or includes your domain) -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTd4-1QDwlwGxdI22VXpnRop48glDBT0E&libraries=places&callback=initMap" async defer></script>
   <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -12,6 +12,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
+    /* (same styles as before – keep) */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; }
     .hero { background: linear-gradient(135deg, #0f2b5e, #1e4a8a); color: white; padding: 4rem 2rem; text-align: center; }
@@ -48,6 +49,7 @@
     .footer a { color: #94a3b8; text-decoration: none; margin: 0 0.5rem; }
     .footer a:hover { color: white; }
     .extra-login { display: flex; gap: 0.5rem; justify-content: center; margin: 1rem 0; }
+    .fee-note { background: #fef9c3; padding: 0.5rem; border-radius: 0.5rem; font-size: 0.8rem; margin-top: 0.5rem; }
   </style>
 </head>
 <body>
@@ -75,14 +77,30 @@
     </div>
   </div>
 
-  <!-- Pricing & Service Options -->
+  <!-- Pricing & Fee Structure -->
   <div class="card">
-    <div class="card-header"><i class="fas fa-tag"></i> Delivery Options & Pricing</div>
+    <div class="card-header"><i class="fas fa-calculator"></i> Delivery Fees & Earnings</div>
     <div class="grid-2">
-      <div><strong>🛵 Standard Delivery (car/scooter)</strong><br>From JMD 300 • Fast, large loads</div>
-      <div><strong>🚶 On‑Foot Delivery (walker)</strong><br>From JMD 150 • Perfect for short distances, eco‑friendly</div>
-      <div><strong>📦 Pickup Only</strong><br>Free • Customer picks up from store</div>
+      <div>
+        <strong>💰 For Buyers</strong>
+        <ul>
+          <li>Standard delivery: from JMD 300 (car) / JMD 150 (on‑foot)</li>
+          <li>"Deliverer Fronts Cost": buyer pays item cost <strong>+22.4%</strong> (includes platform fee)</li>
+          <li>Weight surcharge (on‑foot): +JMD 50 per 10 lbs over 50 lbs</li>
+          <li>Long distance (on‑foot >3 km): +25% of total delivery fee</li>
+        </ul>
+      </div>
+      <div>
+        <strong>🏆 For Deliverers (Earnings)</strong>
+        <ul>
+          <li>Standard car delivery: 11-15% commission of item cost (minimum JMD 200)</li>
+          <li>On‑foot delivery: base JMD 150 + weight/distance bonuses</li>
+          <li>Taxi/car: +5% per extra 150 lbs (bulky items)</li>
+          <li>When buyer chooses "Fronts Cost", deliverer gets item cost + 22.4% fee (minus platform cut)</li>
+        </ul>
+      </div>
     </div>
+    <div class="fee-note"><i class="fas fa-info-circle"></i> All fees are calculated automatically when you post a request. Drivers see the exact payout before accepting.</div>
   </div>
 
   <!-- Positions & Etiquette -->
@@ -91,43 +109,24 @@
     <div class="grid-2">
       <div>
         <strong>🚗 Delivery Driver (car/scooter)</strong>
-        <ul style="margin-left: 1.2rem; margin-top: 0.5rem;">
-          <li>Pick up items from stores/restaurants</li>
-          <li>Deliver to customer within promised time</li>
-          <li>Check order accuracy before leaving</li>
-          <li>Be polite, wear clean clothes, communicate delays</li>
-        </ul>
+        <ul><li>Pick up items from stores</li><li>Deliver within promised time</li><li>Check order accuracy</li><li>Wear clean clothes, communicate delays</li></ul>
       </div>
       <div>
-        <strong>🚶 On‑Foot Deliverer (walker)</strong>
-        <ul style="margin-left: 1.2rem; margin-top: 0.5rem;">
-          <li>Best for short distances (under 2 km)</li>
-          <li>Use a cart or backpack for small items</li>
-          <li>Always carry a phone with GPS</li>
-          <li>Greet customers with a smile</li>
-        </ul>
+        <strong>🚶 On‑Foot Deliverer</strong>
+        <ul><li>Best for short distances (<2 km)</li><li>Use cart/backpack</li><li>Carry phone with GPS</li><li>Greet customers politely</li></ul>
       </div>
       <div>
         <strong>🛒 Shopper</strong>
-        <ul style="margin-left: 1.2rem; margin-top: 0.5rem;">
-          <li>Select items as per customer's list</li>
-          <li>Check expiry dates and quality</li>
-          <li>Message customer if substitution needed</li>
-        </ul>
+        <ul><li>Select items as per list</li><li>Check expiry dates</li><li>Message if substitution needed</li></ul>
       </div>
       <div>
-        <strong>🤝 Etiquette for All Roles</strong>
-        <ul style="margin-left: 1.2rem; margin-top: 0.5rem;">
-          <li>Always be respectful and punctual</li>
-          <li>Wear identifiable attire (OnRoadNow badge)</li>
-          <li>Keep customer data confidential</li>
-          <li>Resolve issues politely or escalate to support</li>
-        </ul>
+        <strong>🤝 Etiquette for All</strong>
+        <ul><li>Be respectful and punctual</li><li>Wear OnRoadNow badge</li><li>Keep customer data confidential</li><li>Resolve issues politely</li></ul>
       </div>
     </div>
   </div>
 
-  <!-- Member Dashboard (appears after login) -->
+  <!-- Member Dashboard -->
   <div id="memberDashboard" class="card hidden">
     <div style="background: linear-gradient(45deg, #1e3a8a, #2563eb); height: 100px; border-radius: 1rem 1rem 0 0; margin: -1.5rem -1.5rem 0 -1.5rem;"></div>
     <div class="flex-between" style="margin-top: -40px; padding: 0 1rem;">
@@ -172,6 +171,8 @@
         <input type="text" id="pickupLocation" placeholder="Pickup address" required>
         <input type="text" id="dropoffLocation" placeholder="Dropoff address" required>
         <input type="number" id="itemCost" placeholder="Item cost (JMD)" required>
+        <input type="number" id="weight" placeholder="Weight (lbs)" value="0" step="1">
+        <input type="number" id="distance" placeholder="Distance (km) estimate" step="0.1">
         <select id="paymentMethod">
           <option value="visa_mc">Visa/Mastercard</option>
           <option value="etransfer">E-Transfer</option>
@@ -186,7 +187,7 @@
     <div id="adminTabContent" class="tab-content hidden"><h4>Admin Controls</h4><div id="adminListings"></div></div>
   </div>
 
-  <!-- Map for everyone -->
+  <!-- Map -->
   <div class="card">
     <div class="card-header"><i class="fas fa-map-marked-alt"></i> Find Stores & Shops (move map)</div>
     <div id="map"></div>
@@ -203,6 +204,45 @@
 </div>
 
 <script>
+  // Helper function to calculate delivery fee based on weight, distance, type
+  function calculateDeliveryFee(weight, distance, type) {
+    let base = 0;
+    if (type === 'foot') base = 150;
+    else base = 300; // car/scooter
+    let surcharge = 0;
+    if (weight > 50) {
+      const extraLbs = weight - 50;
+      surcharge += Math.ceil(extraLbs / 10) * 50;
+    }
+    let distanceSurcharge = 0;
+    if (distance > 3 && type === 'foot') distanceSurcharge = base * 0.25;
+    let total = base + surcharge + distanceSurcharge;
+    // For car, additional 5% per 150 lbs over 150
+    if (type === 'car' && weight > 150) {
+      const extra = Math.ceil((weight - 150) / 150);
+      total += base * 0.05 * extra;
+    }
+    return Math.round(total);
+  }
+
+  // Calculate driver earnings (commission)
+  function calculateDriverEarnings(itemCost, type, weight, distance) {
+    let commissionRate = 0;
+    if (type === 'foot') {
+      const fee = calculateDeliveryFee(weight, distance, 'foot');
+      return fee; // on‑foot gets the full delivery fee
+    } else {
+      // car: 11-15% sliding scale based on item cost, minimum JMD 200
+      if (itemCost <= 1000) commissionRate = 0.15;
+      else if (itemCost <= 5000) commissionRate = 0.13;
+      else commissionRate = 0.11;
+      let earnings = itemCost * commissionRate;
+      if (earnings < 200) earnings = 200;
+      return Math.round(earnings);
+    }
+  }
+
+  // API helper
   async function apiCall(url, options = {}) {
     const res = await fetch(url, {
       ...options,
@@ -259,8 +299,8 @@
           <p id="authMsg"></p>
         </div>
       `;
-      document.getElementById('appleLoginBtn').onclick = () => alert('Apple login: will be integrated soon.');
-      document.getElementById('telegramLoginBtn').onclick = () => alert('Telegram login: will be integrated soon.');
+      document.getElementById('appleLoginBtn').onclick = () => alert('Apple login coming soon.');
+      document.getElementById('telegramLoginBtn').onclick = () => alert('Telegram login coming soon.');
       document.getElementById('emailLogin').onclick = async () => {
         const res = await apiCall('/api/login', { method: 'POST', body: JSON.stringify({ email: document.getElementById('loginEmail').value }) });
         if (res.error) document.getElementById('authMsg').innerText = res.error;
@@ -335,16 +375,37 @@
   document.getElementById('requestForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!currentUser) return alert('Login first');
+    const itemCost = parseFloat(document.getElementById('itemCost').value);
+    const weight = parseFloat(document.getElementById('weight').value) || 0;
+    const distance = parseFloat(document.getElementById('distance').value) || 0;
+    const role = document.getElementById('roleSelect')?.value || 'customer';
+    let paymentMethod = document.getElementById('paymentMethod').value;
+    let finalCost = itemCost;
+    let driverPayout = 0;
+    let delivererRole = role.includes('deliverer') ? (role === 'deliverer_foot' ? 'foot' : 'car') : 'car';
+    if (paymentMethod === 'deliverer_fronts') {
+      finalCost = itemCost * 1.224; // +22.4%
+      driverPayout = finalCost; // deliverer gets the full amount
+    } else {
+      driverPayout = calculateDriverEarnings(itemCost, delivererRole, weight, distance);
+    }
+    const deliveryFee = calculateDeliveryFee(weight, distance, delivererRole);
+    const totalBuyerPays = finalCost + deliveryFee;
     await apiCall('/api/requests', { method: 'POST', body: JSON.stringify({
       itemDetails: document.getElementById('itemDetails').value,
       pickupLocation: document.getElementById('pickupLocation').value,
       dropoffLocation: document.getElementById('dropoffLocation').value,
-      itemCost: parseFloat(document.getElementById('itemCost').value),
-      paymentMethod: document.getElementById('paymentMethod').value
+      itemCost: finalCost,
+      paymentMethod,
+      weight, distance,
+      driverPayout,
+      deliveryFee,
+      totalBuyerPays
     })});
-    alert('Request posted!');
+    alert(`Request posted! Total for buyer: JMD ${totalBuyerPays}. Driver earns: JMD ${driverPayout}`);
     loadRequests();
   });
+
   async function loadRequests() {
     const reqs = await apiCall('/api/requests');
     const container = document.getElementById('requests');
@@ -357,7 +418,7 @@
         actions = `<button onclick="acceptRequest('${r.id}')" class="btn btn-primary btn-sm">Accept</button>`;
         if (r.paymentMethod === 'deliverer_fronts') actions += `<button onclick="offerLoan('${r.id}')" class="btn btn-outline btn-sm">Front money</button>`;
       }
-      div.innerHTML = `<div><strong>${escapeHtml(r.itemDetails)}</strong><br>Pickup: ${escapeHtml(r.pickupLocation)}<br>Dropoff: ${escapeHtml(r.dropoffLocation)}<br>💰 JMD ${r.itemCost}<br>💳 ${r.paymentMethod}<br>Status: ${r.status}</div><div>${actions}</div>`;
+      div.innerHTML = `<div><strong>${escapeHtml(r.itemDetails)}</strong><br>Pickup: ${escapeHtml(r.pickupLocation)}<br>Dropoff: ${escapeHtml(r.dropoffLocation)}<br>💰 Item cost: JMD ${r.itemCost}<br>🚚 Delivery fee: JMD ${r.deliveryFee}<br>💳 Payment: ${r.paymentMethod}<br>📦 Weight: ${r.weight} lbs, Distance: ${r.distance} km<br>Driver earns: JMD ${r.driverPayout}<br>Status: ${r.status}</div><div>${actions}</div>`;
       container.appendChild(div);
     });
   }
@@ -380,8 +441,9 @@
     });
   }
 
-  // Google Maps
+  // Google Maps (with error logging)
   function initMap() {
+    console.log("initMap called");
     const defaultLocation = { lat: 18.4655, lng: -77.9223 };
     map = new google.maps.Map(document.getElementById('map'), { center: defaultLocation, zoom: 14 });
     infoWindow = new google.maps.InfoWindow();
@@ -410,7 +472,7 @@
           div.onclick = () => { map.setCenter(place.geometry.location); map.setZoom(16); };
           placesDiv.appendChild(div);
         });
-      } else placesDiv.innerHTML = '<div>No shops found. Move map.</div>';
+      } else placesDiv.innerHTML = '<div>No shops found. Move map. If map is empty, check Google Maps API key restrictions.</div>';
     });
   }
   function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
