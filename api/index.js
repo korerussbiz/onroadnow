@@ -195,3 +195,16 @@ module.exports = async (req, res) => {
 
   res.status(404).json({ error: 'Not found' });
 };
+
+// ---------- Accept Terms (record acceptance) ----------
+if (url === '/api/accept-terms' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  const user = users.find(u => u.id === userId);
+  if (user) {
+    user.termsAccepted = Date.now();
+    res.status(200).json({ message: 'Terms accepted' });
+  } else {
+    res.status(404).json({ error: 'User not found' });
+  }
+  return;
+}
