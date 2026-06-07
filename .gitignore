@@ -2,3 +2,5 @@ node_modules/
 *.log
 .DS_Store
 serviceAccountKey.json
+serviceAccountKey.json
+serviceAccountKey.json
