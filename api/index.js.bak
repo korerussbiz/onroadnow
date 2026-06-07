@@ -15,7 +15,7 @@ try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
   } else {
-    // For local development: place serviceAccountKey.json in project root
+    // For local development: use the file we just created
     serviceAccount = require('./serviceAccountKey.json');
   }
   admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
@@ -25,13 +25,12 @@ try {
   console.error('Firestore not available, using in-memory fallback', e.message);
 }
 
-// In-memory fallback (if no Firestore)
+// In-memory fallback
 let memoryUsers = [];
 let memoryListings = [];
 let memorySales = [];
 let memoryRequests = [];
 
-// Helper functions
 async function getUser(uid) {
   if (db) {
     const doc = await db.collection('users').doc(uid).get();
@@ -123,7 +122,6 @@ async function updateRequest(id, data) {
   }
 }
 
-// Helper to get user from JWT cookie
 function getUserFromCookies(cookies) {
   if (!cookies.token) return null;
   try {
@@ -138,21 +136,17 @@ module.exports = async (req, res) => {
   const tokenData = getUserFromCookies(cookies);
   let userId = tokenData ? tokenData.userId : null;
 
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', 'https://onroadnow.vercel.app');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (method === 'OPTIONS') return res.status(200).end();
 
-  // ---------- Google OAuth ----------
+  // Google OAuth
   if (url === '/api/auth/google' && method === 'POST') {
     const { credential } = req.body;
     try {
-      const ticket = await oauthClient.verifyIdToken({
-        idToken: credential,
-        audience: GOOGLE_CLIENT_ID,
-      });
+      const ticket = await oauthClient.verifyIdToken({ idToken: credential, audience: GOOGLE_CLIENT_ID });
       const payload = ticket.getPayload();
       const email = payload.email;
       const name = payload.name;
@@ -171,10 +165,9 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // ---------- Email/password auth (fallback) ----------
+  // Email/password fallback (simplified)
   if (url === '/api/signup' && method === 'POST') {
-    const { email, password, name } = req.body;
-    // For simplicity, we just create a user – no password hashing (demo)
+    const { email, name } = req.body;
     let user = await getUser(email);
     if (user) return res.status(400).json({ error: 'User exists' });
     await setUser(email, { id: email, email, name, phone: '', role: 'customer', createdAt: Date.now() });
@@ -184,7 +177,7 @@ module.exports = async (req, res) => {
     return;
   }
   if (url === '/api/login' && method === 'POST') {
-    const { email } = req.body; // no password check for demo
+    const { email } = req.body;
     let user = await getUser(email);
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
@@ -198,7 +191,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // ---------- User profile ----------
+  // User profile
   if (url === '/api/me' && method === 'GET') {
     if (!userId) return res.status(401).json({ error: 'Unauthorized' });
     const user = await getUser(userId);
@@ -212,7 +205,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // ---------- Marketplace ----------
+  // Marketplace
   if (url === '/api/listings' && method === 'GET') {
     const listings = await getListings();
     res.status(200).json(listings);
@@ -221,15 +214,11 @@ module.exports = async (req, res) => {
   if (url === '/api/listings' && method === 'POST') {
     if (!userId) return res.status(401).json({ error: 'Login required' });
     const { title, description, price, feePercent } = req.body;
-    const newListing = {
-      sellerId: userId,
-      title, description,
-      price: parseFloat(price),
-      feePercent: feePercent || 2,
-      status: 'active',
-      createdAt: Date.now()
-    };
-    const listing = await addListing(newListing);
+    const listing = await addListing({
+      sellerId: userId, title, description,
+      price: parseFloat(price), feePercent: feePercent || 2,
+      status: 'active', createdAt: Date.now()
+    });
     res.status(200).json(listing);
     return;
   }
@@ -249,15 +238,10 @@ module.exports = async (req, res) => {
     const listing = listings.find(l => l.id === listingId);
     if (!listing || listing.status !== 'active') return res.status(404).json({ error: 'Not available' });
     const feeAmount = (listing.price * listing.feePercent) / 100;
-    const sale = {
-      listingId,
-      sellerId: listing.sellerId,
-      buyerId: userId,
-      amount: listing.price,
-      fee: feeAmount,
-      timestamp: Date.now()
-    };
-    await addSale(sale);
+    await addSale({
+      listingId, sellerId: listing.sellerId, buyerId: userId,
+      amount: listing.price, fee: feeAmount, timestamp: Date.now()
+    });
     if (db) {
       await db.collection('listings').doc(listingId).update({ status: 'sold' });
     } else {
@@ -269,12 +253,12 @@ module.exports = async (req, res) => {
   }
   if (url === '/api/sales' && method === 'GET') {
     if (!userId) return res.status(401).json({ error: 'Login required' });
-    const userSales = await getSalesForUser(userId);
-    res.status(200).json(userSales);
+    const sales = await getSalesForUser(userId);
+    res.status(200).json(sales);
     return;
   }
 
-  // ---------- Delivery requests ----------
+  // Delivery requests
   if (url === '/api/requests' && method === 'POST') {
     if (!userId) return res.status(401).json({ error: 'Login required' });
     const request = { ...req.body, userId, status: 'open', createdAt: Date.now() };
@@ -294,27 +278,12 @@ module.exports = async (req, res) => {
     res.status(200).json({});
     return;
   }
-  if (url === '/api/offerLoan' && method === 'POST') {
-    res.status(200).json({});
-    return;
-  }
-  if (url === '/api/confirmDelivery' && method === 'POST') {
-    const { requestId } = req.body;
-    await updateRequest(requestId, { status: 'completed' });
-    res.status(200).json({});
-    return;
-  }
-  if (url === '/api/updateLocation' && method === 'POST') {
-    // store in memory or separate collection – simplified
-    res.status(200).json({});
-    return;
-  }
-  if (url.startsWith('/api/getLocation')) {
-    res.status(200).json({ location: null });
-    return;
-  }
+  if (url === '/api/offerLoan' && method === 'POST') { res.status(200).json({}); return; }
+  if (url === '/api/confirmDelivery' && method === 'POST') { res.status(200).json({}); return; }
+  if (url === '/api/updateLocation' && method === 'POST') { res.status(200).json({}); return; }
+  if (url.startsWith('/api/getLocation')) { res.status(200).json({ location: null }); return; }
 
-  // ---------- Nearby places (proxy) ----------
+  // Nearby places proxy
   if (url.startsWith('/api/nearby')) {
     const { lat, lon, radius = 2000 } = req.query;
     const query = `[out:json];(node["shop"](around:${radius},${lat},${lon});node["amenity"="restaurant"](around:${radius},${lat},${lon});node["amenity"="cafe"](around:${radius},${lat},${lon});node["amenity"="pharmacy"](around:${radius},${lat},${lon});node["shop"="supermarket"](around:${radius},${lat},${lon}););out body;`;
