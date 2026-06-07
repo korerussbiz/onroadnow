@@ -7,11 +7,8 @@
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2772533792093956"
      crossorigin="anonymous"></script>
-  <!-- Google Maps (with fallback) -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCTd4-1QDwlwGxdI22VXpnRop48glDBT0E&libraries=places&callback=initMap" async defer></script>
-  <!-- Fallback Leaflet (OpenStreetMap) -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Google Maps Advanced Components -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"></script>
   <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -37,7 +34,10 @@
     .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
     .form-group { margin-bottom: 1rem; }
     input, select, textarea { width: 100%; padding: 0.75rem 1rem; border: 1px solid #cbd5e1; border-radius: 1rem; font-family: inherit; }
-    #map { height: 400px; border-radius: 1rem; margin-top: 1rem; background: #e2e8f0; }
+    #map-container { height: 450px; border-radius: 1rem; overflow: hidden; margin-top: 1rem; position: relative; }
+    gmp-map { height: 100%; width: 100%; display: block; }
+    .place-picker-container { padding: 10px; background: white; border-radius: 2rem; box-shadow: 0 2px 6px rgba(0,0,0,0.1); width: 300px; max-width: 90%; }
+    gmpx-place-picker { width: 100%; }
     .place-list { max-height: 250px; overflow-y: auto; background: white; border-radius: 1rem; border: 1px solid #e2e8f0; margin-top: 1rem; }
     .place { padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
     .listing-card { border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; }
@@ -75,7 +75,7 @@
     <p>OnRoadNow connects you with trusted local deliverers. Whether you need groceries, medicine, food, or packages – post a request and a deliverer will pick up and deliver. Earn money by delivering items or selling goods in our marketplace.</p>
     <div class="tutorial-steps" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
       <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-user-plus fa-2x"></i><h4>1. Sign Up</h4><p>Google, Email, Apple, Telegram</p></div>
-      <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-map-marker-alt fa-2x"></i><h4>2. Find Store</h4><p>Move the map, click any shop</p></div>
+      <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-map-marker-alt fa-2x"></i><h4>2. Find Store</h4><p>Search or move map</p></div>
       <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-clipboard-list fa-2x"></i><h4>3. Post Request</h4><p>Describe item & location</p></div>
       <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-hand-holding-usd fa-2x"></i><h4>4. Earn Money</h4><p>Accept, deliver, get paid</p></div>
     </div>
@@ -133,7 +133,7 @@
     </div>
   </div>
 
-  <!-- Member Dashboard -->
+  <!-- Member Dashboard (appears after login) -->
   <div id="memberDashboard" class="card hidden">
     <div style="background: linear-gradient(45deg, #1e3a8a, #2563eb); height: 100px; border-radius: 1rem 1rem 0 0; margin: -1.5rem -1.5rem 0 -1.5rem;"></div>
     <div class="flex-between" style="margin-top: -40px; padding: 0 1rem;">
@@ -192,14 +192,21 @@
     <div id="adminTabContent" class="tab-content hidden"><h4>Admin Controls</h4><div id="adminListings"></div></div>
   </div>
 
-  <!-- Map -->
+  <!-- Advanced Map with Place Picker -->
   <div class="card">
-    <div class="card-header"><i class="fas fa-map-marked-alt"></i> Find Stores & Shops (move map)</div>
-    <div id="map"></div>
-    <div id="places" class="place-list"><div style="padding:1rem;">Move map to load shops</div></div>
+    <div class="card-header"><i class="fas fa-map-marked-alt"></i> Find Stores & Shops – Search or move map</div>
+    <div id="map-container">
+      <gmp-map center="18.4655,-77.9223" zoom="14" map-id="DEMO_MAP_ID">
+        <div slot="control-block-start-inline-start" class="place-picker-container">
+          <gmpx-place-picker placeholder="Search for a store or address"></gmpx-place-picker>
+        </div>
+        <gmp-advanced-marker></gmp-advanced-marker>
+      </gmp-map>
+    </div>
+    <div id="places" class="place-list"><div style="padding:1rem;">Loading nearby shops...</div></div>
   </div>
 
-  <!-- AdSense Unit (location‑based) -->
+  <!-- AdSense Unit -->
   <div class="ad-container">
     <ins class="adsbygoogle"
          style="display:block"
@@ -233,6 +240,111 @@
 </div>
 
 <script>
+  // Load API loader with correct Maps API key (the one you have for Maps)
+  const loaderScript = document.createElement('script');
+  loaderScript.src = `https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js`;
+  loaderScript.type = 'module';
+  document.head.appendChild(loaderScript);
+
+  // Also add the API key loader element (gmp-map expects this)
+  const apiLoader = document.createElement('gmpx-api-loader');
+  apiLoader.setAttribute('key', 'AIzaSyCTd4-1QDwlwGxdI22VXpnRop48glDBT0E');
+  apiLoader.setAttribute('solution-channel', 'GMP_GE_mapsandplacesautocomplete_v2');
+  document.body.appendChild(apiLoader);
+
+  // After the map components are ready, we'll handle place picker events and fetch nearby shops.
+  // We'll use a MutationObserver to wait for the custom element definitions, then attach our logic.
+  async function initMapComponents() {
+    await customElements.whenDefined('gmp-map');
+    await customElements.whenDefined('gmpx-place-picker');
+
+    const map = document.querySelector('gmp-map');
+    const marker = document.querySelector('gmp-advanced-marker');
+    const placePicker = document.querySelector('gmpx-place-picker');
+    const infowindow = new google.maps.InfoWindow();
+
+    if (map && map.innerMap) {
+      map.innerMap.setOptions({ mapTypeControl: false });
+    }
+
+    if (placePicker) {
+      placePicker.addEventListener('gmpx-placechange', () => {
+        const place = placePicker.value;
+        if (!place || !place.location) {
+          alert('No details available for: ' + (place ? place.name : ''));
+          infowindow.close();
+          if (marker) marker.position = null;
+          return;
+        }
+        if (place.viewport && map) {
+          map.innerMap.fitBounds(place.viewport);
+        } else if (map) {
+          map.center = place.location;
+          map.zoom = 17;
+        }
+        if (marker) marker.position = place.location;
+        infowindow.setContent(`<strong>${place.displayName}</strong><br><span>${place.formattedAddress}</span>`);
+        infowindow.open(map.innerMap, marker);
+        // After place selection, also fetch nearby shops (if needed)
+        fetchNearbyPlaces(place.location.lat, place.location.lng);
+      });
+    }
+
+    // Fetch nearby shops on map move (if we have the map instance)
+    if (map && map.innerMap) {
+      map.innerMap.addListener('idle', () => {
+        const center = map.innerMap.getCenter();
+        fetchNearbyPlaces(center.lat(), center.lng());
+      });
+    }
+
+    // Initial load: Montego Bay center
+    fetchNearbyPlaces(18.4655, -77.9223);
+  }
+
+  async function fetchNearbyPlaces(lat, lon) {
+    const placesDiv = document.getElementById('places');
+    placesDiv.innerHTML = '<div style="padding:1rem;">Loading shops...</div>';
+    try {
+      const res = await fetch(`/api/nearby?lat=${lat}&lon=${lon}&radius=2000`);
+      const data = await res.json();
+      const placesDiv = document.getElementById('places');
+      placesDiv.innerHTML = '';
+      if (data.elements && data.elements.length) {
+        data.elements.forEach(el => {
+          const name = el.tags?.name || (el.tags?.shop || el.tags?.amenity || 'Unnamed');
+          const div = document.createElement('div');
+          div.className = 'place';
+          div.innerHTML = `<i class="fas fa-store"></i> ${name}`;
+          div.onclick = () => {
+            // Optionally move map to that place
+            const map = document.querySelector('gmp-map');
+            if (map && map.innerMap) {
+              map.innerMap.setCenter({ lat: el.lat, lng: el.lon });
+              map.innerMap.setZoom(16);
+            }
+            // Pre‑fill store name in form
+            const storeInput = document.getElementById('storeName');
+            if (storeInput) storeInput.value = name;
+          };
+          placesDiv.appendChild(div);
+        });
+      } else {
+        placesDiv.innerHTML = '<div style="padding:1rem;">No shops found. Move map or search.</div>';
+      }
+    } catch(e) {
+      console.error(e);
+      placesDiv.innerHTML = '<div style="padding:1rem;">Error loading shops.</div>';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initMapComponents();
+  });
+
+  // -------------------------------------------------------------
+  // Existing API and authentication logic (same as before)
+  // -------------------------------------------------------------
   async function apiCall(url, options = {}) {
     const res = await fetch(url, {
       ...options,
@@ -243,8 +355,6 @@
   }
 
   let currentUser = null;
-  let map, service, infoWindow, markers = [];
-  let fallbackMap = null;
 
   function handleCredentialResponse(response) {
     fetch('/api/auth/google', {
@@ -410,57 +520,6 @@
       adminDiv.innerHTML += `<div class="listing-card"><strong>${l.title}</strong> by ${l.sellerId}<br>Price: JMD ${l.price}<br><button onclick="deleteListing('${l.id}')" class="btn btn-outline">Delete</button></div>`;
     });
   }
-
-  // Google Maps with fallback
-  function initMap() {
-    // Try Google Maps
-    if (typeof google !== 'undefined' && google.maps) {
-      const defaultLocation = { lat: 18.4655, lng: -77.9223 };
-      map = new google.maps.Map(document.getElementById('map'), { center: defaultLocation, zoom: 14 });
-      infoWindow = new google.maps.InfoWindow();
-      service = new google.maps.places.PlacesService(map);
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-          map.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          searchNearbyPlaces({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        }, () => searchNearbyPlaces(defaultLocation));
-      } else searchNearbyPlaces(defaultLocation);
-      map.addListener('idle', () => {
-        const center = map.getCenter();
-        searchNearbyPlaces({ lat: center.lat(), lng: center.lng() });
-      });
-    } else {
-      // Fallback to Leaflet
-      console.warn('Google Maps failed, using OpenStreetMap fallback');
-      fallbackMap = L.map('map').setView([18.4655, -77.9223], 14);
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(fallbackMap);
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => fallbackMap.setView([pos.coords.latitude, pos.coords.longitude], 14));
-      }
-      document.getElementById('places').innerHTML = '<div>Google Maps unavailable, showing OpenStreetMap. No shop list.</div>';
-    }
-  }
-
-  function searchNearbyPlaces(location) {
-    if (!service) return;
-    service.nearbySearch({ location, radius: 1500, type: ['store','supermarket','restaurant','cafe','pharmacy'] }, (results, status) => {
-      const placesDiv = document.getElementById('places');
-      if (status === google.maps.places.PlacesServiceStatus.OK && results.length) {
-        clearMarkers(); placesDiv.innerHTML = '';
-        results.forEach(place => {
-          const marker = new google.maps.Marker({ map, position: place.geometry.location, title: place.name });
-          markers.push(marker);
-          google.maps.event.addListener(marker, 'click', () => infoWindow.setContent(`<strong>${place.name}</strong><br>${place.vicinity || ''}`) && infoWindow.open(map, marker));
-          const div = document.createElement('div'); div.className = 'place'; div.innerHTML = `<i class="fas fa-store"></i> ${place.name}`;
-          div.onclick = () => { map.setCenter(place.geometry.location); map.setZoom(16); };
-          placesDiv.appendChild(div);
-        });
-      } else placesDiv.innerHTML = '<div>No shops found. Move map.</div>';
-    });
-  }
-
-  function clearMarkers() { markers.forEach(m => m.setMap(null)); markers = []; }
-  window.initMap = initMap;
 
   function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])) : ''; }
 
