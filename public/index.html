@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>onroadnow – Delivery & Marketplace</title>
   <!-- Google AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2772533792093956"
-     crossorigin="anonymous"></script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2772533792093956" crossorigin="anonymous"></script>
   <meta name="google-adsense-account" content="ca-pub-2772533792093956">
-  <!-- Google Maps Advanced Components with your key -->
+  <!-- Google Maps Advanced Components -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"></script>
   <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -19,7 +18,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; }
     .hero { background: linear-gradient(135deg, #0f2b5e, #1e4a8a); color: white; padding: 4rem 2rem; text-align: center; }
     .hero h1 { font-size: 3rem; margin-bottom: 1rem; }
     .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto; opacity: 0.9; }
@@ -28,10 +27,10 @@
     .stat-number { font-size: 2rem; font-weight: 800; }
     .stat-label { font-size: 0.9rem; opacity: 0.8; }
     .container { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
-    .card { background: white; border-radius: 1.5rem; box-shadow: 0 20px 25px -12px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 2rem; transition: 0.2s; }
-    .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 2px solid #eef2ff; padding-bottom: 0.75rem; font-weight: 700; font-size: 1.2rem; }
-    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 9999px; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; background: #f1f5f9; }
-    .btn-primary { background: #2563eb; color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .card { background: white; border-radius: 1.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); padding: 1.5rem; margin-bottom: 2rem; }
+    .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; border-bottom: 2px solid #e0e7ff; padding-bottom: 0.75rem; font-weight: 700; font-size: 1.2rem; }
+    .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; }
+    .btn-primary { background: #2563eb; color: white; }
     .btn-google { background: #db4437; color: white; }
     .btn-apple { background: #000000; color: white; }
     .btn-telegram { background: #0088cc; color: white; }
@@ -45,11 +44,11 @@
     .place-list { max-height: 250px; overflow-y: auto; background: white; border-radius: 1rem; border: 1px solid #e2e8f0; margin-top: 1rem; }
     .place { padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
     .listing-card { border: 1px solid #e2e8f0; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; }
-    .badge { background: #eef2ff; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; color: #1e40af; }
+    .badge { background: #eef2ff; padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.75rem; font-weight: 600; color: #1e40af; }
     .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
     .hidden { display: none; }
     .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
-    .tab { padding: 0.5rem 1rem; cursor: pointer; border-radius: 2rem; transition: 0.2s; }
+    .tab { padding: 0.5rem 1rem; cursor: pointer; border-radius: 2rem; }
     .tab.active { background: #2563eb; color: white; }
     .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white; margin-top: -40px; margin-left: 1rem; }
     .footer { text-align: center; margin-top: 3rem; padding: 1.5rem; background: #1e293b; color: #94a3b8; border-radius: 1rem; }
@@ -70,8 +69,6 @@
     .message.me .message-bubble { background: #2563eb; color: white; }
     .chat-input { display: flex; gap: 0.5rem; padding: 0.5rem; border-top: 1px solid #e2e8f0; }
     .chat-input input { flex: 1; margin: 0; }
-    .tutorial-steps { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
-    .step { flex: 1; min-width: 180px; background: #f8fafc; border-radius: 1rem; padding: 1rem; text-align: center; }
   </style>
 </head>
 <body>
@@ -91,11 +88,11 @@
   <div class="card">
     <div class="card-header"><i class="fas fa-info-circle"></i> How onroadnow Works</div>
     <p>onroadnow connects you with trusted local deliverers. Whether you need groceries, medicine, food, or packages – post a request and a deliverer will pick up and deliver. Earn money by delivering items or selling goods in our marketplace. Use the <strong>chat</strong> to negotiate deals directly with other users.</p>
-    <div class="tutorial-steps">
-      <div class="step"><i class="fas fa-user-plus fa-2x"></i><h4>1. Sign Up</h4><p>Google, Email, Apple, Telegram</p></div>
-      <div class="step"><i class="fas fa-map-marker-alt fa-2x"></i><h4>2. Find Store</h4><p>Search or move map</p></div>
-      <div class="step"><i class="fas fa-clipboard-list fa-2x"></i><h4>3. Post Request</h4><p>Describe item & location</p></div>
-      <div class="step"><i class="fas fa-hand-holding-usd fa-2x"></i><h4>4. Earn Money</h4><p>Accept, deliver, get paid</p></div>
+    <div class="tutorial-steps" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+      <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-user-plus fa-2x"></i><h4>1. Sign Up</h4><p>Google, Email, Apple, Telegram</p></div>
+      <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-map-marker-alt fa-2x"></i><h4>2. Find Store</h4><p>Search or move map</p></div>
+      <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-clipboard-list fa-2x"></i><h4>3. Post Request</h4><p>Describe item & location</p></div>
+      <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-hand-holding-usd fa-2x"></i><h4>4. Earn Money</h4><p>Accept, deliver, get paid</p></div>
     </div>
   </div>
 
@@ -226,7 +223,7 @@
 
   <!-- AdSense Unit -->
   <div class="ad-container">
-    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2772533792093956" data-ad-slot="your-actual-ad-slot" data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2772533792093956" data-ad-slot="YOUR_AD_SLOT_ID" data-ad-format="auto" data-full-width-responsive="true"></ins>
     <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
   </div>
 
@@ -235,7 +232,7 @@
     <div class="card-header"><i class="fas fa-credit-card"></i> Support onroadnow</div>
     <div class="payment-buttons">
       <form action="https://www.paypal.com/donate" method="post" target="_top">
-        <input type="hidden" name="hosted_button_id" value="your-actual-paypal-button-id" />
+        <input type="hidden" name="hosted_button_id" value="YOUR_PAYPAL_BUTTON_ID" />
         <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0" name="submit" title="PayPal" alt="Donate with PayPal" />
       </form>
       <button id="googlePayBtn" class="btn btn-primary">Google Pay (coming soon)</button>
@@ -246,7 +243,7 @@
   <div class="footer">© 2025 onroadnow by KorerussBiz | <a href="#">Terms</a> | <a href="#">Privacy</a></div>
 </div>
 
-<!-- Google Maps API loader with your key -->
+<!-- Google Maps API loader -->
 <gmpx-api-loader key="AIzaSyB9RTVhBfAtrFET-YyMLK5f2v4tQ-uT2w0" solution-channel="GMP_GE_mapsandplacesautocomplete_v2"></gmpx-api-loader>
 
 <script>
@@ -264,7 +261,7 @@
 
   function uid() { return auth.currentUser?.uid; }
 
-  // ---------- Google Sign-In callback ----------
+  // Google Sign-In callback (working from commit 31b151d)
   function handleCredentialResponse(response) {
     fetch('/api/auth/google', {
       method: 'POST',
@@ -276,7 +273,6 @@
     .catch(err => alert('Error: ' + err.message));
   }
 
-  // ---------- API helper ----------
   async function apiCall(url, options = {}) {
     const res = await fetch(url, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json', ...options.headers } });
     return res.json();
@@ -284,7 +280,6 @@
 
   let currentUser = null;
 
-  // ---------- Auth UI ----------
   async function checkAuth() {
     const data = await apiCall('/api/me');
     if (data.id) {
@@ -327,7 +322,7 @@
     }
   }
 
-  // ---------- Chat Functions ----------
+  // Chat functions (restored from working version)
   let currentConversationId = null;
   let unsubscribeMessages = null;
 
@@ -431,19 +426,7 @@
     });
   }
 
-  // Override listing/request load functions to add message buttons
-  const originalLoadListings = window.loadMarketplaceListings;
-  window.loadMarketplaceListings = async function() {
-    await originalLoadListings();
-    addMessageButtons();
-  };
-  const originalLoadRequests = window.loadRequests;
-  window.loadRequests = async function() {
-    await originalLoadRequests();
-    addMessageButtons();
-  };
-
-  // ---------- Marketplace, Requests, etc. ----------
+  // Marketplace, requests, sales (full restored)
   async function loadMarketplaceListings() {
     const listings = await apiCall('/api/listings');
     const container = document.getElementById('marketplaceListings');
@@ -497,7 +480,6 @@
   }
   window.acceptRequest = async (id) => { await apiCall(`/api/accept?id=${id}`, { method: 'POST', body: JSON.stringify({ delivererId: currentUser.id, delivererName: currentUser.name }) }); alert('Accepted!'); loadRequests(); };
   window.offerLoan = async (id) => { const amount = prompt('Amount to front (JMD):'); if (amount) await apiCall('/api/offerLoan', { method: 'POST', body: JSON.stringify({ requestId: id, delivererId: currentUser.id, amountFronted: parseFloat(amount) }) }); };
-  // Tracking
   let watchId = null;
   const startBtn = document.getElementById('startTrackingBtn'), stopBtn = document.getElementById('stopTrackingBtn'), trackingStatus = document.getElementById('trackingStatus');
   if (startBtn && currentUser && currentUser.role === 'deliverer') {
@@ -530,16 +512,34 @@
     loadActiveDeliveries(); loadRequests();
   };
   setInterval(() => { if (currentUser?.role === 'customer') loadActiveDeliveries(); }, 5000);
-
   async function loadAdminData() {
     const listings = await apiCall('/api/listings');
     const adminDiv = document.getElementById('adminListings');
     if (!adminDiv) return;
     adminDiv.innerHTML = '<h5>All Listings</h5>';
-    listings.forEach(l => {
-      adminDiv.innerHTML += `<div class="listing-card"><strong>${l.title}</strong> by ${l.sellerId}<br>Price: JMD ${l.price}<br><button onclick="deleteListing('${l.id}')" class="btn btn-outline">Delete</button></div>`;
-    });
+    listings.forEach(l => { adminDiv.innerHTML += `<div class="listing-card"><strong>${l.title}</strong> by ${l.sellerId}<br>Price: JMD ${l.price}<br><button onclick="deleteListing('${l.id}')" class="btn btn-outline">Delete</button></div>`; });
   }
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.tab;
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
+      document.getElementById(`${tabName}Tab`).classList.remove('hidden');
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      if (tabName === 'chat') loadConversations();
+      if (tabName === 'admin') loadAdminData();
+    });
+  });
+  document.getElementById('saveProfileBtn')?.addEventListener('click', async () => {
+    await apiCall('/api/user', { method: 'POST', body: JSON.stringify({
+      phone: document.getElementById('phoneInput').value,
+      name: document.getElementById('fullNameInput').value,
+      role: document.getElementById('roleSelect').value
+    }) });
+    await db.collection('users').doc(uid()).set({ name: document.getElementById('fullNameInput').value, phone: document.getElementById('phoneInput').value, role: document.getElementById('roleSelect').value }, { merge: true });
+    alert('Profile saved!'); location.reload();
+  });
+  document.getElementById('changeAvatarBtn')?.addEventListener('click', () => alert('Avatar upload: coming soon'));
 
   // Map initialization
   (async () => {
@@ -589,34 +589,6 @@
       } else placesDiv.innerHTML = '<div style="padding:1rem;">No shops found. Move map or search.</div>';
     } catch(e) { placesDiv.innerHTML = '<div style="padding:1rem;">Error loading shops.</div>'; }
   }
-
-  // Tab handling and initial loads
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      const tabName = tab.dataset.tab;
-      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
-      document.getElementById(`${tabName}Tab`).classList.remove('hidden');
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      if (tabName === 'chat') loadConversations();
-      if (tabName === 'admin') loadAdminData();
-    });
-  });
-
-  document.getElementById('saveProfileBtn')?.addEventListener('click', async () => {
-    await apiCall('/api/user', { method: 'POST', body: JSON.stringify({
-      phone: document.getElementById('phoneInput').value,
-      name: document.getElementById('fullNameInput').value,
-      role: document.getElementById('roleSelect').value
-    }) });
-    await db.collection('users').doc(uid()).set({ name: document.getElementById('fullNameInput').value, phone: document.getElementById('phoneInput').value, role: document.getElementById('roleSelect').value }, { merge: true });
-    alert('Profile saved!'); location.reload();
-  });
-
-  document.getElementById('changeAvatarBtn')?.addEventListener('click', () => {
-    alert('Avatar upload: coming soon');
-  });
-
   function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])) : ''; }
 
   checkAuth();
