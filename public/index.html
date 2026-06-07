@@ -17,7 +17,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
-    /* (all existing styles – same as before) */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #0f172a; }
     .hero { background: linear-gradient(135deg, #0f2b5e, #1e4a8a); color: white; padding: 4rem 2rem; text-align: center; }
@@ -85,7 +84,7 @@
 <div class="container">
   <div id="authSection"></div>
 
-  <!-- Business Description & Tutorial (same as before) -->
+  <!-- Business Description & Tutorial -->
   <div class="card">
     <div class="card-header"><i class="fas fa-info-circle"></i> How onroadnow2 Works</div>
     <p>onroadnow2 connects you with trusted local deliverers. Post a request, earn money by delivering, sell items, and chat with others.</p>
@@ -245,13 +244,116 @@
     }
   }
 
-  // ---------- Chat Functions (restored from previous working version) ----------
-  async function loadConversations() { /* same as earlier – omitted for brevity but functional */ }
-  function openConversation(convId, otherId, otherName) { /* same */ }
-  async function startConversation(otherUserId, otherName) { /* same */ }
-  function addMessageButtons() { /* same */ }
+  // ---------- Chat Functions ----------
+  async function loadConversations() {
+    if (!uid()) return;
+    const convQuery = await db.collection('conversations').where('participants', 'array-contains', uid()).orderBy('lastUpdated', 'desc').get();
+    const convList = convQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const container = document.getElementById('conversationsList');
+    if (!container) return;
+    container.innerHTML = '';
+    for (const conv of convList) {
+      const otherId = conv.participants.find(p => p !== uid());
+      let otherName = otherId;
+      try {
+        const userDoc = await db.collection('users').doc(otherId).get();
+        if (userDoc.exists) otherName = userDoc.data().name || otherId;
+      } catch(e) {}
+      const div = document.createElement('div');
+      div.className = 'chat-item';
+      div.innerHTML = `<strong>${escapeHtml(otherName)}</strong><br><small>${conv.lastMessage || 'No messages'}</small>`;
+      div.onclick = () => openConversation(conv.id, otherId, otherName);
+      container.appendChild(div);
+    }
+    if (convList.length === 0) container.innerHTML = '<div style="padding:1rem;">No conversations yet. Start one by messaging a seller or deliverer.</div>';
+  }
 
-  // ---------- Marketplace, Requests, etc. (restored) ----------
+  let currentConversationId = null;
+  let unsubscribeMessages = null;
+
+  function openConversation(convId, otherId, otherName) {
+    currentConversationId = convId;
+    if (unsubscribeMessages) unsubscribeMessages();
+    const chatWindow = document.getElementById('chatWindow');
+    const noChat = document.getElementById('noChatSelected');
+    if (chatWindow) chatWindow.classList.remove('hidden');
+    if (noChat) noChat.classList.add('hidden');
+    if (chatWindow) chatWindow.style.display = 'flex';
+    unsubscribeMessages = db.collection('conversations').doc(convId).collection('messages').orderBy('timestamp', 'asc').onSnapshot(snapshot => {
+      const messagesDiv = document.getElementById('chatMessages');
+      if (!messagesDiv) return;
+      messagesDiv.innerHTML = '';
+      snapshot.forEach(doc => {
+        const msg = doc.data();
+        const div = document.createElement('div');
+        div.className = `message ${msg.senderId === uid() ? 'me' : ''}`;
+        div.innerHTML = `<div class="message-bubble">${escapeHtml(msg.text)}<br><small style="font-size:0.7rem;">${new Date(msg.timestamp?.toDate() || Date.now()).toLocaleTimeString()}</small></div>`;
+        messagesDiv.appendChild(div);
+      });
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+    const sendBtn = document.getElementById('sendMessageBtn');
+    const input = document.getElementById('messageInput');
+    if (sendBtn && input) {
+      sendBtn.onclick = async () => {
+        const text = input.value.trim();
+        if (!text) return;
+        await db.collection('conversations').doc(convId).collection('messages').add({
+          text,
+          senderId: uid(),
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await db.collection('conversations').doc(convId).update({ lastMessage: text, lastUpdated: firebase.firestore.FieldValue.serverTimestamp() });
+        input.value = '';
+      };
+      input.onkeypress = (e) => { if (e.key === 'Enter' && sendBtn) sendBtn.click(); };
+    }
+  }
+
+  async function startConversation(otherUserId, otherName) {
+    if (!uid()) return alert('Please login first');
+    const convId = [uid(), otherUserId].sort().join('_');
+    const convRef = db.collection('conversations').doc(convId);
+    const doc = await convRef.get();
+    if (!doc.exists) {
+      await convRef.set({
+        participants: [uid(), otherUserId],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+        lastMessage: ''
+      });
+    }
+    openConversation(convId, otherUserId, otherName);
+    const chatTab = document.querySelector('.tab[data-tab="chat"]');
+    if (chatTab) chatTab.click();
+  }
+
+  function addMessageButtons() {
+    document.querySelectorAll('.listing-card .msg-btn').forEach(btn => btn.remove());
+    document.querySelectorAll('.listing-card').forEach(card => {
+      const sellerId = card.dataset.sellerId;
+      if (sellerId && sellerId !== uid()) {
+        const msgBtn = document.createElement('button');
+        msgBtn.className = 'btn btn-outline btn-sm msg-btn';
+        msgBtn.innerHTML = '<i class="fas fa-comment"></i> Message Seller';
+        msgBtn.onclick = () => startConversation(sellerId, 'Seller');
+        card.querySelector('.flex-between')?.appendChild(msgBtn);
+      }
+    });
+    document.querySelectorAll('.request-card .msg-btn').forEach(btn => btn.remove());
+    document.querySelectorAll('.request-card').forEach(card => {
+      const userId = card.dataset.userId;
+      if (userId && userId !== uid()) {
+        const msgBtn = document.createElement('button');
+        msgBtn.className = 'btn btn-outline btn-sm msg-btn';
+        msgBtn.innerHTML = '<i class="fas fa-comment"></i> Message User';
+        msgBtn.onclick = () => startConversation(userId, 'User');
+        card.querySelector('.flex-between')?.appendChild(msgBtn);
+      }
+    });
+  }
+
+  // ---------- Marketplace, Requests, etc. ----------
   async function loadMarketplaceListings() {
     const listings = await apiCall('/api/listings');
     const container = document.getElementById('marketplaceListings');
