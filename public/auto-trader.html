@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto‑Trader Bot – OnRoadNow</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; padding: 2rem; }
+    .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.05); }
+    h1 { color: #1e3a8a; }
+    .btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; background: #2563eb; color: white; text-decoration: none; margin: 0.5rem 0; }
+    .btn-secondary { background: #e2e8f0; color: #1e293b; }
+    .status { padding: 1rem; border-radius: 1rem; margin: 1rem 0; }
+    .status.running { background: #dcfce7; color: #166534; }
+    .status.stopped { background: #fee2e2; color: #991b1b; }
+    .price { font-size: 1.5rem; font-weight: bold; color: #2563eb; }
+    input, select { width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 1rem; margin: 0.5rem 0; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1><i class="fas fa-robot"></i> Auto‑Trader Bot</h1>
+  <p>Automated crypto trading bot that scans for profitable opportunities and executes trades. Earn passive income.</p>
+
+  <div id="authMessage">Loading...</div>
+  <div id="statusPanel" style="display: none;">
+    <div class="status" id="botStatus"></div>
+    <button id="startBtn" class="btn">Start Bot</button>
+    <button id="stopBtn" class="btn btn-secondary">Stop Bot</button>
+    <p id="earnings"></p>
+  </div>
+  <div id="paymentPanel" style="display: none;">
+    <h3>Get Access</h3>
+    <p>One‑time fee: <span class="price">$10 USD</span> (or equivalent in JMD / crypto)</p>
+    <form id="paymentForm">
+      <select id="currency">
+        <option value="usd">USD ($)</option>
+        <option value="jmd">JMD (J$)</option>
+        <option value="crypto">Cryptocurrency (SOL)</option>
+      </select>
+      <button type="submit" class="btn">Pay Now</button>
+    </form>
+    <p><small>Pay with PayPal, card, or SOL. After payment, you'll get instant access.</small></p>
+  </div>
+</div>
+
+<script>
+  // Check login status via /api/me
+  async function apiCall(url, options = {}) {
+    const res = await fetch(url, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+    return res.json();
+  }
+
+  async function checkAuth() {
+    const data = await apiCall('/api/me');
+    if (data.id) {
+      // Logged in, check if has bot access
+      const user = data;
+      document.getElementById('authMessage').innerHTML = `Logged in as ${user.email}`;
+      // Check bot access via separate endpoint or user object
+      const botAccess = user.botAccess || false;
+      if (botAccess || user.email === 'admin@korerussbiz.com') {
+        showBotControls();
+      } else {
+        showPayment();
+      }
+    } else {
+      document.getElementById('authMessage').innerHTML = `Please <a href="/" onclick="window.location.href='/'">login</a> to access the auto‑trader.`;
+    }
+  }
+
+  async function showBotControls() {
+    document.getElementById('paymentPanel').style.display = 'none';
+    const statusDiv = document.getElementById('statusPanel');
+    statusDiv.style.display = 'block';
+    // Fetch current bot status
+    const status = await apiCall('/api/bot/status');
+    updateStatusUI(status);
+    document.getElementById('startBtn').onclick = async () => {
+      const res = await apiCall('/api/bot/control', { method: 'POST', body: JSON.stringify({ action: 'start' }) });
+      if (res.error) alert(res.error);
+      else location.reload();
+    };
+    document.getElementById('stopBtn').onclick = async () => {
+      const res = await apiCall('/api/bot/control', { method: 'POST', body: JSON.stringify({ action: 'stop' }) });
+      if (res.error) alert(res.error);
+      else location.reload();
+    };
+  }
+
+  function updateStatusUI(status) {
+    const statusElem = document.getElementById('botStatus');
+    if (status.running) {
+      statusElem.className = 'status running';
+      statusElem.innerHTML = `<i class="fas fa-play-circle"></i> Bot is running. Last run: ${new Date(status.lastRun).toLocaleString()}`;
+    } else {
+      statusElem.className = 'status stopped';
+      statusElem.innerHTML = `<i class="fas fa-stop-circle"></i> Bot is stopped.`;
+    }
+    document.getElementById('earnings').innerHTML = `Total earnings: $${status.earnings} (simulated)`;
+  }
+
+  function showPayment() {
+    document.getElementById('statusPanel').style.display = 'none';
+    document.getElementById('paymentPanel').style.display = 'block';
+    document.getElementById('paymentForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const currency = document.getElementById('currency').value;
+      if (currency === 'crypto') {
+        // Redirect to SOL donation page
+        window.location.href = '/';
+      } else {
+        // Use PayPal.me link for USD/JMD
+        window.open('https://www.paypal.me/KoreyRussell809', '_blank');
+        // After payment, we need to grant access – manually or via webhook
+        alert('After completing payment, please contact support to activate your bot access, or use the provided access code.');
+      }
+    };
+  }
+
+  checkAuth();
+</script>
+</body>
+</html>
