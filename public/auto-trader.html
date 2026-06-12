@@ -1,103 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OnRoadNow – Auto-Trader Dashboard</title>
+  <title>OnRoadNow – Auto‑Trader</title>
+  <!-- Chart.js for profit chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Stripe JS -->
   <script src="https://js.stripe.com/v3/"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 2rem; }
-    .container { max-width: 1400px; margin: 0 auto; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
-    .card { background: #1e293b; border-radius: 1.5rem; padding: 1.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
-    .card-header { font-size: 1.2rem; font-weight: 600; margin-bottom: 1rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
-    .balance { font-size: 2rem; font-weight: bold; color: #10b981; }
-    .btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; margin: 0.2rem; }
-    .btn-primary { background: #3b82f6; color: white; }
-    .btn-danger { background: #ef4444; color: white; }
-    .btn-success { background: #10b981; color: white; }
-    .btn-secondary { background: #64748b; color: white; }
-    .log { background: #0f172a; border-radius: 1rem; padding: 1rem; font-family: monospace; max-height: 400px; overflow-y: auto; margin-top: 1rem; }
-    .log p { margin: 0.2rem 0; font-size: 0.8rem; color: #94a3b8; }
-    input, select { background: #334155; border: none; padding: 0.5rem; border-radius: 0.75rem; color: white; margin: 0.2rem 0; width: 100%; }
-    .flex-between { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
-    .chart-container { height: 200px; margin-top: 1rem; }
-    .badge { background: #3b82f6; border-radius: 1rem; padding: 0.2rem 0.6rem; font-size: 0.7rem; }
+    body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 2rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .card { background: white; border-radius: 1.5rem; padding: 1.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+    .card h3 { margin-bottom: 1rem; color: #1e293b; }
+    .balance { font-size: 2rem; font-weight: 800; color: #16a34a; }
+    .btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; background: #2563eb; color: white; margin: 0.5rem 0; transition: 0.2s; }
+    .btn-danger { background: #dc2626; }
+    .btn-secondary { background: #64748b; }
+    .btn-success { background: #16a34a; }
+    .btn-sm { padding: 0.3rem 0.8rem; font-size: 0.8rem; }
+    .log { background: #0f172a; color: #94a3b8; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; }
+    .log p { margin: 0.2rem 0; }
+    .flex { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    canvas { max-height: 250px; }
+    .nav { margin-bottom: 2rem; }
+    .nav a { color: #2563eb; text-decoration: none; margin-right: 1rem; }
   </style>
 </head>
 <body>
 <div class="container">
-  <div class="flex-between" style="margin-bottom: 2rem;">
-    <h1>🤖 OnRoadNow Auto‑Trader</h1>
-    <div><a href="/" style="color: #3b82f6;">← Back to Home</a></div>
-  </div>
-
+  <div class="nav"><a href="/">← Home</a> | <a href="/auto-trader">Auto‑Trader</a></div>
   <div id="authMessage"></div>
-
-  <div id="traderDashboard" style="display: none;">
+  <div id="traderContent" style="display: none;">
     <div class="grid">
-      <!-- Balance Card -->
       <div class="card">
-        <div class="card-header">💰 Your Balance</div>
-        <div class="balance" id="userBalance">0.00 JMD</div>
-        <div style="margin-top: 1rem;">
-          <button id="depositBtn" class="btn btn-success">💳 Deposit via Card</button>
-          <button id="withdrawBtn" class="btn btn-secondary">🏧 Withdraw</button>
+        <h3>💰 Your Trading Balance</h3>
+        <div class="balance" id="balance">0 JMD</div>
+        <div class="flex" style="margin-top: 1rem;">
+          <input type="number" id="fundAmount" placeholder="Amount (JMD)" style="flex:1; padding:0.5rem; border-radius:1rem; border:1px solid #cbd5e1;">
+          <button id="fundBtn" class="btn btn-success">💳 Add Funds (Card/GPay)</button>
         </div>
-        <div style="margin-top: 1rem; font-size: 0.8rem;">Supported: USD, JMD, EUR, GBP (converted to JMD)</div>
+        <p style="margin-top:1rem; font-size:0.8rem;">Supports Visa, Mastercard, Google Pay, Apple Pay.</p>
       </div>
-
-      <!-- Trading Card -->
       <div class="card">
-        <div class="card-header">📈 Trading Controls</div>
-        <div class="flex-between">
-          <span>Status: <strong id="statusText">Stopped</strong></span>
-          <span>Bot active: <span id="botActive" class="badge">No</span></span>
-        </div>
-        <div style="margin: 1rem 0;">
-          <button id="startBtn" class="btn btn-primary">▶ Start Trading</button>
-          <button id="stopBtn" class="btn btn-danger">⏹ Stop Trading</button>
+        <h3>📈 Total Profit (after fees)</h3>
+        <div class="balance" id="profit">0 JMD</div>
+        <h3>🏦 Platform Fees Collected</h3>
+        <div class="balance" id="ownerFees">0 JMD</div>
+      </div>
+      <div class="card">
+        <h3>🤖 Trading Controls</h3>
+        <div class="flex">
+          <button id="startBtn" class="btn">▶️ Start Trading</button>
+          <button id="stopBtn" class="btn btn-danger">⏹️ Stop Trading</button>
           <button id="testTradeBtn" class="btn btn-secondary">🧪 Test Trade</button>
         </div>
-        <div class="flex-between">
-          <span>📊 Today's profit: <span id="todayProfit">0.00 JMD</span></span>
-          <span>📅 Total profit (after fees): <span id="totalProfit">0.00 JMD</span></span>
-        </div>
-        <div class="chart-container">
-          <canvas id="profitChart"></canvas>
-        </div>
-      </div>
-
-      <!-- Stats Card -->
-      <div class="card">
-        <div class="card-header">📋 Platform Fees (Owner)</div>
-        <div>Fees collected: <strong id="ownerFees">0.00 JMD</strong></div>
-        <div>Your referral link: <input type="text" id="referralLink" readonly value="https://onroadnow.vercel.app/ref/"></div>
-        <div class="badge" style="margin-top: 1rem;">Fee on trades: 3‑10% of profit</div>
+        <div class="status-text" style="margin-top:1rem;"><strong>Status:</strong> <span id="statusText">Stopped</span></div>
       </div>
     </div>
-
-    <!-- Transaction Log -->
-    <div class="card" style="margin-top: 1.5rem;">
-      <div class="card-header">📜 Transaction Log</div>
-      <div class="log" id="logArea"></div>
+    <div class="card">
+      <h3>📊 Profit Over Time</h3>
+      <canvas id="profitChart" width="400" height="200"></canvas>
+    </div>
+    <div class="card">
+      <h3>📝 Transaction Log</h3>
+      <div id="logArea" class="log"></div>
     </div>
   </div>
 </div>
-
 <script>
-  // Stripe (replace YOUR_STRIPE_PUBLISHABLE_KEY with actual key from env)
-  const stripe = Stripe('YOUR_STRIPE_PUBLISHABLE_KEY');
-
-  async function apiCall(url, options = {}) {
-    const res = await fetch(url, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json', ...options.headers } });
-    return res.json();
-  }
-
+  const API_BASE = '/api';
   let tradingInterval = null;
   let profitChart = null;
+  const stripe = Stripe('pk_test_51T42gtGSQA72AJa6D75M9nkRk1QG4yxbwcSnOCr1ehRkF2Ymf0OSHgZXXxZSfc75o9LqMBGxyTfF9Wwp9gqMOCma009ZXF7fsg');
+
+  async function apiCall(endpoint, options = {}) {
+    const res = await fetch(API_BASE + endpoint, {
+      ...options,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...options.headers }
+    });
+    if (res.status === 401) {
+      window.location.href = '/';
+      throw new Error('Unauthorized');
+    }
+    return res.json();
+  }
 
   function addLog(msg) {
     const logDiv = document.getElementById('logArea');
@@ -108,14 +98,12 @@
   }
 
   async function refreshStatus() {
-    const state = await apiCall('/api/auto-trader/status');
+    const state = await apiCall('/auto-trader/status');
     if (state) {
       document.getElementById('statusText').innerText = state.running ? 'Active' : 'Stopped';
-      document.getElementById('botActive').innerText = state.running ? 'Yes' : 'No';
-      document.getElementById('userBalance').innerText = (state.userProfit || 0).toFixed(2) + ' JMD';
+      document.getElementById('balance').innerText = (state.balance || 0).toFixed(2) + ' JMD';
+      document.getElementById('profit').innerText = (state.userProfit || 0).toFixed(2) + ' JMD';
       document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2) + ' JMD';
-      document.getElementById('totalProfit').innerText = (state.userProfit || 0).toFixed(2) + ' JMD';
-      // today's profit would need separate tracking
       if (state.log && state.log.length) {
         const logDiv = document.getElementById('logArea');
         logDiv.innerHTML = '';
@@ -125,24 +113,23 @@
           logDiv.appendChild(p);
         });
       }
-      // Update chart
-      if (profitChart && state.profitHistory) {
-        profitChart.data.datasets[0].data = state.profitHistory;
+      if (state.history && profitChart) {
+        profitChart.data.datasets[0].data = state.history.slice(-30);
         profitChart.update();
       }
     }
   }
 
-  async function reportProfit(profitJMD, feePercent) {
-    const res = await apiCall('/api/auto-trader/report-profit', {
+  async function reportProfit(profit, feePercent) {
+    addLog(`📊 Reporting profit: ${profit.toFixed(2)} JMD, fee ${feePercent.toFixed(1)}%`);
+    const res = await apiCall('/auto-trader/report-profit', {
       method: 'POST',
-      body: JSON.stringify({ profitJMD, feePercent })
+      body: JSON.stringify({ profitJMD: profit, feePercent })
     });
-    if (res.error) {
-      addLog(`❌ Error: ${res.error}`);
-    } else {
-      addLog(`✅ Trade: profit ${profitJMD.toFixed(2)} JMD, fee ${feePercent.toFixed(1)}% → you +${res.userGain.toFixed(2)} JMD, owner +${res.fee.toFixed(2)} JMD`);
-      await refreshStatus();
+    if (res.error) addLog(`❌ Error: ${res.error}`);
+    else {
+      addLog(`✅ Trade recorded: user gain ${res.userGain.toFixed(2)} JMD, owner fee ${res.fee.toFixed(2)} JMD`);
+      refreshStatus();
     }
   }
 
@@ -154,41 +141,48 @@
   }
 
   async function startTrading() {
-    const res = await apiCall('/api/auto-trader/start', { method: 'POST' });
-    if (res.error) {
-      addLog(`❌ ${res.error}`);
-      return;
-    }
-    addLog('🚀 Auto‑Trader started (simulated trades every 30 seconds)');
     if (tradingInterval) clearInterval(tradingInterval);
+    await apiCall('/auto-trader/start', { method: 'POST' });
+    addLog('🚀 Auto‑Trader started (simulated every 30 sec)');
     tradingInterval = setInterval(simulateTrade, 30000);
-    await refreshStatus();
+    refreshStatus();
   }
 
   async function stopTrading() {
-    if (tradingInterval) {
-      clearInterval(tradingInterval);
-      tradingInterval = null;
-    }
-    await apiCall('/api/auto-trader/stop', { method: 'POST' });
+    if (tradingInterval) clearInterval(tradingInterval);
+    tradingInterval = null;
+    await apiCall('/auto-trader/stop', { method: 'POST' });
     addLog('⏹️ Auto‑Trader stopped');
-    await refreshStatus();
+    refreshStatus();
+  }
+
+  async function fundBalance() {
+    const amount = parseFloat(document.getElementById('fundAmount').value);
+    if (!amount || amount < 1) return alert('Enter a valid amount (JMD)');
+    const session = await apiCall('/create-checkout-session', {
+      method: 'POST',
+      body: JSON.stringify({ amount, currency: 'jmd' })
+    });
+    stripe.redirectToCheckout({ sessionId: session.id });
+  }
+
+  async function testTrade() {
+    await simulateTrade();
   }
 
   async function init() {
-    const user = await apiCall('/api/me');
+    const user = await apiCall('/me');
     if (!user.id) {
-      document.getElementById('authMessage').innerHTML = '<div class="card">🔐 Please <a href="/" style="color:#3b82f6;">log in</a> to access the Auto‑Trader.</div>';
+      document.getElementById('authMessage').innerHTML = '<div class="card">🔐 You must <a href="/">log in</a> to use the Auto‑Trader.</div>';
       return;
     }
     document.getElementById('authMessage').innerHTML = `<div class="card">✅ Logged in as <strong>${user.email}</strong></div>`;
-    document.getElementById('traderDashboard').style.display = 'block';
+    document.getElementById('traderContent').style.display = 'block';
 
-    // Initialize chart
     const ctx = document.getElementById('profitChart').getContext('2d');
     profitChart = new Chart(ctx, {
       type: 'line',
-      data: { labels: [], datasets: [{ label: 'Profit (JMD)', data: [], borderColor: '#10b981', tension: 0.1 }] },
+      data: { labels: [], datasets: [{ label: 'Profit (JMD)', data: [], borderColor: '#2563eb', fill: false }] },
       options: { responsive: true, maintainAspectRatio: true }
     });
 
@@ -196,22 +190,8 @@
 
     document.getElementById('startBtn').onclick = startTrading;
     document.getElementById('stopBtn').onclick = stopTrading;
-    document.getElementById('testTradeBtn').onclick = async () => {
-      await reportProfit(50, 5);
-    };
-    document.getElementById('depositBtn').onclick = async () => {
-      const session = await apiCall('/api/create-checkout-session', { method: 'POST' });
-      if (session.id) {
-        await stripe.redirectToCheckout({ sessionId: session.id });
-      } else {
-        alert('Payment session error');
-      }
-    };
-    document.getElementById('withdrawBtn').onclick = () => {
-      alert('Withdrawals will be available soon. Contact support.');
-    };
-    // Referral link
-    document.getElementById('referralLink').value = `https://onroadnow.vercel.app/ref/${user.id}`;
+    document.getElementById('testTradeBtn').onclick = testTrade;
+    document.getElementById('fundBtn').onclick = fundBalance;
   }
 
   init();
