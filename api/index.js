@@ -317,3 +317,76 @@ if (url === '/api/auto-trader/start' && method === 'POST') {
   // In real implementation, you would create a Stripe checkout session and return the URL.
   return;
 }
+
+// ---------- Auto‑Trader state (in‑memory; replace with DB later) ----------
+let traderState = {
+  running: false,
+  userProfit: 0,      // profit earned by the current user (JMD)
+  ownerFees: 0,       // fees collected for platform owner
+  log: []
+};
+
+// Helper to add log entry
+function addLog(msg) {
+  traderState.log.unshift(`[${new Date().toISOString()}] ${msg}`);
+  if (traderState.log.length > 100) traderState.log.pop();
+}
+
+// ---------- Start Auto‑Trader (real trading) ----------
+if (url === '/api/auto-trader/start' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  if (traderState.running) return res.status(400).json({ error: 'Already running' });
+  traderState.running = true;
+  addLog(`Trader started by user ${userId}`);
+
+  // Simulate real trading loop (replace with actual bot logic)
+  // In a real implementation, this would run a separate thread/process.
+  // For demo, we use a setInterval (but careful – Vercel doesn't support long-running).
+  // We'll store a flag and use a background worker or external cron.
+  // Since Vercel is serverless, we recommend using a separate VPS or a cron job that calls an API.
+  // For now, we'll just mark as running and let an external process handle trades.
+  res.status(200).json({ message: 'Auto‑trader started (background process will handle trades).' });
+  return;
+}
+
+// ---------- Stop Auto‑Trader ----------
+if (url === '/api/auto-trader/stop' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  traderState.running = false;
+  addLog(`Trader stopped by user ${userId}`);
+  res.status(200).json({ message: 'Trader stopped.' });
+  return;
+}
+
+// ---------- Get status and balance ----------
+if (url === '/api/auto-trader/status' && method === 'GET') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  // In a real system, you'd fetch user-specific profit from DB.
+  // For simplicity, we return the global state (single user demo).
+  res.status(200).json({
+    running: traderState.running,
+    userProfit: traderState.userProfit,
+    ownerFees: traderState.ownerFees,
+    log: traderState.log
+  });
+  return;
+}
+
+// ---------- Report profit from a trade (called by the trading bot) ----------
+// This endpoint deducts fee (3-10%) and credits user, sends fee to owner.
+if (url === '/api/auto-trader/report-profit' && method === 'POST') {
+  // Authorization: use a secret API key (not user session) to prevent abuse.
+  const apiKey = req.headers['x-api-key'];
+  if (apiKey !== process.env.TRADER_API_KEY) return res.status(403).json({ error: 'Unauthorized' });
+  const { profitJMD, feePercent } = req.body; // profit in JMD, feePercent between 3 and 10
+  if (!profitJMD || profitJMD <= 0) return res.status(400).json({ error: 'Invalid profit' });
+  const fee = profitJMD * (Math.min(10, Math.max(3, feePercent)) / 100);
+  const userGain = profitJMD - fee;
+  traderState.userProfit += userGain;
+  traderState.ownerFees += fee;
+  addLog(`Trade profit: ${profitJMD} JMD, fee ${fee} JMD (${feePercent}%), user gain ${userGain} JMD`);
+  // In production, you would also transfer the fee to your wallet (Korey D Russell).
+  // For real crypto, you'd initiate a blockchain transaction.
+  res.status(200).json({ userGain, fee });
+  return;
+}

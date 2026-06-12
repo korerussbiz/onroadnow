@@ -1,169 +1,91 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OnRoadNow – Auto‑Trader</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #f8fafc; padding: 2rem; }
-    .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
-    h1 { color: #1e3a8a; margin-bottom: 1rem; }
-    .btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; background: #2563eb; color: white; margin: 0.5rem 0.5rem 0.5rem 0; }
-    .btn-danger { background: #dc2626; }
-    .btn-secondary { background: #64748b; }
-    .status { margin-top: 1rem; padding: 1rem; background: #f1f5f9; border-radius: 1rem; }
-    .balance { font-size: 1.2rem; font-weight: bold; color: #16a34a; }
-    .log { margin-top: 1rem; max-height: 300px; overflow-y: auto; background: #1e293b; color: #94a3b8; padding: 1rem; border-radius: 1rem; font-family: monospace; font-size: 0.8rem; }
-    .log p { margin: 0.2rem 0; }
-    .hidden { display: none; }
-    .nav { margin-bottom: 2rem; }
-    .nav a { margin-right: 1rem; text-decoration: none; color: #2563eb; }
-    .warning { background: #fef9c3; padding: 0.5rem; border-radius: 0.5rem; margin: 1rem 0; }
-  </style>
+<html>
+<head><title>OnRoadNow Auto‑Trader</title>
+<style>
+body { font-family: sans-serif; margin: 2rem; }
+button { padding: 0.5rem 1rem; margin: 0.5rem; }
+pre { background: #f4f4f4; padding: 1rem; }
+</style>
 </head>
 <body>
-<div class="container">
-  <div class="nav">
-    <a href="/">← Back to Home</a>
-  </div>
-  <h1>🤖 OnRoadNow Auto‑Trader</h1>
-  <p>Automated trading bot that runs in your browser. A fee of <strong>3‑10% of profits</strong> is deducted and credited to the platform owner (Korey D Russell). Your earnings are stored on our server.</p>
-  <div id="authMessage" class="warning hidden">Please log in to use the Auto‑Trader.</div>
-  <div id="traderControls">
-    <button id="startBtn" class="btn">▶️ Start Trading (simulated)</button>
-    <button id="stopBtn" class="btn btn-danger">⏹️ Stop Trading</button>
-    <button id="testTradeBtn" class="btn btn-secondary">🧪 Test Trade (report profit)</button>
-    <div class="status">
-      <strong>Status:</strong> <span id="statusText">Stopped</span><br>
-      <strong>Your balance (from trades):</strong> <span id="userBalance" class="balance">0 JMD</span><br>
-      <strong>Platform fees earned (for owner):</strong> <span id="ownerFees">0 JMD</span>
-    </div>
-    <div class="log" id="logArea"></div>
-  </div>
+<h1>🤖 Auto‑Trader (Simulator)</h1>
+<p>Profit fee: 3‑10% goes to platform owner.</p>
+<div>
+  <button id="startBtn">▶ Start Trading</button>
+  <button id="stopBtn">⏹ Stop Trading</button>
+  <button id="testBtn">🧪 Test Trade (report profit)</button>
+</div>
+<div>
+  <h3>Status</h3>
+  <pre id="status">Not started</pre>
+  <h3>Log</h3>
+  <pre id="log"></pre>
 </div>
 <script>
-  // Helper to call API
-  async function apiCall(url, options = {}) {
-    try {
-      const res = await fetch(url, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json', ...options.headers } });
-      return await res.json();
-    } catch (err) {
-      console.error(err);
-      return { error: err.message };
-    }
-  }
-
-  let tradingInterval = null;
-  let currentUser = null;
+  let interval = null;
+  const logDiv = document.getElementById('log');
+  const statusDiv = document.getElementById('status');
 
   function addLog(msg) {
-    const logDiv = document.getElementById('logArea');
-    const p = document.createElement('p');
+    const p = document.createElement('div');
     p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
     logDiv.appendChild(p);
     logDiv.scrollTop = logDiv.scrollHeight;
   }
 
-  // Report profit to backend
-  async function reportProfit(profitJMD, feePercent) {
-    addLog(`📊 Reporting profit: ${profitJMD.toFixed(2)} JMD, fee ${feePercent.toFixed(1)}%`);
-    const res = await apiCall('/api/auto-trader/report-profit', {
-      method: 'POST',
-      body: JSON.stringify({ profitJMD, feePercent })
-    });
-    if (res.error) {
-      addLog(`❌ Error: ${res.error}`);
-    } else {
-      addLog(`✅ Trade processed: user gain ${res.userGain?.toFixed(2) || 0} JMD, owner fee ${res.fee?.toFixed(2) || 0} JMD`);
-      // Refresh balances from status
-      const state = await apiCall('/api/auto-trader/status');
-      if (state && !state.error) {
-        document.getElementById('userBalance').innerText = (state.userProfit || 0).toFixed(2) + ' JMD';
-        document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2) + ' JMD';
-      }
-    }
+  async function apiCall(endpoint, data = null) {
+    const options = { method: data ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json' }, credentials: 'include' };
+    if (data) options.body = JSON.stringify(data);
+    const res = await fetch(`/api/auto-trader/${endpoint}`, options);
+    return await res.json();
   }
 
-  // Simulate a trade
+  async function reportProfit(profit, feePercent) {
+    addLog(`Reporting profit: JMD ${profit}, fee ${feePercent}%`);
+    const result = await apiCall('report-profit', { profitJMD: profit, feePercent });
+    addLog(`Result: user gain ${result.userGain}, owner fee ${result.fee}`);
+    // update status
+    const state = await apiCall('status');
+    statusDiv.innerText = JSON.stringify(state, null, 2);
+  }
+
   async function simulateTrade() {
     const profit = 10 + Math.random() * 90;
-    const feePercent = 3 + Math.random() * 7;
-    addLog(`📈 Simulated trade: profit ${profit.toFixed(2)} JMD, fee ${feePercent.toFixed(1)}%`);
-    await reportProfit(profit, feePercent);
+    const fee = 3 + Math.random() * 7;
+    await reportProfit(profit, fee);
   }
 
   async function startTrading() {
-    if (!currentUser) {
-      addLog('❌ Please log in first');
-      return;
-    }
-    if (tradingInterval) clearInterval(tradingInterval);
-    tradingInterval = setInterval(simulateTrade, 60000);
-    document.getElementById('statusText').innerText = 'Active (simulated every 60s)';
-    addLog('🚀 Auto‑Trader started (simulated trades every 60 seconds)');
-    // Also call backend to mark started? optional
-    await apiCall('/api/auto-trader/start', { method: 'POST' });
+    if (interval) clearInterval(interval);
+    await apiCall('start');
+    addLog('Trading started (simulated every 30 seconds)');
+    interval = setInterval(simulateTrade, 30000);
+    const state = await apiCall('status');
+    statusDiv.innerText = JSON.stringify(state, null, 2);
   }
 
   async function stopTrading() {
-    if (tradingInterval) {
-      clearInterval(tradingInterval);
-      tradingInterval = null;
-    }
-    document.getElementById('statusText').innerText = 'Stopped';
-    addLog('⏹️ Auto‑Trader stopped');
-    await apiCall('/api/auto-trader/stop', { method: 'POST' });
+    if (interval) clearInterval(interval);
+    interval = null;
+    await apiCall('stop');
+    addLog('Trading stopped');
+    const state = await apiCall('status');
+    statusDiv.innerText = JSON.stringify(state, null, 2);
   }
 
   async function testTrade() {
-    if (!currentUser) {
-      addLog('❌ Please log in first');
-      return;
-    }
     await simulateTrade();
   }
 
-  async function init() {
-    // Check login status
-    const user = await apiCall('/api/me');
-    if (user && user.id) {
-      currentUser = user;
-      document.getElementById('authMessage').classList.add('hidden');
-      addLog(`✅ Logged in as ${user.email}`);
-    } else {
-      document.getElementById('authMessage').classList.remove('hidden');
-      addLog('⚠️ Not logged in. Please log in to use the trader.');
-      // Disable buttons? We'll still allow but will show error on click.
-    }
+  document.getElementById('startBtn').onclick = startTrading;
+  document.getElementById('stopBtn').onclick = stopTrading;
+  document.getElementById('testBtn').onclick = testTrade;
 
-    // Get initial status from backend
-    const state = await apiCall('/api/auto-trader/status');
-    if (state && !state.error) {
-      document.getElementById('statusText').innerText = state.running ? 'Active' : 'Stopped';
-      document.getElementById('userBalance').innerText = (state.userProfit || 0).toFixed(2) + ' JMD';
-      document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2) + ' JMD';
-      if (state.log && state.log.length) {
-        const logDiv = document.getElementById('logArea');
-        logDiv.innerHTML = '';
-        state.log.slice().reverse().forEach(msg => {
-          const p = document.createElement('p');
-          p.textContent = msg;
-          logDiv.appendChild(p);
-        });
-      }
-    } else {
-      addLog('⚠️ Could not fetch trader status. Make sure backend is running.');
-    }
-
-    // Attach event listeners
-    document.getElementById('startBtn').onclick = startTrading;
-    document.getElementById('stopBtn').onclick = stopTrading;
-    document.getElementById('testTradeBtn').onclick = testTrade;
-  }
-
-  init();
+  // initial status
+  (async () => {
+    const state = await apiCall('status');
+    statusDiv.innerText = JSON.stringify(state, null, 2);
+  })();
 </script>
 </body>
 </html>
