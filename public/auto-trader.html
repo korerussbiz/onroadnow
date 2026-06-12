@@ -1,5 +1,73 @@
 <!DOCTYPE html>
-<html>
-<head><title>OnRoadNow Auto‑Trader</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"><style>body{font-family:Inter,sans-serif;background:#f8fafc;padding:2rem}.container{max-width:800px;margin:0 auto;background:white;border-radius:1.5rem;padding:2rem}h1{color:#1e3a8a}.btn{display:inline-block;padding:0.6rem 1.2rem;border-radius:2rem;background:#2563eb;color:white;text-decoration:none;margin:0.5rem 0}</style></head>
-<body><div class="container"><h1>🤖 Auto‑Trader</h1><p>Automated trading bot – fee 3‑10% of profits.</p><a href="/" class="btn">⬅ Back to Home</a><div id="status"></div></div><script>fetch('/api/auto-trader/status').then(r=>r.json()).then(d=>document.getElementById('status').innerHTML=JSON.stringify(d)).catch(e=>console.log(e));</script></body>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OnRoadNow – Auto‑Trader Bot</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; padding: 2rem; }
+    .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+    h1 { color: #1e3a8a; }
+    .btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; background: #2563eb; color: white; margin: 0.5rem 0; }
+    .btn-danger { background: #dc2626; }
+    .status { margin-top: 1rem; padding: 1rem; background: #f1f5f9; border-radius: 1rem; }
+    .balance { font-size: 1.2rem; font-weight: bold; color: #16a34a; }
+    .log { margin-top: 1rem; max-height: 300px; overflow-y: auto; background: #1e293b; color: #94a3b8; padding: 1rem; border-radius: 1rem; font-family: monospace; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🤖 OnRoadNow Auto‑Trader Bot</h1>
+  <p>Automated trading bot – fee 3‑10% of profits. Your earnings are automatically credited.</p>
+  <div id="authMessage"></div>
+  <div id="controls" style="display: none;">
+    <button id="startBtn" class="btn">▶️ Start Bot</button>
+    <button id="stopBtn" class="btn btn-danger">⏹️ Stop Bot</button>
+    <div class="status">
+      <strong>Status:</strong> <span id="statusText">Stopped</span><br>
+      <strong>Your profit (JMD):</strong> <span id="userProfit" class="balance">0.00</span><br>
+      <strong>Platform fees collected:</strong> <span id="ownerFees">0.00</span>
+    </div>
+    <div id="log" class="log">Logs will appear here...</div>
+  </div>
+  <div style="margin-top: 1rem;"><a href="/" class="btn">⬅ Back to Home</a></div>
+</div>
+<script>
+  async function apiCall(url, options = {}) {
+    const res = await fetch(url, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json', ...options.headers } });
+    return res.json();
+  }
+  async function loadState() {
+    const user = await apiCall('/api/me');
+    if (!user.id) {
+      document.getElementById('authMessage').innerHTML = '<p>🔐 Please <a href="/">log in</a> to use the Auto‑Trader.</p>';
+      return;
+    }
+    document.getElementById('authMessage').innerHTML = `<p>✅ Logged in as ${user.email}</p>`;
+    document.getElementById('controls').style.display = 'block';
+    const state = await apiCall('/api/auto-trader/status');
+    document.getElementById('statusText').innerText = state.running ? 'Running' : 'Stopped';
+    document.getElementById('userProfit').innerText = (state.userProfit || 0).toFixed(2);
+    document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2);
+    const logDiv = document.getElementById('log');
+    if (state.log && state.log.length) {
+      logDiv.innerHTML = state.log.join('<br>');
+    } else {
+      logDiv.innerHTML = 'No logs yet. Start the bot.';
+    }
+  }
+  document.getElementById('startBtn')?.addEventListener('click', async () => {
+    const res = await apiCall('/api/auto-trader/start', { method: 'POST' });
+    alert(res.message || (res.error ? `Error: ${res.error}` : 'Started'));
+    loadState();
+  });
+  document.getElementById('stopBtn')?.addEventListener('click', async () => {
+    const res = await apiCall('/api/auto-trader/stop', { method: 'POST' });
+    alert(res.message || 'Stopped');
+    loadState();
+  });
+  loadState();
+</script>
+</body>
 </html>
