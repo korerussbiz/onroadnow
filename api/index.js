@@ -526,3 +526,126 @@ if (url === '/api/stripe-webhook' && method === 'POST') {
   res.status(200).json({ received: true });
   return;
 }
+
+// ---------- Stripe integration ----------
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+
+// Create a checkout session for funding trading balance
+if (url === '/api/create-checkout-session' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { amount, currency = 'usd' } = req.body;
+  if (!amount || amount < 1) return res.status(400).json({ error: 'Invalid amount' });
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card', 'google_pay', 'apple_pay'],
+      line_items: [{
+        price_data: {
+          currency: currency.toLowerCase(),
+          product_data: { name: 'Trading Balance' },
+          unit_amount: Math.round(amount * 100)
+        },
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: 'https://onroadnow.vercel.app/auto-trader?success=1',
+      cancel_url: 'https://onroadnow.vercel.app/auto-trader?cancel=1',
+      metadata: { userId }
+    });
+    res.status(200).json({ id: session.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+  return;
+}
+
+// Webhook to add funds after payment (optional but recommended)
+if (url === '/api/stripe-webhook' && method === 'POST') {
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const uid = session.metadata.userId;
+    const amountPaid = session.amount_total / 100;
+    let state = userTraderStates.get(uid);
+    if (!state) state = { running: false, userProfit: 0, ownerFees: 0, log: [], balance: 0, history: [] };
+    state.balance = (state.balance || 0) + amountPaid;
+    addTraderLog(uid, `💰 Added ${amountPaid} JMD to trading balance via card`);
+    userTraderStates.set(uid, state);
+  }
+  res.status(200).json({ received: true });
+  return;
+}
+
+// ---------- Per‑user Auto‑Trader state (already defined, but ensure helpers exist) ----------
+if (typeof userTraderStates === 'undefined') {
+  var userTraderStates = new Map();
+  function getUserTraderState(uid) {
+    if (!userTraderStates.has(uid)) {
+      userTraderStates.set(uid, { running: false, userProfit: 0, ownerFees: 0, log: [], balance: 0, history: [] });
+    }
+    return userTraderStates.get(uid);
+  }
+  function addTraderLog(uid, msg) {
+    const state = getUserTraderState(uid);
+    state.log.unshift(`[${new Date().toISOString()}] ${msg}`);
+    if (state.log.length > 100) state.log.pop();
+  }
+}
+
+// Overwrite existing endpoints (if any) – we'll put them after the helpers
+// The endpoints below should be placed before the final 404. The existing code may already have them.
+// To avoid duplication, we will remove any old auto-trader endpoints and insert fresh ones.
+// We'll use a marker approach: replace the block between "// ---------- Auto‑Trader endpoints" and "// ----------".
+// Since the file may not have that marker, we'll simply append at the end before the 404.
+
+// ---------- Auto‑Trader endpoints (start/stop/status/report) ----------
+if (url === '/api/auto-trader/start' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  state.running = true;
+  addTraderLog(userId, 'Trader started');
+  res.status(200).json({ message: 'started' });
+  return;
+}
+if (url === '/api/auto-trader/stop' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  state.running = false;
+  addTraderLog(userId, 'Trader stopped');
+  res.status(200).json({ message: 'stopped' });
+  return;
+}
+if (url === '/api/auto-trader/status' && method === 'GET') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  res.status(200).json({
+    running: state.running,
+    userProfit: state.userProfit,
+    ownerFees: state.ownerFees,
+    balance: state.balance,
+    log: state.log,
+    history: state.history
+  });
+  return;
+}
+if (url === '/api/auto-trader/report-profit' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { profitJMD, feePercent } = req.body;
+  if (!profitJMD || profitJMD <= 0) return res.status(400).json({ error: 'Invalid profit' });
+  const fee = profitJMD * (Math.min(10, Math.max(3, feePercent)) / 100);
+  const userGain = profitJMD - fee;
+  const state = getUserTraderState(userId);
+  state.userProfit += userGain;
+  state.ownerFees += fee;
+  state.history.push({ profit: profitJMD, gain: userGain, fee, timestamp: Date.now() });
+  if (state.history.length > 100) state.history.shift();
+  addTraderLog(userId, `Trade: profit ${profitJMD} JMD, fee ${feePercent}% → user +${userGain}, owner +${fee}`);
+  res.status(200).json({ userGain, fee, newUserBalance: state.userProfit, newOwnerFees: state.ownerFees });
+  return;
+}
