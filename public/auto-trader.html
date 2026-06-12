@@ -2,88 +2,58 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OnRoadNow – Auto‑Trader</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://js.stripe.com/v3/"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 2rem; }
-    .container { max-width: 1200px; margin: 0 auto; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-    .card { background: white; border-radius: 1.5rem; padding: 1.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
-    .card h3 { margin-bottom: 1rem; color: #1e293b; }
-    .balance { font-size: 2rem; font-weight: 800; color: #16a34a; }
-    .btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; background: #2563eb; color: white; margin: 0.5rem 0; transition: 0.2s; text-decoration: none; }
+    body { font-family: 'Inter', sans-serif; background: #f1f5f9; margin: 0; padding: 2rem; }
+    .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 1.5rem; padding: 2rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+    h1 { color: #1e3a8a; }
+    .btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; background: #2563eb; color: white; margin: 0.5rem 0.5rem 0.5rem 0; }
     .btn-danger { background: #dc2626; }
     .btn-secondary { background: #64748b; }
-    .btn-success { background: #16a34a; }
-    .btn-paypal { background: #0070ba; }
-    .flex { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-    .log { background: #0f172a; color: #94a3b8; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; }
-    .log p { margin: 0.2rem 0; }
-    canvas { max-height: 250px; }
-    .nav { margin-bottom: 2rem; }
-    .nav a { color: #2563eb; text-decoration: none; margin-right: 1rem; }
-    input { padding: 0.5rem; border-radius: 1rem; border: 1px solid #cbd5e1; }
+    .status-card { background: #f1f5f9; border-radius: 1rem; padding: 1rem; margin: 1rem 0; }
+    .balance { font-size: 1.5rem; font-weight: bold; color: #16a34a; }
+    .log { background: #0f172a; color: #94a3b8; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; margin-top: 1rem; }
+    .log p { margin: 0.2rem 0; font-size: 0.8rem; }
+    .hidden { display: none; }
+    .nav { margin-bottom: 1rem; }
+    .nav a { margin-right: 1rem; color: #2563eb; text-decoration: none; }
   </style>
 </head>
 <body>
 <div class="container">
-  <div class="nav"><a href="/">← Home</a> | <a href="/auto-trader">Auto‑Trader</a></div>
+  <div class="nav"><a href="/">← Back to Home</a></div>
+  <h1>🤖 OnRoadNow Auto‑Trader</h1>
+  <p>A fee of <strong>3‑10% of profits</strong> is deducted and credited to the platform owner. Your earnings are stored per user.</p>
   <div id="authMessage"></div>
-  <div id="traderContent" style="display: none;">
-    <div class="grid">
-      <div class="card">
-        <h3>💰 Your Trading Balance</h3>
-        <div class="balance" id="balance">0 JMD</div>
-        <div class="flex" style="margin-top: 1rem;">
-          <input type="number" id="fundAmount" placeholder="Amount (JMD)" style="flex:1;">
-          <button id="stripeBtn" class="btn btn-success">💳 Add with Card/GPay</button>
-          <a href="https://www.paypal.me/KoreyRussell809" target="_blank" class="btn btn-paypal">💸 Donate via PayPal</a>
-        </div>
-      </div>
-      <div class="card">
-        <h3>📈 Total Profit (after fees)</h3>
-        <div class="balance" id="profit">0 JMD</div>
-        <h3>🏦 Platform Fees Collected</h3>
-        <div class="balance" id="ownerFees">0 JMD</div>
-      </div>
-      <div class="card">
-        <h3>🤖 Trading Controls</h3>
-        <div class="flex">
-          <button id="startBtn" class="btn">▶️ Start Trading</button>
-          <button id="stopBtn" class="btn btn-danger">⏹️ Stop Trading</button>
-          <button id="testTradeBtn" class="btn btn-secondary">🧪 Test Trade</button>
-        </div>
-        <div style="margin-top:1rem;"><strong>Status:</strong> <span id="statusText">Stopped</span></div>
-      </div>
+  <div id="traderControls" class="hidden">
+    <div>
+      <button id="startBtn" class="btn">▶️ Start Trading</button>
+      <button id="stopBtn" class="btn btn-danger">⏹️ Stop Trading</button>
+      <button id="testTradeBtn" class="btn btn-secondary">🧪 Test Trade (simulated profit)</button>
     </div>
-    <div class="card">
-      <h3>📊 Profit Over Time</h3>
-      <canvas id="profitChart" width="400" height="200"></canvas>
+    <div class="status-card">
+      <strong>Status:</strong> <span id="statusText">Stopped</span><br>
+      <strong>Your profit (after fees):</strong> <span id="userBalance" class="balance">0 JMD</span><br>
+      <strong>Platform fees collected:</strong> <span id="ownerFees">0 JMD</span>
     </div>
-    <div class="card">
-      <h3>📝 Transaction Log</h3>
-      <div id="logArea" class="log"></div>
-    </div>
+    <div class="log" id="logArea"></div>
   </div>
 </div>
 <script>
-  const API_BASE = '/api';
-  let tradingInterval = null;
-  let profitChart = null;
-  const stripe = Stripe('pk_test_51T42gtGSQA72AJa6D75M9nkRk1QG4yxbwcSnOCr1ehRkF2Ymf0OSHgZXXxZSfc75o9LqMBGxyTfF9Wwp9gqMOCma009ZXF7fsg');
-
   async function apiCall(endpoint, options = {}) {
-    const res = await fetch(API_BASE + endpoint, {
+    const res = await fetch(`/api/auto-trader/${endpoint}`, {
       ...options,
       credentials: 'include',
       headers: { 'Content-Type': 'application/json', ...options.headers }
     });
-    if (res.status === 401) { window.location.href = '/'; throw new Error('Unauthorized'); }
+    if (res.status === 401) {
+      window.location.href = '/';
+      throw new Error('Unauthorized');
+    }
     return res.json();
   }
+
+  let tradingInterval = null;
 
   function addLog(msg) {
     const logDiv = document.getElementById('logArea');
@@ -94,38 +64,31 @@
   }
 
   async function refreshStatus() {
-    const state = await apiCall('/auto-trader/status');
-    if (state) {
+    try {
+      const state = await apiCall('status');
       document.getElementById('statusText').innerText = state.running ? 'Active' : 'Stopped';
-      document.getElementById('balance').innerText = (state.balance || 0).toFixed(2) + ' JMD';
-      document.getElementById('profit').innerText = (state.userProfit || 0).toFixed(2) + ' JMD';
+      document.getElementById('userBalance').innerText = (state.userProfit || 0).toFixed(2) + ' JMD';
       document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2) + ' JMD';
-      if (state.log && state.log.length) {
-        const logDiv = document.getElementById('logArea');
-        logDiv.innerHTML = '';
-        state.log.slice().reverse().forEach(msg => {
-          const p = document.createElement('p');
-          p.textContent = msg;
-          logDiv.appendChild(p);
-        });
-      }
-      if (state.history && profitChart) {
-        profitChart.data.datasets[0].data = state.history.slice(-30).map(h => h.gain);
-        profitChart.update();
-      }
+    } catch (err) {
+      console.error(err);
     }
   }
 
-  async function reportProfit(profit, feePercent) {
-    addLog(`📊 Reporting profit: ${profit.toFixed(2)} JMD, fee ${feePercent.toFixed(1)}%`);
-    const res = await apiCall('/auto-trader/report-profit', {
-      method: 'POST',
-      body: JSON.stringify({ profitJMD: profit, feePercent })
-    });
-    if (res.error) addLog(`❌ Error: ${res.error}`);
-    else {
-      addLog(`✅ Trade recorded: user gain ${res.userGain.toFixed(2)} JMD, owner fee ${res.fee.toFixed(2)} JMD`);
-      refreshStatus();
+  async function reportProfit(profitJMD, feePercent) {
+    addLog(`📊 Reporting profit: ${profitJMD.toFixed(2)} JMD, fee ${feePercent.toFixed(1)}%`);
+    try {
+      const res = await apiCall('report-profit', {
+        method: 'POST',
+        body: JSON.stringify({ profitJMD, feePercent })
+      });
+      if (res.error) {
+        addLog(`❌ Error: ${res.error}`);
+      } else {
+        addLog(`✅ Trade recorded: user gain ${res.userGain.toFixed(2)} JMD, owner fee ${res.fee.toFixed(2)} JMD`);
+        refreshStatus();
+      }
+    } catch (err) {
+      addLog(`❌ Network error: ${err.message}`);
     }
   }
 
@@ -138,8 +101,8 @@
 
   async function startTrading() {
     if (tradingInterval) clearInterval(tradingInterval);
-    await apiCall('/auto-trader/start', { method: 'POST' });
-    addLog('🚀 Auto‑Trader started (simulated every 30 sec)');
+    await apiCall('start', { method: 'POST' });
+    addLog('🚀 Auto‑Trader started (simulated trade every 30 seconds)');
     tradingInterval = setInterval(simulateTrade, 30000);
     refreshStatus();
   }
@@ -147,45 +110,33 @@
   async function stopTrading() {
     if (tradingInterval) clearInterval(tradingInterval);
     tradingInterval = null;
-    await apiCall('/auto-trader/stop', { method: 'POST' });
+    await apiCall('stop', { method: 'POST' });
     addLog('⏹️ Auto‑Trader stopped');
     refreshStatus();
   }
 
-  async function fundWithStripe() {
-    const amount = parseFloat(document.getElementById('fundAmount').value);
-    if (!amount || amount < 1) return alert('Enter a valid amount (JMD)');
-    const session = await apiCall('/create-checkout-session', {
-      method: 'POST',
-      body: JSON.stringify({ amount, currency: 'jmd' })
-    });
-    stripe.redirectToCheckout({ sessionId: session.id });
+  async function testTrade() {
+    await simulateTrade();
   }
 
-  async function testTrade() { await simulateTrade(); }
-
   async function init() {
-    const user = await apiCall('/me');
+    // Check if user is authenticated by calling /api/me
+    const meRes = await fetch('/api/me', { credentials: 'include' });
+    const user = await meRes.json();
     if (!user.id) {
-      document.getElementById('authMessage').innerHTML = '<div class="card">🔐 You must <a href="/">log in</a> to use the Auto‑Trader.</div>';
+      document.getElementById('authMessage').innerHTML = '<div class="status-card">🔐 You must <a href="/">log in</a> to use the Auto‑Trader.</div>';
       return;
     }
-    document.getElementById('authMessage').innerHTML = `<div class="card">✅ Logged in as <strong>${user.email}</strong></div>`;
-    document.getElementById('traderContent').style.display = 'block';
+    document.getElementById('authMessage').innerHTML = `<div class="status-card">✅ Logged in as <strong>${user.email}</strong></div>`;
+    document.getElementById('traderControls').classList.remove('hidden');
 
-    const ctx = document.getElementById('profitChart').getContext('2d');
-    profitChart = new Chart(ctx, {
-      type: 'line',
-      data: { labels: [], datasets: [{ label: 'Profit (JMD)', data: [], borderColor: '#2563eb', fill: false }] },
-      options: { responsive: true, maintainAspectRatio: true }
-    });
-
+    // Load initial status
     await refreshStatus();
 
+    // Attach event listeners
     document.getElementById('startBtn').onclick = startTrading;
     document.getElementById('stopBtn').onclick = stopTrading;
     document.getElementById('testTradeBtn').onclick = testTrade;
-    document.getElementById('stripeBtn').onclick = fundWithStripe;
   }
 
   init();
