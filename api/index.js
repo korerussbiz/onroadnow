@@ -474,3 +474,55 @@ if (url === '/api/create-checkout-session' && method === 'POST') {
   }
   return;
 }
+
+// ---------- Stripe integration (for card payments) ----------
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY || 'YOUR_SECRET_KEY');
+
+// Create a checkout session for users to fund their trading balance
+if (url === '/api/create-checkout-session' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { amount, currency = 'usd' } = req.body;
+  if (!amount || amount < 1) return res.status(400).json({ error: 'Invalid amount' });
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card', 'google_pay', 'apple_pay'],
+      line_items: [{
+        price_data: { currency, product_data: { name: 'Trading Balance' }, unit_amount: amount * 100 },
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: 'https://onroadnow.vercel.app/auto-trader?success=1',
+      cancel_url: 'https://onroadnow.vercel.app/auto-trader?cancel=1',
+      metadata: { userId }
+    });
+    res.status(200).json({ id: session.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+  return;
+}
+
+// Webhook to handle successful payments (add funds to user's trading balance)
+if (url === '/api/stripe-webhook' && method === 'POST') {
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const userId = session.metadata.userId;
+    const amountPaid = session.amount_total / 100;
+    // Add amount to user's trading balance
+    let state = userTraderStates.get(userId);
+    if (!state) state = { running: false, userProfit: 0, ownerFees: 0, log: [], balance: 0 };
+    state.balance = (state.balance || 0) + amountPaid;
+    userTraderStates.set(userId, state);
+    addTraderLog(userId, `💰 Added ${amountPaid} JMD to trading balance via card payment`);
+  }
+  res.status(200).json({ received: true });
+  return;
+}
