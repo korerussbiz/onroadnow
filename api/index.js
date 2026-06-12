@@ -193,6 +193,44 @@ module.exports = async (req, res) => {
   if (url === '/api/updateLocation' && method === 'POST') { res.status(200).json({}); return; }
   if (url.startsWith('/api/getLocation')) { res.status(200).json({ location: null }); return; }
 
+
+// ---------- Per‑user Auto‑Trader endpoints ----------
+if (url === '/api/auto-trader/start' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  state.running = true;
+  addTraderLog(userId, 'Trader started');
+  res.status(200).json({ message: 'started' });
+  return;
+}
+if (url === '/api/auto-trader/stop' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  state.running = false;
+  addTraderLog(userId, 'Trader stopped');
+  res.status(200).json({ message: 'stopped' });
+  return;
+}
+if (url === '/api/auto-trader/status' && method === 'GET') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  res.status(200).json({ running: state.running, userProfit: state.userProfit, ownerFees: state.ownerFees, log: state.log });
+  return;
+}
+if (url === '/api/auto-trader/report-profit' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { profitJMD, feePercent } = req.body;
+  if (!profitJMD || profitJMD <= 0) return res.status(400).json({ error: 'Invalid profit' });
+  const fee = profitJMD * (Math.min(10, Math.max(3, feePercent)) / 100);
+  const userGain = profitJMD - fee;
+  const state = getUserTraderState(userId);
+  state.userProfit += userGain;
+  state.ownerFees += fee;
+  addTraderLog(userId, `Trade: profit ${profitJMD} JMD, fee ${feePercent}% → user +${userGain}, owner +${fee}`);
+  res.status(200).json({ userGain, fee, newUserBalance: state.userProfit, newOwnerFees: state.ownerFees });
+  return;
+}
+
   res.status(404).json({ error: 'Not found' });
 };
 
@@ -390,3 +428,23 @@ if (url === '/api/auto-trader/report-profit' && method === 'POST') {
   res.status(200).json({ userGain, fee });
   return;
 }
+
+// ---------- Per‑user Auto‑Trader state ----------
+let userTraderStates = new Map(); // key = userId, value = { running, userProfit, ownerFees, log }
+
+function getUserTraderState(userId) {
+  if (!userTraderStates.has(userId)) {
+    userTraderStates.set(userId, { running: false, userProfit: 0, ownerFees: 0, log: [] });
+  }
+  return userTraderStates.get(userId);
+}
+
+function addTraderLog(userId, msg) {
+  const state = getUserTraderState(userId);
+  state.log.unshift(`[${new Date().toISOString()}] ${msg}`);
+  if (state.log.length > 50) state.log.pop();
+}
+
+// Override the existing auto‑trader endpoints (remove previous simple ones and replace)
+// We'll insert new endpoints before the final 404. For safety, we'll replace the whole block.
+// Since we already have some, we'll use sed to delete old and add new.
