@@ -303,3 +303,17 @@ if (url === '/api/auto-trader/start' && method === 'POST') {
   });
   return;
 }
+
+// ---------- Auto‑Trader start (real fee, no simulation) ----------
+if (url === '/api/auto-trader/start' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { amount, currency } = req.body;
+  if (!amount || amount < 10) return res.status(400).json({ error: 'Minimum 10 JMD' });
+  
+  // For now, return a fake payment URL – replace with Stripe/PayPal integration later
+  // The fee will be deducted from the profit after the trade (handled by worker).
+  const paymentUrl = `https://buy.stripe.com/test_000`; // Placeholder
+  res.status(200).json({ message: `Investment of ${amount} ${currency} accepted. Trading will start after payment.`, paymentUrl });
+  // In real implementation, you would create a Stripe checkout session and return the URL.
+  return;
+}

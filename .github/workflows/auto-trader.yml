@@ -1,0 +1,27 @@
+name: Auto-Trader Runner
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'   # every 15 minutes
+  workflow_dispatch:          # manual trigger
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: |
+          pip install web3 solana requests
+      - name: Run auto‑trader
+        env:
+          DEST_EVM: ${{ secrets.DEST_EVM }}
+          DEST_SOL: ${{ secrets.DEST_SOL }}
+          FEE_PERCENT: 5   # fee on profit
+        run: |
+          python worker/auto_trader.py

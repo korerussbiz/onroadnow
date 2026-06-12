@@ -8,3 +8,5 @@ serviceAccountKey.json
 *.env
 koreruss*.env
 serviceAccountKey.json
+worker/*.json
+.env
