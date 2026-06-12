@@ -137,7 +137,8 @@
     </div>
     <div id="profileInfo" style="margin: 1rem 1rem 0 1rem;"></div>
     <div class="tabs">
-      <div class="tab" data-tab="autotrader">🤖 Auto-Trader</div>
+      <div class="tab" data-tab="autotrader">🤖 Auto-Trader  <div class="tab" data-tab="autotrader">🤖 Auto‑Trader</div>
+</div>
       <div class="tab active" data-tab="profile">👤 Profile</div>
       <div class="tab" data-tab="marketplace">🛒 Marketplace</div>
       <div class="tab" data-tab="deliveries">🚚 Deliveries</div>
@@ -208,6 +209,13 @@
       </div>
     </div>
     <div id="adminTabContent" class="tab-content hidden"><h4>Admin Controls</h4><div id="adminListings"></div></div>
+    <div id="autotraderTab" class="tab-content hidden">
+      <h3>🤖 OnRoadNow Auto‑Trader</h3>
+      <p>Activate our automated trading bot. A 3‑10% fee applies on successful trades (paid to platform operator).</p>
+      <div class="form-group"><label>Amount to invest (JMD or equivalent)</label><input type="number" id="investAmount" placeholder="Min 100"></div>
+      <button id="startTraderBtn" class="btn btn-primary">▶️ Start Trading</button>
+      <div id="traderStatus" style="margin-top:1rem;"></div>
+    </div>
   </div>
 
   <!-- Map Card -->
@@ -675,3 +683,34 @@
   OnRoadNow is a new, independent project. We need donations to cover hosting, development, and to start serving real deliveries and sales.<br>
   💡 <strong>Become a partner</strong> – invest in the platform and share in future revenues. Contact us to discuss.
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const startBtn = document.getElementById('startTraderBtn');
+  if (startBtn) {
+    startBtn.addEventListener('click', async () => {
+      if (typeof currentUser === 'undefined' || !currentUser) {
+        alert('Please login first.');
+        return;
+      }
+      const amount = document.getElementById('investAmount').value;
+      if (!amount || amount < 100) {
+        alert('Minimum investment is 100 JMD (or equivalent).');
+        return;
+      }
+      const statusDiv = document.getElementById('traderStatus');
+      statusDiv.innerHTML = '⏳ Activating auto‑trader...';
+      try {
+        const res = await fetch('/api/auto-trader/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: currentUser.uid, amount: parseFloat(amount) })
+        });
+        const data = await res.json();
+        statusDiv.innerHTML = `<pre>✅ ${JSON.stringify(data, null, 2)}</pre>`;
+      } catch (err) {
+        statusDiv.innerHTML = `❌ Error: ${err.message}`;
+      }
+    });
+  }
+});
+</script>

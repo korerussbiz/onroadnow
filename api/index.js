@@ -266,3 +266,40 @@ if (url === '/api/bot/grant' && method === 'POST') {
   res.status(200).json({ message: 'Access granted' });
   return;
 }
+
+// ---------- Auto-Trader endpoint with fee (3-10%) and earnings to Korey D. Russell ----------
+// This is a simulation; real trading would require external bot and payment processing.
+if (url === '/api/auto-trader/start' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { amount } = req.body;
+  if (!amount || amount < 100) return res.status(400).json({ error: 'Minimum amount 100 JMD' });
+  
+  // Simulate a trading run (in real implementation, you'd call an external bot)
+  // Fee is between 3% and 10% (random for simulation)
+  const feePercent = Math.floor(Math.random() * (10 - 3 + 1) + 3);
+  const fee = (amount * feePercent) / 100;
+  const netAfterFee = amount - fee;
+  // Simulated profit (could be negative, but for demo we'll assume small gain)
+  const profit = netAfterFee * 0.05; // 5% profit
+  const totalEarned = netAfterFee + profit;
+  const earningsToKorey = totalEarned * 0.8; // 80% to user, 20% to platform (already took fee, but for demo)
+  // In reality, you'd store the earnings in a user's wallet and send to your address.
+
+  // For demonstration, we'll just return a summary.
+  // The actual transfer of funds would require a payment processor (Stripe, etc.) or crypto.
+  console.log(`Auto-trader activated for user ${userId}, invested ${amount} JMD, fee ${feePercent}% (${fee} JMD), total earned ${totalEarned} JMD`);
+  
+  // Here you would trigger a real payment to your wallet (Korey D. Russell)
+  // For now, we log it.
+  res.status(200).json({
+    message: "Auto‑trader simulation complete.",
+    invested: amount,
+    feePercent,
+    fee,
+    netAfterFee,
+    profit,
+    totalEarned,
+    note: "Earnings will be sent to Korey D. Russell's wallet (simulated). In production, you would integrate Stripe/PayPal/crypto."
+  });
+  return;
+}
