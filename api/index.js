@@ -448,3 +448,29 @@ function addTraderLog(userId, msg) {
 // Override the existing auto‑trader endpoints (remove previous simple ones and replace)
 // We'll insert new endpoints before the final 404. For safety, we'll replace the whole block.
 // Since we already have some, we'll use sed to delete old and add new.
+
+// ---------- Stripe Checkout ----------
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+if (url === '/api/create-checkout-session' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'jmd',
+          product_data: { name: 'Deposit to Auto‑Trader Balance' },
+          unit_amount: 100, // example: 1 JMD = 100 cents (but Stripe expects smallest unit; adjust)
+        },
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: 'https://onroadnow.vercel.app/auto-trader?success=true',
+      cancel_url: 'https://onroadnow.vercel.app/auto-trader?canceled=true',
+    });
+    res.status(200).json({ id: session.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+  return;
+}
