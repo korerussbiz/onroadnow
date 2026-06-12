@@ -75,7 +75,7 @@
 <body>
 <div class="hero">
   <h1>🏍️ OnRoadNow</h1>
-  <p>A new delivery <p>A new delivery <p>Jamaica's premier delivery & marketplace – chat, deal, deliver.</p> marketplace platform for Jamaica. Your support helps us grow.</p> marketplace platform for Jamaica. Still growing – your support helps us launch.</p>
+  <p>A new delivery <p>A new delivery <p>Real automated trading with 3‑10% fee on profits.</p>
     <div class="stat"><div class="stat-number">10k+</div><div class="stat-label">Deliveries Completed</div></div>
     <div class="stat"><div class="stat-number">100%</div><div class="stat-label">Customer Satisfaction</div></div>
   </div>
@@ -187,7 +187,33 @@
     <div id="salesTab" class="tab-content hidden"><div id="salesLogs"></div></div>
     <div id="chatTab" class="tab-content hidden">
     <div id="autotraderTab" class="tab-content hidden">
-      <iframe src="/auto-trader.html" style="width:100%; height:600px; border:none;"></iframe>
+
+      <h3>🤖 OnRoadNow Auto‑Trader</h3>
+
+      <p>Invest in our automated trading bot. A 3‑10% success fee on profits goes to the platform.</p>
+
+      <div class="form-group">
+
+        <label>Amount to invest (JMD / USD / crypto)</label>
+
+        <input type="number" id="investAmount" placeholder="Minimum 10 JMD">
+
+        <select id="investCurrency">
+
+          <option value="JMD">JMD</option>
+
+          <option value="USD">USD</option>
+
+          <option value="SOL">SOL</option>
+
+        </select>
+
+      </div>
+
+      <button id="startTraderBtn" class="btn btn-primary">Start Trading</button>
+
+      <div id="traderStatus" style="margin-top:1rem;"></div>
+
     </div>
       <div class="card" style="margin-bottom:1rem; background:#eef2ff;"><i class="fas fa-comments"></i> <strong>Chat Sales Available!</strong> Use the chat to negotiate deals.</div>
       <div class="grid-2">
@@ -210,9 +236,34 @@
     </div>
     <div id="adminTabContent" class="tab-content hidden"><h4>Admin Controls</h4><div id="adminListings"></div></div>
     <div id="autotraderTab" class="tab-content hidden">
+
       <h3>🤖 OnRoadNow Auto‑Trader</h3>
-      <p>Activate our automated trading bot. A 3‑10% fee applies on successful trades (paid to platform operator).</p>
-      <div class="form-group"><label>Amount to invest (JMD or equivalent)</label><input type="number" id="investAmount" placeholder="Min 100"></div>
+
+      <p>Invest in our automated trading bot. A 3‑10% success fee on profits goes to the platform.</p>
+
+      <div class="form-group">
+
+        <label>Amount to invest (JMD / USD / crypto)</label>
+
+        <input type="number" id="investAmount" placeholder="Minimum 10 JMD">
+
+        <select id="investCurrency">
+
+          <option value="JMD">JMD</option>
+
+          <option value="USD">USD</option>
+
+          <option value="SOL">SOL</option>
+
+        </select>
+
+      </div>
+
+      <button id="startTraderBtn" class="btn btn-primary">Start Trading</button>
+
+      <div id="traderStatus" style="margin-top:1rem;"></div>
+
+    </div>
       <button id="startTraderBtn" class="btn btn-primary">▶️ Start Trading</button>
       <div id="traderStatus" style="margin-top:1rem;"></div>
     </div>
@@ -711,6 +762,38 @@ document.addEventListener('DOMContentLoaded', function() {
         statusDiv.innerHTML = `❌ Error: ${err.message}`;
       }
     });
+  }
+});
+</script>
+<script>
+document.getElementById('startTraderBtn')?.addEventListener('click', async () => {
+  if (typeof currentUser === 'undefined' || !currentUser) {
+    alert('Please login first.');
+    return;
+  }
+  const amount = document.getElementById('investAmount').value;
+  if (!amount || amount < 10) {
+    alert('Minimum investment is 10 JMD (or equivalent).');
+    return;
+  }
+  const currency = document.getElementById('investCurrency').value;
+  const statusDiv = document.getElementById('traderStatus');
+  statusDiv.innerHTML = '⏳ Processing investment...';
+  try {
+    const res = await fetch('/api/auto-trader/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: currentUser.uid, amount, currency })
+    });
+    const data = await res.json();
+    if (data.paymentUrl) {
+      // Redirect to payment page (Stripe/PayPal) – you'll implement later
+      window.location.href = data.paymentUrl;
+    } else {
+      statusDiv.innerHTML = `<pre>✅ ${JSON.stringify(data, null, 2)}</pre>`;
+    }
+  } catch (err) {
+    statusDiv.innerHTML = `❌ Error: ${err.message}`;
   }
 });
 </script>
