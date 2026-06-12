@@ -31,8 +31,8 @@
     .nav a { margin-right: 1rem; text-decoration: none; color: #2563eb; }
     .login-card { max-width: 500px; margin: 0 auto; text-align: center; }
     .extra-login { display: flex; gap: 0.5rem; justify-content: center; margin: 1rem 0; }
+    .error-badge { background: #fee2e2; color: #b91c1c; padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.75rem; margin-left: 1rem; }
   </style>
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -61,7 +61,7 @@
   </div>
 
   <div id="traderContent" style="display: none;">
-    <h1>🤖 OnRoadNow Auto‑Trader</h1>
+    <h1>🤖 OnRoadNow Auto‑Trader <span id="priceStatus" class="error-badge">● Live</span></h1>
     <div class="grid-2">
       <div class="card">
         <h3>📊 Market Data</h3>
@@ -116,15 +116,22 @@
   let currentPrice = 0;
   let priceHistory = [];
   let priceChart = null;
+  let fetchRetryCount = 0;
+  let maxRetries = 5;
 
   async function apiCall(endpoint, options = {}) {
-    const res = await fetch(`/api/auto-trader/${endpoint}`, {
-      ...options,
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json', ...options.headers }
-    });
-    if (res.status === 401) throw new Error('Unauthorized');
-    return res.json();
+    try {
+      const res = await fetch(`/api/auto-trader/${endpoint}`, {
+        ...options,
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...options.headers }
+      });
+      if (res.status === 401) throw new Error('Unauthorized');
+      return await res.json();
+    } catch (err) {
+      console.error(`API call to ${endpoint} failed:`, err);
+      throw err;
+    }
   }
 
   function addLog(msg, isError = false) {
@@ -142,17 +149,27 @@
       const state = await apiCall('status');
       document.getElementById('userProfit').innerText = (state.userProfit || 0).toFixed(2);
       document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2);
-    } catch(e) { console.error(e); }
+    } catch(e) {
+      addLog(`Balance refresh failed: ${e.message}`, true);
+    }
   }
 
-  async function fetchPrice() {
+  async function fetchPriceWithRetry(attempt = 1) {
+    const maxAttempts = 5;
+    const baseDelay = 1000;
     try {
       const url = `https://api.binance.com/api/v3/ticker/price?symbol=${currentPair}`;
-      const res = await fetch(url);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       currentPrice = parseFloat(data.price);
       if (currentPrice) {
         document.getElementById('price').innerText = `${currentPrice.toFixed(2)} USD`;
+        document.getElementById('priceStatus').innerText = '● Live';
+        document.getElementById('priceStatus').style.color = '#10b981';
         priceHistory.push(currentPrice);
         if (priceHistory.length > 30) priceHistory.shift();
         if (priceChart) {
@@ -166,9 +183,22 @@
             options: { responsive: true, maintainAspectRatio: true }
           });
         }
+        fetchRetryCount = 0;
+        return;
       }
-    } catch(e) {
-      addLog(`Price fetch error: ${e.message}`, true);
+      throw new Error('Invalid price data');
+    } catch (err) {
+      console.warn(`Price fetch attempt ${attempt} failed:`, err);
+      document.getElementById('priceStatus').innerText = '● Offline';
+      document.getElementById('priceStatus').style.color = '#ef4444';
+      if (attempt < maxAttempts) {
+        const delay = baseDelay * Math.pow(2, attempt - 1);
+        addLog(`⚠️ Price fetch failed (attempt ${attempt}), retrying in ${delay/1000}s...`, true);
+        setTimeout(() => fetchPriceWithRetry(attempt + 1), delay);
+      } else {
+        addLog(`❌ Price fetch failed after ${maxAttempts} attempts. Will retry in 30 seconds.`, true);
+        setTimeout(() => fetchPriceWithRetry(1), 30000);
+      }
     }
   }
 
@@ -183,13 +213,21 @@
         addLog(`✅ Trade recorded: profit ${profitJMD.toFixed(2)} JMD → user gain ${res.userGain.toFixed(2)} JMD, owner fee ${res.fee.toFixed(2)} JMD`);
         refreshBalance();
       }
-    } catch(e) { addLog(`❌ Network error: ${e.message}`, true); }
+    } catch(e) {
+      addLog(`❌ Network error reporting profit: ${e.message}`, true);
+    }
   }
 
   async function executeTrade(type) {
-    if (!currentPrice) { addLog("Price not loaded yet, try again.", true); return; }
+    if (!currentPrice) {
+      addLog("Price not loaded yet, try again.", true);
+      return;
+    }
     const amountUSD = parseFloat(document.getElementById('tradeAmount').value);
-    if (isNaN(amountUSD) || amountUSD <= 0) { addLog("Enter a valid amount (USD)", true); return; }
+    if (isNaN(amountUSD) || amountUSD <= 0) {
+      addLog("Enter a valid amount (USD)", true);
+      return;
+    }
     const cryptoAmount = amountUSD / currentPrice;
     // Simulated profit: random between 2% and 12% of the trade value
     const profit = amountUSD * (Math.random() * 0.10 + 0.02);
@@ -203,13 +241,13 @@
     currentPair = e.target.value;
     priceHistory = [];
     if (priceChart) { priceChart.destroy(); priceChart = null; }
-    fetchPrice();
+    fetchPriceWithRetry(1);
     addLog(`Switched to ${currentPair}`);
   });
   document.getElementById('buyBtn').addEventListener('click', () => executeTrade('buy'));
   document.getElementById('sellBtn').addEventListener('click', () => executeTrade('sell'));
 
-  // Login handlers (same as before)
+  // Login handlers
   window.handleGoogleCredential = function(response) {
     fetch('/api/auth/google', {
       method: 'POST',
@@ -265,8 +303,8 @@
     if (user.id) {
       document.getElementById('loginCard').style.display = 'none';
       document.getElementById('traderContent').style.display = 'block';
-      fetchPrice();
-      setInterval(fetchPrice, 5000);
+      fetchPriceWithRetry(1);
+      setInterval(() => fetchPriceWithRetry(1), 30000);
       refreshBalance();
       addLog("Auto‑Trader ready. Enter USD amount and click Buy or Sell to trade (paper trading, profit reported with fee).");
     } else {

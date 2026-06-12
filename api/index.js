@@ -211,48 +211,4 @@ module.exports = async (req, res) => {
   if (url === '/api/updateLocation' && method === 'POST') { res.status(200).json({}); return; }
   if (url.startsWith('/api/getLocation')) { res.status(200).json({ location: null }); return; }
 
-  // ---------- Auto‑Trader endpoints ----------
-  if (url === '/api/auto-trader/start' && method === 'POST') {
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-    const state = getUserTraderState(userId);
-    state.running = true;
-    addTraderLog(userId, 'Trader started');
-    res.status(200).json({ message: 'started' });
-    return;
-  }
-  if (url === '/api/auto-trader/stop' && method === 'POST') {
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-    const state = getUserTraderState(userId);
-    state.running = false;
-    addTraderLog(userId, 'Trader stopped');
-    res.status(200).json({ message: 'stopped' });
-    return;
-  }
-  if (url === '/api/auto-trader/status' && method === 'GET') {
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-    const state = getUserTraderState(userId);
-    res.status(200).json({
-      running: state.running,
-      userProfit: state.userProfit,
-      ownerFees: state.ownerFees,
-      log: state.log,
-      history: state.history
-    });
-    return;
-  }
-  if (url === '/api/auto-trader/report-profit' && method === 'POST') {
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-    const { profitJMD, feePercent } = req.body;
-    if (!profitJMD || profitJMD <= 0) return res.status(400).json({ error: 'Invalid profit' });
-    const fee = profitJMD * (Math.min(10, Math.max(3, feePercent)) / 100);
-    const userGain = profitJMD - fee;
-    const state = getUserTraderState(userId);
-    state.userProfit += userGain;
-    state.ownerFees += fee;
-    addTraderLog(userId, `Trade: profit ${profitJMD} JMD, fee ${feePercent}% → user +${userGain}, owner +${fee}`);
-    res.status(200).json({ userGain, fee, newUserBalance: state.userProfit, newOwnerFees: state.ownerFees });
-    return;
-  }
-
-  res.status(404).json({ error: 'Not found' });
-};
+  
