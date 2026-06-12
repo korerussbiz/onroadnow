@@ -208,3 +208,61 @@ if (url === '/api/accept-terms' && method === 'POST') {
   }
   return;
 }
+
+// ---------- Auto‑Trader API ----------
+// In-memory status (replace with Firestore later)
+let botStatus = {
+  running: false,
+  lastRun: null,
+  earnings: 0,
+  users: [] // list of user IDs who have paid for access
+};
+
+// Check if user has paid for bot access
+async function hasBotAccess(userId) {
+  if (!userId) return false;
+  // For now, check if user email is admin (free) or if they have a 'bot_access' field
+  const userDoc = await db.collection('users').doc(userId).get();
+  if (!userDoc.exists) return false;
+  const user = userDoc.data();
+  return user.botAccess === true || user.email === 'admin@korerussbiz.com';
+}
+
+// Endpoint to get bot status (public, but we can restrict later)
+if (url === '/api/bot/status' && method === 'GET') {
+  res.status(200).json({ running: botStatus.running, lastRun: botStatus.lastRun, earnings: botStatus.earnings });
+  return;
+}
+
+// Endpoint to start/stop bot (requires payment or admin)
+if (url === '/api/bot/control' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Login required' });
+  const hasAccess = await hasBotAccess(userId);
+  if (!hasAccess) return res.status(403).json({ error: 'Access denied. Please purchase bot access.' });
+  const { action } = req.body;
+  if (action === 'start') {
+    if (botStatus.running) return res.status(400).json({ error: 'Bot already running' });
+    // Here you would actually start the bot process (e.g., spawn a child process)
+    // For demo, just set flag
+    botStatus.running = true;
+    botStatus.lastRun = Date.now();
+    res.status(200).json({ message: 'Bot started' });
+  } else if (action === 'stop') {
+    botStatus.running = false;
+    res.status(200).json({ message: 'Bot stopped' });
+  } else {
+    res.status(400).json({ error: 'Invalid action' });
+  }
+  return;
+}
+
+// Endpoint to grant bot access after payment (webhook or manual)
+if (url === '/api/bot/grant' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+  const { paymentId, amount } = req.body;
+  // In production, verify payment with PayPal/Stripe
+  // For now, just grant access
+  await db.collection('users').doc(userId).set({ botAccess: true }, { merge: true });
+  res.status(200).json({ message: 'Access granted' });
+  return;
+}
