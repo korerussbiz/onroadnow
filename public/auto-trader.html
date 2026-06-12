@@ -1,130 +1,305 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>OnRoadNow Micro Trader</title>
-    <style>
-        body { font-family: Arial; margin: 2rem; background: #0f172a; color: #eee; }
-        .card { background: #1e293b; padding: 1.5rem; border-radius: 1rem; margin-bottom: 1rem; }
-        button { background: #3b82f6; border: none; padding: 0.5rem 1rem; border-radius: 2rem; color: white; cursor: pointer; margin: 0.2rem; }
-        .buy { background: #10b981; }
-        .sell { background: #ef4444; }
-        input { padding: 0.5rem; border-radius: 1rem; border: none; margin: 0.5rem 0; }
-        .log { background: #0f172a; padding: 1rem; border-radius: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; }
-    </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OnRoadNow – Auto‑Trader</title>
+  <!-- Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Firebase SDK (for chat and Firestore – already used) -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 2rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .card { background: white; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+    h1 { color: #1e3a8a; margin-bottom: 0.5rem; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+    .btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; background: #2563eb; color: white; margin: 0.5rem 0; transition: 0.2s; }
+    .btn-buy { background: #10b981; }
+    .btn-sell { background: #ef4444; }
+    .btn-outline { background: transparent; border: 1px solid #2563eb; color: #2563eb; }
+    .price { font-size: 2rem; font-weight: 800; color: #facc15; }
+    .wallet { background: #eef2ff; border-radius: 1rem; padding: 1rem; margin: 1rem 0; }
+    .log { background: #0f172a; color: #94a3b8; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; }
+    .log p { margin: 0.2rem 0; }
+    .flex { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    input { padding: 0.5rem 1rem; border-radius: 2rem; border: 1px solid #cbd5e1; flex: 1; }
+    .nav { margin-bottom: 2rem; }
+    .nav a { margin-right: 1rem; text-decoration: none; color: #2563eb; }
+    .login-card { max-width: 500px; margin: 0 auto; text-align: center; }
+    .extra-login { display: flex; gap: 0.5rem; justify-content: center; margin: 1rem 0; }
+  </style>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-<h1>📈 OnRoadNow Micro Trading Bot</h1>
-<div class="card">
-    <h3>Market Data</h3>
-    <select id="pairSelect">
-        <option value="BTC">BTC/USD</option>
-        <option value="ETH">ETH/USD</option>
-        <option value="SOL">SOL/USD</option>
-    </select>
-    <div id="price" style="font-size: 2rem; margin: 1rem 0;">— USD</div>
-    <canvas id="priceChart" width="400" height="200"></canvas>
+<div class="container">
+  <div class="nav">
+    <a href="/">← Home</a> | <a href="/auto-trader">Auto‑Trader</a>
+  </div>
+
+  <!-- Login / Signup Card (shown when not logged in) -->
+  <div id="loginCard" class="card login-card">
+    <h1>🔐 Login to Trade</h1>
+    <div id="g_id_onload"
+         data-client_id="134628093591-61nk4mneo6d1o6of5da3e3fijgtd5dd0.apps.googleusercontent.com"
+         data-callback="handleGoogleCredential"
+         data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin" data-type="standard" data-size="large"></div>
+    <div class="extra-login">
+      <button id="appleLoginBtn" class="btn btn-apple" style="background:#000;"><i class="fab fa-apple"></i> Apple (soon)</button>
+      <button id="telegramLoginBtn" class="btn btn-telegram" style="background:#0088cc;"><i class="fab fa-telegram"></i> Telegram (soon)</button>
+    </div>
+    <div style="margin:1rem 0; text-align:center;">or</div>
+    <div class="flex">
+      <input type="email" id="loginEmail" placeholder="Email">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <button id="emailLoginBtn" class="btn">Login</button>
+      <button id="emailSignupBtn" class="btn btn-outline">Signup</button>
+    </div>
+    <p id="authMsg" style="margin-top:1rem; color:red;"></p>
+  </div>
+
+  <!-- Trading Bot Interface (hidden until logged in) -->
+  <div id="traderContent" style="display: none;">
+    <h1>🤖 OnRoadNow Auto‑Trader</h1>
+    <div class="grid-2">
+      <div class="card">
+        <h3>📊 Market Data</h3>
+        <div class="flex" style="justify-content: space-between;">
+          <select id="pairSelect" class="btn-outline" style="padding:0.4rem 0.8rem;">
+            <option value="BTC">BTC/USD</option>
+            <option value="ETH">ETH/USD</option>
+            <option value="SOL">SOL/USD</option>
+          </select>
+          <span id="price" class="price">— USD</span>
+        </div>
+        <canvas id="priceChart" width="400" height="200" style="margin-top: 1rem;"></canvas>
+      </div>
+      <div class="card">
+        <h3>💰 Your Trading Balance</h3>
+        <div class="wallet">
+          <div><strong>Profit (after fees):</strong> <span id="userProfit">0.00</span> JMD</div>
+          <div><strong>Platform fees earned:</strong> <span id="ownerFees">0.00</span> JMD</div>
+        </div>
+        <div class="flex">
+          <input type="number" id="tradeAmount" placeholder="Amount (USD)" step="any">
+          <button id="buyBtn" class="btn btn-buy">Buy</button>
+          <button id="sellBtn" class="btn btn-sell">Sell</button>
+        </div>
+        <div style="font-size:0.8rem; margin-top:0.5rem;">💡 Micro trades allowed (min $1). Profit fee: 3‑10% deducted automatically.</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📜 Transaction Log</h3>
+      <div id="logArea" class="log"></div>
+    </div>
+  </div>
 </div>
-<div class="card">
-    <h3>Virtual Wallet</h3>
-    <div>USD: <span id="usdBalance">10000.00</span></div>
-    <div id="cryptoBalance">BTC: 0.0000</div>
-    <input type="number" id="amount" placeholder="Amount (USD)" step="any">
-    <button id="buyBtn" class="buy">Buy</button>
-    <button id="sellBtn" class="sell">Sell</button>
-</div>
-<div class="card">
-    <h3>Transaction Log</h3>
-    <div id="log" class="log">Ready.</div>
-</div>
+
 <script>
-    let wallet = { USD: 10000, BTC: 0, ETH: 0, SOL: 0 };
-    let currentPair = "BTC";
-    let currentPrice = 0;
-    let priceHistory = [];
-    let chart = null;
+  // Firebase configuration (same as main site)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBrldf3h28e9_Dwjrp2zZL21EJzxp_1MSk",
+    authDomain: "onroadnow-3aabb.firebaseapp.com",
+    projectId: "onroadnow-3aabb",
+    storageBucket: "onroadnow-3aabb.appspot.com",
+    appId: "1:134628093591:web:xxx"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
 
-    const logDiv = document.getElementById('log');
-    function addLog(msg) {
-        const p = document.createElement('div');
-        p.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
-        logDiv.appendChild(p);
-        logDiv.scrollTop = logDiv.scrollHeight;
-    }
+  let currentUser = null;
+  let currentPair = "BTC";
+  let currentPrice = 0;
+  let priceHistory = [];
+  let priceChart = null;
 
-    async function fetchPrice() {
-        const id = { BTC: 'bitcoin', ETH: 'ethereum', SOL: 'solana' }[currentPair];
-        try {
-            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
-            const data = await res.json();
-            currentPrice = data[id]?.usd;
-            if (currentPrice) {
-                document.getElementById('price').innerText = `${currentPrice} USD`;
-                priceHistory.push(currentPrice);
-                if (priceHistory.length > 30) priceHistory.shift();
-                if (chart) {
-                    chart.data.datasets[0].data = priceHistory;
-                    chart.update();
-                } else {
-                    const ctx = document.getElementById('priceChart').getContext('2d');
-                    chart = new Chart(ctx, {
-                        type: 'line',
-                        data: { labels: priceHistory.map((_, i) => i), datasets: [{ label: `${currentPair}/USD`, data: priceHistory, borderColor: '#facc15' }] }
-                    });
-                }
-            }
-        } catch(e) { addLog(`Price fetch error: ${e.message}`); }
-    }
-
-    function updateUI() {
-        document.getElementById('usdBalance').innerText = wallet.USD.toFixed(2);
-        if (currentPair === 'BTC') document.getElementById('cryptoBalance').innerHTML = `BTC: ${wallet.BTC.toFixed(8)}`;
-        else if (currentPair === 'ETH') document.getElementById('cryptoBalance').innerHTML = `ETH: ${wallet.ETH.toFixed(6)}`;
-        else document.getElementById('cryptoBalance').innerHTML = `SOL: ${wallet.SOL.toFixed(4)}`;
-    }
-
-    async function trade(type) {
-        if (!currentPrice) { addLog("Price not loaded"); return; }
-        let amountUSD = parseFloat(document.getElementById('amount').value);
-        if (isNaN(amountUSD) || amountUSD <= 0) { addLog("Invalid amount"); return; }
-        let cryptoAmount = amountUSD / currentPrice;
-        let minCrypto = { BTC: 0.0001, ETH: 0.001, SOL: 0.01 }[currentPair];
-        if (cryptoAmount < minCrypto) { addLog(`Min trade: ${minCrypto} ${currentPair}`); return; }
-        if (type === 'buy') {
-            if (wallet.USD < amountUSD) { addLog("Insufficient USD"); return; }
-            wallet.USD -= amountUSD;
-            if (currentPair === 'BTC') wallet.BTC += cryptoAmount;
-            else if (currentPair === 'ETH') wallet.ETH += cryptoAmount;
-            else wallet.SOL += cryptoAmount;
-            addLog(`Bought ${cryptoAmount.toFixed(8)} ${currentPair} for $${amountUSD.toFixed(2)}`);
-        } else {
-            let balance = { BTC: wallet.BTC, ETH: wallet.ETH, SOL: wallet.SOL }[currentPair];
-            if (balance < cryptoAmount) { addLog(`Insufficient ${currentPair}`); return; }
-            if (currentPair === 'BTC') wallet.BTC -= cryptoAmount;
-            else if (currentPair === 'ETH') wallet.ETH -= cryptoAmount;
-            else wallet.SOL -= cryptoAmount;
-            wallet.USD += amountUSD;
-            addLog(`Sold ${cryptoAmount.toFixed(8)} ${currentPair} for $${amountUSD.toFixed(2)}`);
-        }
-        updateUI();
-        document.getElementById('amount').value = '';
-    }
-
-    document.getElementById('pairSelect').addEventListener('change', (e) => {
-        currentPair = e.target.value;
-        priceHistory = [];
-        if (chart) { chart.destroy(); chart = null; }
-        fetchPrice();
-        updateUI();
-        addLog(`Switched to ${currentPair}/USD`);
+  // Helper API calls (using backend)
+  async function apiCall(endpoint, options = {}) {
+    const res = await fetch(`/api/auto-trader/${endpoint}`, {
+      ...options,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...options.headers }
     });
-    document.getElementById('buyBtn').onclick = () => trade('buy');
-    document.getElementById('sellBtn').onclick = () => trade('sell');
+    if (res.status === 401) throw new Error('Unauthorized');
+    return res.json();
+  }
 
+  function addLog(msg, isError = false) {
+    const logDiv = document.getElementById('logArea');
+    if (!logDiv) return;
+    const p = document.createElement('p');
+    p.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    if (isError) p.style.color = "#f87171";
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  async function refreshBalance() {
+    try {
+      const state = await apiCall('status');
+      document.getElementById('userProfit').innerText = (state.userProfit || 0).toFixed(2);
+      document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2);
+    } catch(e) { console.error(e); }
+  }
+
+  async function fetchPrice() {
+    const id = { BTC: 'bitcoin', ETH: 'ethereum', SOL: 'solana' }[currentPair];
+    try {
+      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
+      const data = await res.json();
+      currentPrice = data[id]?.usd;
+      if (currentPrice) {
+        document.getElementById('price').innerText = `${currentPrice.toFixed(2)} USD`;
+        priceHistory.push(currentPrice);
+        if (priceHistory.length > 30) priceHistory.shift();
+        if (priceChart) {
+          priceChart.data.datasets[0].data = priceHistory;
+          priceChart.update();
+        } else {
+          const ctx = document.getElementById('priceChart').getContext('2d');
+          priceChart = new Chart(ctx, {
+            type: 'line',
+            data: { labels: priceHistory.map((_, i) => i), datasets: [{ label: `${currentPair}/USD`, data: priceHistory, borderColor: '#facc15', fill: false }] },
+            options: { responsive: true, maintainAspectRatio: true }
+          });
+        }
+      }
+    } catch(e) { addLog(`Price fetch error: ${e.message}`, true); }
+  }
+
+  async function reportTrade(profitJMD, feePercent) {
+    try {
+      const res = await apiCall('report-profit', {
+        method: 'POST',
+        body: JSON.stringify({ profitJMD, feePercent })
+      });
+      if (res.error) addLog(`❌ Error: ${res.error}`, true);
+      else {
+        addLog(`✅ Trade recorded: profit ${profitJMD.toFixed(2)} JMD → user gain ${res.userGain.toFixed(2)} JMD, owner fee ${res.fee.toFixed(2)} JMD`);
+        refreshBalance();
+      }
+    } catch(e) { addLog(`❌ Network error: ${e.message}`, true); }
+  }
+
+  async function simulateTrade() {
+    if (!currentPrice) { addLog("Price not loaded yet, try again.", true); return; }
+    const amountUSD = parseFloat(document.getElementById('tradeAmount').value);
+    if (isNaN(amountUSD) || amountUSD <= 0) { addLog("Enter a valid amount (USD)", true); return; }
+    const cryptoAmount = amountUSD / currentPrice;
+    const minCrypto = { BTC: 0.0001, ETH: 0.001, SOL: 0.01 }[currentPair];
+    if (cryptoAmount < minCrypto) {
+      addLog(`Minimum trade: ${minCrypto} ${currentPair} (≈ $${(minCrypto * currentPrice).toFixed(2)})`, true);
+      return;
+    }
+    const profit = amountUSD * (Math.random() * 0.1 + 0.02); // 2‑12% profit
+    const feePercent = 3 + Math.random() * 7; // 3‑10%
+    addLog(`📈 Simulated trade: bought ${cryptoAmount.toFixed(8)} ${currentPair} for $${amountUSD.toFixed(2)}, profit $${profit.toFixed(2)}`);
+    await reportTrade(profit, feePercent);
+  }
+
+  // Trading UI event listeners (set up after login)
+  function initTradingUI() {
+    document.getElementById('pairSelect').addEventListener('change', (e) => {
+      currentPair = e.target.value;
+      priceHistory = [];
+      if (priceChart) { priceChart.destroy(); priceChart = null; }
+      fetchPrice();
+      addLog(`Switched to ${currentPair}/USD`);
+    });
+    document.getElementById('buyBtn').addEventListener('click', () => simulateTrade());
+    document.getElementById('sellBtn').addEventListener('click', () => simulateTrade());
     fetchPrice();
     setInterval(fetchPrice, 5000);
-    updateUI();
-    addLog("Bot started. Use Buy/Sell to simulate trades.");
+    refreshBalance();
+    addLog("Auto‑Trader ready. Enter an amount (USD) and click Buy or Sell to simulate a trade.");
+  }
+
+  // Google Sign-In callback (global)
+  window.handleGoogleCredential = function(response) {
+    // Send token to backend
+    fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.user) location.reload();
+      else alert('Google login failed');
+    })
+    .catch(err => alert('Error: ' + err.message));
+  };
+
+  // Firebase Auth state listener (for email/password login)
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      // Sync with backend
+      const backendRes = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, uid: user.uid })
+      });
+      if (backendRes.ok) {
+        location.reload();
+      } else {
+        // create account if not exists
+        await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user.email, name: user.displayName, uid: user.uid })
+        });
+        location.reload();
+      }
+    }
+  });
+
+  // Email login/signup
+  document.getElementById('emailLoginBtn').addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail').value;
+    const pwd = document.getElementById('loginPassword').value;
+    try {
+      await auth.signInWithEmailAndPassword(email, pwd);
+    } catch(e) {
+      document.getElementById('authMsg').innerText = e.message;
+    }
+  });
+  document.getElementById('emailSignupBtn').addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail').value;
+    const pwd = document.getElementById('loginPassword').value;
+    const name = prompt('Your name:');
+    if (!name) return;
+    try {
+      const cred = await auth.createUserWithEmailAndPassword(email, pwd);
+      await cred.user.updateProfile({ displayName: name });
+    } catch(e) {
+      document.getElementById('authMsg').innerText = e.message;
+    }
+  });
+
+  // Apple/Telegram placeholder
+  document.getElementById('appleLoginBtn')?.addEventListener('click', () => alert('Apple login coming soon'));
+  document.getElementById('telegramLoginBtn')?.addEventListener('click', () => alert('Telegram login coming soon'));
+
+  // Check if already authenticated (via backend session)
+  async function checkInitialAuth() {
+    const meRes = await fetch('/api/me', { credentials: 'include' });
+    const user = await meRes.json();
+    if (user.id) {
+      document.getElementById('loginCard').style.display = 'none';
+      document.getElementById('traderContent').style.display = 'block';
+      initTradingUI();
+    } else {
+      document.getElementById('loginCard').style.display = 'block';
+      document.getElementById('traderContent').style.display = 'none';
+    }
+  }
+  checkInitialAuth();
 </script>
 </body>
 </html>
