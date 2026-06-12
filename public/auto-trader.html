@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OnRoadNow – Auto‑Trader</title>
+  <!-- Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -21,39 +26,96 @@
     .log { background: #0f172a; color: #94a3b8; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; }
     .log p { margin: 0.2rem 0; }
     .flex { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-    input, select { padding: 0.5rem 1rem; border-radius: 2rem; border: 1px solid #cbd5e1; flex: 1; }
+    input { padding: 0.5rem 1rem; border-radius: 2rem; border: 1px solid #cbd5e1; flex: 1; }
     .nav { margin-bottom: 2rem; }
     .nav a { margin-right: 1rem; text-decoration: none; color: #2563eb; }
-    .loading { text-align: center; padding: 2rem; }
+    .login-card { max-width: 500px; margin: 0 auto; text-align: center; }
+    .extra-login { display: flex; gap: 0.5rem; justify-content: center; margin: 1rem 0; }
   </style>
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="container">
-  <div class="nav">
-    <a href="/">← Home</a> | <a href="/auto-trader">Auto‑Trader</a>
+  <div class="nav"><a href="/">← Home</a> | <a href="/auto-trader">Auto‑Trader</a></div>
+
+  <div id="loginCard" class="card login-card">
+    <h1>🔐 Login to Trade</h1>
+    <div id="g_id_onload"
+         data-client_id="134628093591-61nk4mneo6d1o6of5da3e3fijgtd5dd0.apps.googleusercontent.com"
+         data-callback="handleGoogleCredential"
+         data-auto_prompt="false"></div>
+    <div class="g_id_signin" data-type="standard" data-size="large"></div>
+    <div class="extra-login">
+      <button id="appleLoginBtn" class="btn" style="background:#000;"><i class="fab fa-apple"></i> Apple (soon)</button>
+      <button id="telegramLoginBtn" class="btn" style="background:#0088cc;"><i class="fab fa-telegram"></i> Telegram (soon)</button>
+    </div>
+    <div style="margin:1rem 0; text-align:center;">or</div>
+    <div class="flex">
+      <input type="email" id="loginEmail" placeholder="Email">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <button id="emailLoginBtn" class="btn">Login</button>
+      <button id="emailSignupBtn" class="btn btn-outline">Signup</button>
+    </div>
+    <p id="authMsg" style="margin-top:1rem; color:red;"></p>
   </div>
-  <div id="mainContent">
-    <div class="loading">Checking authentication...</div>
+
+  <div id="traderContent" style="display: none;">
+    <h1>🤖 OnRoadNow Auto‑Trader</h1>
+    <div class="grid-2">
+      <div class="card">
+        <h3>📊 Market Data</h3>
+        <div class="flex" style="justify-content: space-between;">
+          <select id="pairSelect" class="btn-outline" style="padding:0.4rem 0.8rem;">
+            <option value="BTCUSDT">BTC/USD</option>
+            <option value="ETHUSDT">ETH/USD</option>
+            <option value="SOLUSDT">SOL/USD</option>
+            <option value="DOGEUSDT">DOGE/USD</option>
+            <option value="BNBUSDT">BNB/USD</option>
+            <option value="XRPUSDT">XRP/USD</option>
+          </select>
+          <span id="price" class="price">— USD</span>
+        </div>
+        <canvas id="priceChart" width="400" height="200" style="margin-top: 1rem;"></canvas>
+      </div>
+      <div class="card">
+        <h3>💰 Your Trading Balance</h3>
+        <div class="wallet">
+          <div><strong>Profit (after fees):</strong> <span id="userProfit">0.00</span> JMD</div>
+          <div><strong>Platform fees earned:</strong> <span id="ownerFees">0.00</span> JMD</div>
+        </div>
+        <div class="flex">
+          <input type="number" id="tradeAmount" placeholder="Amount (USD)" step="any">
+          <button id="buyBtn" class="btn btn-buy">Buy</button>
+          <button id="sellBtn" class="btn btn-sell">Sell</button>
+        </div>
+        <div style="font-size:0.8rem; margin-top:0.5rem;">💡 Paper trading – real market prices, virtual profit. Fee: 3‑10% deducted from profit.</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📜 Transaction Log</h3>
+      <div id="logArea" class="log"></div>
+    </div>
   </div>
 </div>
+
 <script>
-  async function checkAuth() {
-    try {
-      const res = await fetch('/api/me', { credentials: 'include' });
-      const user = await res.json();
-      if (!user.id) {
-        // Not logged in – redirect to main page with return URL
-        window.location.href = '/?redirect=/auto-trader';
-        return;
-      }
-      // Logged in – load the trader interface
-      loadTrader(user);
-    } catch (err) {
-      console.error(err);
-      document.getElementById('mainContent').innerHTML = `<div class="card">Error checking login. Please <a href="/">log in</a>.</div>`;
-    }
-  }
+  // Firebase config (same as main site)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBrldf3h28e9_Dwjrp2zZL21EJzxp_1MSk",
+    authDomain: "onroadnow-3aabb.firebaseapp.com",
+    projectId: "onroadnow-3aabb",
+    storageBucket: "onroadnow-3aabb.appspot.com",
+    appId: "1:134628093591:web:xxx"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  let currentUser = null;
+  let currentPair = "BTCUSDT";
+  let currentPrice = 0;
+  let priceHistory = [];
+  let priceChart = null;
 
   async function apiCall(endpoint, options = {}) {
     const res = await fetch(`/api/auto-trader/${endpoint}`, {
@@ -61,15 +123,9 @@
       credentials: 'include',
       headers: { 'Content-Type': 'application/json', ...options.headers }
     });
+    if (res.status === 401) throw new Error('Unauthorized');
     return res.json();
   }
-
-  let currentPair = "BTC";
-  let currentPrice = 0;
-  let priceHistory = [];
-  let priceChart = null;
-  let traderRunning = false;
-  let tradeInterval = null;
 
   function addLog(msg, isError = false) {
     const logDiv = document.getElementById('logArea');
@@ -81,22 +137,20 @@
     logDiv.scrollTop = logDiv.scrollHeight;
   }
 
-  async function refreshStatus() {
+  async function refreshBalance() {
     try {
       const state = await apiCall('status');
-      document.getElementById('userBalance').innerText = (state.balance || 0).toFixed(2);
       document.getElementById('userProfit').innerText = (state.userProfit || 0).toFixed(2);
       document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2);
-      return state.running;
-    } catch(e) { addLog(`Status error: ${e.message}`, true); return false; }
+    } catch(e) { console.error(e); }
   }
 
   async function fetchPrice() {
-    const id = { BTC: 'bitcoin', ETH: 'ethereum', SOL: 'solana' }[currentPair];
     try {
-      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
+      const url = `https://api.binance.com/api/v3/ticker/price?symbol=${currentPair}`;
+      const res = await fetch(url);
       const data = await res.json();
-      currentPrice = data[id]?.usd;
+      currentPrice = parseFloat(data.price);
       if (currentPrice) {
         document.getElementById('price').innerText = `${currentPrice.toFixed(2)} USD`;
         priceHistory.push(currentPrice);
@@ -108,12 +162,14 @@
           const ctx = document.getElementById('priceChart').getContext('2d');
           priceChart = new Chart(ctx, {
             type: 'line',
-            data: { labels: priceHistory.map((_, i) => i), datasets: [{ label: `${currentPair}/USD`, data: priceHistory, borderColor: '#facc15', fill: false }] },
+            data: { labels: priceHistory.map((_, i) => i), datasets: [{ label: currentPair, data: priceHistory, borderColor: '#facc15', fill: false }] },
             options: { responsive: true, maintainAspectRatio: true }
           });
         }
       }
-    } catch(e) { addLog(`Price fetch error: ${e.message}`, true); }
+    } catch(e) {
+      addLog(`Price fetch error: ${e.message}`, true);
+    }
   }
 
   async function reportTrade(profitJMD, feePercent) {
@@ -125,161 +181,100 @@
       if (res.error) addLog(`❌ Error: ${res.error}`, true);
       else {
         addLog(`✅ Trade recorded: profit ${profitJMD.toFixed(2)} JMD → user gain ${res.userGain.toFixed(2)} JMD, owner fee ${res.fee.toFixed(2)} JMD`);
-        refreshStatus();
+        refreshBalance();
       }
     } catch(e) { addLog(`❌ Network error: ${e.message}`, true); }
   }
 
-  async function simulateTrade() {
+  async function executeTrade(type) {
     if (!currentPrice) { addLog("Price not loaded yet, try again.", true); return; }
     const amountUSD = parseFloat(document.getElementById('tradeAmount').value);
     if (isNaN(amountUSD) || amountUSD <= 0) { addLog("Enter a valid amount (USD)", true); return; }
     const cryptoAmount = amountUSD / currentPrice;
-    const minCrypto = { BTC: 0.0001, ETH: 0.001, SOL: 0.01 }[currentPair];
-    if (cryptoAmount < minCrypto) {
-      addLog(`Minimum trade: ${minCrypto} ${currentPair} (≈ $${(minCrypto * currentPrice).toFixed(2)})`, true);
-      return;
-    }
-    const profit = amountUSD * (Math.random() * 0.1 + 0.02); // 2‑12% profit
-    const feePercent = 3 + Math.random() * 7; // 3‑10%
-    addLog(`📈 Simulated trade: bought ${cryptoAmount.toFixed(8)} ${currentPair} for $${amountUSD.toFixed(2)}, profit $${profit.toFixed(2)}`);
+    // Simulated profit: random between 2% and 12% of the trade value
+    const profit = amountUSD * (Math.random() * 0.10 + 0.02);
+    const feePercent = 3 + Math.random() * 7;
+    addLog(`📈 ${type.toUpperCase()} ${cryptoAmount.toFixed(8)} ${currentPair.replace('USDT','')} for $${amountUSD.toFixed(2)} → estimated profit $${profit.toFixed(2)}`);
     await reportTrade(profit, feePercent);
   }
 
-  async function startTrading() {
-    if (tradeInterval) clearInterval(tradeInterval);
-    await apiCall('start', { method: 'POST' });
-    addLog("🚀 Auto‑Trader started (simulated every 30 seconds)");
-    tradeInterval = setInterval(simulateTrade, 30000);
-    document.getElementById('statusText').innerText = 'Active';
-  }
-
-  async function stopTrading() {
-    if (tradeInterval) clearInterval(tradeInterval);
-    tradeInterval = null;
-    await apiCall('stop', { method: 'POST' });
-    addLog("⏹️ Auto‑Trader stopped");
-    document.getElementById('statusText').innerText = 'Stopped';
-  }
-
-  async function depositFunds() {
-    const amount = parseFloat(document.getElementById('depositAmount').value);
-    if (isNaN(amount) || amount <= 0) {
-      addLog("Enter a valid deposit amount (JMD)", true);
-      return;
-    }
-    const res = await apiCall('add-funds', {
-      method: 'POST',
-      body: JSON.stringify({ amount })
-    });
-    if (res.error) addLog(`Deposit error: ${res.error}`, true);
-    else {
-      addLog(`✅ Deposited ${amount} JMD. New balance: ${res.newBalance.toFixed(2)} JMD`);
-      refreshStatus();
-    }
-  }
-
-  function loadTrader(user) {
-    const html = `
-      <div class="flex" style="justify-content: space-between; align-items: center;">
-        <h1>🤖 OnRoadNow Auto‑Trader</h1>
-        <div><span>👋 ${user.email}</span> <button id="logoutBtn" class="btn btn-outline">Logout</button></div>
-      </div>
-      <div class="card">
-        <h3>👤 Your Profile & Payment Info</h3>
-        <div class="flex">
-          <input type="text" id="walletAddress" placeholder="Solana / Crypto wallet address">
-          <input type="text" id="paypalEmail" placeholder="PayPal email for withdrawals">
-        </div>
-        <div class="flex" style="margin-top: 0.5rem;">
-          <input type="number" id="depositAmount" placeholder="Amount (JMD)" step="any">
-          <button id="depositBtn" class="btn">💎 Deposit (simulated)</button>
-        </div>
-        <button id="saveProfileBtn" class="btn btn-outline">Save Payment Info</button>
-        <div id="profileMsg" style="margin-top:0.5rem; font-size:0.8rem;"></div>
-      </div>
-      <div class="grid-2">
-        <div class="card">
-          <h3>📊 Market Data</h3>
-          <div class="flex" style="justify-content: space-between;">
-            <select id="pairSelect" class="btn-outline" style="padding:0.4rem 0.8rem;">
-              <option value="BTC">BTC/USD</option>
-              <option value="ETH">ETH/USD</option>
-              <option value="SOL">SOL/USD</option>
-            </select>
-            <span id="price" class="price">— USD</span>
-          </div>
-          <canvas id="priceChart" width="400" height="200" style="margin-top: 1rem;"></canvas>
-        </div>
-        <div class="card">
-          <h3>💰 Your Trading Balance</h3>
-          <div class="wallet">
-            <div><strong>Balance:</strong> <span id="userBalance">0.00</span> JMD</div>
-            <div><strong>Profit (after fees):</strong> <span id="userProfit">0.00</span> JMD</div>
-            <div><strong>Platform fees earned:</strong> <span id="ownerFees">0.00</span> JMD</div>
-          </div>
-          <div class="flex">
-            <input type="number" id="tradeAmount" placeholder="Amount (USD)" step="any">
-            <button id="buyBtn" class="btn btn-buy">Buy</button>
-            <button id="sellBtn" class="btn btn-sell">Sell</button>
-          </div>
-          <div class="flex" style="justify-content: space-between; margin-top: 0.5rem;">
-            <span><strong>Status:</strong> <span id="statusText">Stopped</span></span>
-            <div>
-              <button id="startBtn" class="btn">Start Trading</button>
-              <button id="stopBtn" class="btn btn-outline">Stop Trading</button>
-            </div>
-          </div>
-          <div style="font-size:0.8rem; margin-top:0.5rem;">💡 Micro trades allowed (min $1). Profit fee: 3‑10% deducted automatically.</div>
-        </div>
-      </div>
-      <div class="card">
-        <h3>📜 Transaction Log</h3>
-        <div id="logArea" class="log"></div>
-      </div>
-    `;
-    document.getElementById('mainContent').innerHTML = html;
-
-    // Attach event listeners after DOM update
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-      window.location.href = '/';
-    });
-    document.getElementById('pairSelect').addEventListener('change', (e) => {
-      currentPair = e.target.value;
-      priceHistory = [];
-      if (priceChart) { priceChart.destroy(); priceChart = null; }
-      fetchPrice();
-      addLog(`Switched to ${currentPair}/USD`);
-    });
-    document.getElementById('buyBtn').addEventListener('click', () => simulateTrade());
-    document.getElementById('sellBtn').addEventListener('click', () => simulateTrade());
-    document.getElementById('startBtn').addEventListener('click', startTrading);
-    document.getElementById('stopBtn').addEventListener('click', stopTrading);
-    document.getElementById('depositBtn').addEventListener('click', depositFunds);
-    document.getElementById('saveProfileBtn').addEventListener('click', async () => {
-      const wallet = document.getElementById('walletAddress').value;
-      const paypal = document.getElementById('paypalEmail').value;
-      // Store in localStorage or send to backend – for now just alert
-      localStorage.setItem('trader_wallet', wallet);
-      localStorage.setItem('trader_paypal', paypal);
-      document.getElementById('profileMsg').innerText = 'Payment info saved locally (backend coming soon)';
-      setTimeout(() => document.getElementById('profileMsg').innerText = '', 2000);
-    });
-
-    // Load saved payment info
-    const savedWallet = localStorage.getItem('trader_wallet');
-    const savedPaypal = localStorage.getItem('trader_paypal');
-    if (savedWallet) document.getElementById('walletAddress').value = savedWallet;
-    if (savedPaypal) document.getElementById('paypalEmail').value = savedPaypal;
-
+  // UI event handlers
+  document.getElementById('pairSelect').addEventListener('change', (e) => {
+    currentPair = e.target.value;
+    priceHistory = [];
+    if (priceChart) { priceChart.destroy(); priceChart = null; }
     fetchPrice();
-    setInterval(fetchPrice, 5000);
-    refreshStatus();
-    addLog("Auto‑Trader ready. Use Buy/Sell to simulate trades or Start Trading for auto mode.");
-  }
+    addLog(`Switched to ${currentPair}`);
+  });
+  document.getElementById('buyBtn').addEventListener('click', () => executeTrade('buy'));
+  document.getElementById('sellBtn').addEventListener('click', () => executeTrade('sell'));
 
-  checkAuth();
+  // Login handlers (same as before)
+  window.handleGoogleCredential = function(response) {
+    fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => { if (data.user) location.reload(); else alert('Google login failed'); })
+    .catch(err => alert('Error: ' + err.message));
+  };
+
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      const backendRes = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, uid: user.uid })
+      });
+      if (backendRes.ok) location.reload();
+      else {
+        await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: user.email, name: user.displayName, uid: user.uid })
+        });
+        location.reload();
+      }
+    }
+  });
+
+  document.getElementById('emailLoginBtn').addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail').value;
+    const pwd = document.getElementById('loginPassword').value;
+    try { await auth.signInWithEmailAndPassword(email, pwd); }
+    catch(e) { document.getElementById('authMsg').innerText = e.message; }
+  });
+  document.getElementById('emailSignupBtn').addEventListener('click', async () => {
+    const email = document.getElementById('loginEmail').value;
+    const pwd = document.getElementById('loginPassword').value;
+    const name = prompt('Your name:');
+    if (!name) return;
+    try {
+      const cred = await auth.createUserWithEmailAndPassword(email, pwd);
+      await cred.user.updateProfile({ displayName: name });
+    } catch(e) { document.getElementById('authMsg').innerText = e.message; }
+  });
+  document.getElementById('appleLoginBtn')?.addEventListener('click', () => alert('Apple login coming soon'));
+  document.getElementById('telegramLoginBtn')?.addEventListener('click', () => alert('Telegram login coming soon'));
+
+  async function checkInitialAuth() {
+    const meRes = await fetch('/api/me', { credentials: 'include' });
+    const user = await meRes.json();
+    if (user.id) {
+      document.getElementById('loginCard').style.display = 'none';
+      document.getElementById('traderContent').style.display = 'block';
+      fetchPrice();
+      setInterval(fetchPrice, 5000);
+      refreshBalance();
+      addLog("Auto‑Trader ready. Enter USD amount and click Buy or Sell to trade (paper trading, profit reported with fee).");
+    } else {
+      document.getElementById('loginCard').style.display = 'block';
+      document.getElementById('traderContent').style.display = 'none';
+    }
+  }
+  checkInitialAuth();
 </script>
 </body>
 </html>
