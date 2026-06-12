@@ -1,379 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>OnRoadNow – Micro Trading Bot</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      padding: 1rem;
-    }
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
-      gap: 1rem;
-    }
-    h1 {
-      font-size: 1.8rem;
-      background: linear-gradient(135deg, #38bdf8, #818cf8);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .badge {
-      background: #1e293b;
-      padding: 0.3rem 0.8rem;
-      border-radius: 2rem;
-      font-size: 0.8rem;
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    .card {
-      background: #1e293b;
-      border-radius: 1.5rem;
-      padding: 1.2rem;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
-    }
-    .card-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      border-left: 3px solid #3b82f6;
-      padding-left: 0.75rem;
-    }
-    .price {
-      font-size: 2rem;
-      font-weight: 800;
-      color: #facc15;
-    }
-    .change-positive { color: #10b981; }
-    .change-negative { color: #ef4444; }
-    .wallet-balance {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin: 0.5rem 0;
-    }
-    .trade-control {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      margin: 1rem 0;
-    }
-    .trade-control input {
-      flex: 1;
-      background: #0f172a;
-      border: 1px solid #334155;
-      color: white;
-      padding: 0.6rem 1rem;
-      border-radius: 2rem;
-      font-size: 1rem;
-    }
-    .btn {
-      background: #3b82f6;
-      border: none;
-      padding: 0.6rem 1.2rem;
-      border-radius: 2rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-      color: white;
-    }
-    .btn-buy { background: #10b981; }
-    .btn-buy:hover { background: #059669; }
-    .btn-sell { background: #ef4444; }
-    .btn-sell:hover { background: #dc2626; }
-    .btn-outline {
-      background: transparent;
-      border: 1px solid #3b82f6;
-      color: #3b82f6;
-    }
-    .log {
-      background: #0f172a;
-      border-radius: 1rem;
-      padding: 1rem;
-      max-height: 300px;
-      overflow-y: auto;
-      font-family: monospace;
-      font-size: 0.8rem;
-    }
-    .log p {
-      margin: 0.3rem 0;
-      border-left: 2px solid #3b82f6;
-      padding-left: 0.5rem;
-    }
-    .warning {
-      background: #fef9c3;
-      color: #854d0e;
-      padding: 0.8rem;
-      border-radius: 1rem;
-      margin-bottom: 1rem;
-      font-size: 0.8rem;
-    }
-    .tutorial {
-      background: #1e293b;
-      border-radius: 1rem;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      font-size: 0.85rem;
-      border-left: 4px solid #3b82f6;
-    }
-    @media (max-width: 640px) {
-      .price { font-size: 1.5rem; }
-      .wallet-balance { font-size: 1.2rem; }
-    }
+    body { font-family: Arial; background: #0f172a; color: #e2e8f0; padding: 2rem; }
+    .card { background: #1e293b; border-radius: 1rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+    button { background: #3b82f6; border: none; padding: 0.5rem 1rem; border-radius: 2rem; color: white; cursor: pointer; margin: 0.5rem; }
+    input { padding: 0.5rem; border-radius: 1rem; border: none; margin: 0.5rem; }
+    .price { font-size: 2rem; color: #facc15; }
+    .log { background: #0f172a; padding: 1rem; border-radius: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; }
   </style>
-  <!-- Chart.js for simple price chart -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
-<div class="container">
-  <div class="header">
-    <h1>📈 OnRoadNow Micro Trader</h1>
-    <div class="badge">🔐 Demo Mode – No real funds</div>
+<div class="card">
+  <h1>🤖 Micro Trading Bot (Demo)</h1>
+  <p>Virtual wallet – no real money. Live price feeds from CoinGecko.</p>
+  <div id="status">Loading price...</div>
+  <div class="price" id="price">—</div>
+  <div>
+    <label>Pair:</label>
+    <select id="pair">
+      <option value="bitcoin">BTC/USD</option>
+      <option value="ethereum">ETH/USD</option>
+      <option value="solana">SOL/USD</option>
+    </select>
   </div>
-
-  <div class="warning">
-    ⚠️ <strong>Disclaimer:</strong> This is a simulated trading bot. No real money is used. Prices are fetched from live public APIs but orders are virtual. Use at your own risk. Always do your own research before real trading.
+  <div>
+    <input type="number" id="amount" placeholder="Amount (USD)" step="any">
+    <button id="buyBtn">Buy</button>
+    <button id="sellBtn">Sell</button>
   </div>
-
-  <div class="tutorial">
-    💡 <strong>How to use:</strong> Choose a trading pair (BTC/USD, ETH/USD, or SOL/USD). Enter an amount in USD or crypto units, then click Buy or Sell. Your virtual balance will update. The chart shows the last 20 price points. Use Micro Trades (as low as 0.0001 BTC or 1 USD) to learn.
-  </div>
-
-  <div class="grid-2">
-    <!-- Price & Chart Card -->
-    <div class="card">
-      <div class="card-title">📊 Market Data</div>
-      <div>
-        <label>Pair:</label>
-        <select id="pairSelect" class="btn-outline" style="margin-left: 0.5rem; padding: 0.3rem 0.8rem;">
-          <option value="BTC">BTC/USD</option>
-          <option value="ETH">ETH/USD</option>
-          <option value="SOL">SOL/USD</option>
-        </select>
-      </div>
-      <div style="margin-top: 1rem;">
-        <span class="price" id="currentPrice">—</span>
-        <span id="priceChange" style="margin-left: 1rem; font-size: 0.9rem;"></span>
-      </div>
-      <canvas id="priceChart" width="400" height="200" style="margin-top: 1rem; max-height: 200px;"></canvas>
-    </div>
-
-    <!-- Wallet & Trading Card -->
-    <div class="card">
-      <div class="card-title">💰 Virtual Wallet</div>
-      <div>
-        <div>💵 USD Balance: <span id="usdBalance" class="wallet-balance">10000.00</span></div>
-        <div id="cryptoBalanceDisplay">₿ BTC Balance: <span id="btcBalance">0.0000</span></div>
-      </div>
-      <div class="trade-control">
-        <input type="number" id="tradeAmount" placeholder="Amount (USD or crypto)" step="any">
-        <button id="buyBtn" class="btn btn-buy">Buy</button>
-        <button id="sellBtn" class="btn btn-sell">Sell</button>
-      </div>
-      <div style="font-size: 0.8rem; margin-top: 0.5rem;">
-        💡 Micro trades allowed (min 1 USD / 0.0001 BTC / 0.001 ETH / 0.01 SOL)
-      </div>
-    </div>
-  </div>
-
-  <!-- Transaction Log -->
-  <div class="card">
-    <div class="card-title">📜 Transaction Log</div>
-    <div id="logArea" class="log">
-      <p>✅ Ready. Select a pair and start trading.</p>
-    </div>
-  </div>
+  <div>💰 USD: <span id="usd">10000.00</span></div>
+  <div id="cryptoBalance">₿ BTC: 0.0000</div>
+  <div class="log" id="log"></div>
 </div>
-
 <script>
-  // ---------- Wallet state ----------
-  let wallet = {
-    USD: 10000.0,
-    BTC: 0.0,
-    ETH: 0.0,
-    SOL: 0.0
-  };
-
-  let currentPair = "BTC";
+  let wallet = { USD: 10000, BTC: 0, ETH: 0, SOL: 0 };
   let currentPrice = 0;
-  let priceHistory = [];
-  let priceChart = null;
+  let currentPair = 'bitcoin';
 
-  // Helper to add log messages
-  function addLog(msg, isError = false) {
-    const logDiv = document.getElementById('logArea');
-    const p = document.createElement('p');
-    p.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    if (isError) p.style.borderLeftColor = "#ef4444";
+  function addLog(msg) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
     logDiv.appendChild(p);
     logDiv.scrollTop = logDiv.scrollHeight;
-    // keep only last 100 messages
-    while (logDiv.children.length > 100) logDiv.removeChild(logDiv.firstChild);
   }
 
-  // Update UI balances
-  function updateBalancesUI() {
-    document.getElementById('usdBalance').innerText = wallet.USD.toFixed(2);
-    if (currentPair === "BTC") document.getElementById('cryptoBalanceDisplay').innerHTML = `₿ BTC Balance: <span id="btcBalance">${wallet.BTC.toFixed(8)}</span>`;
-    else if (currentPair === "ETH") document.getElementById('cryptoBalanceDisplay').innerHTML = `⟠ ETH Balance: <span id="ethBalance">${wallet.ETH.toFixed(6)}</span>`;
-    else document.getElementById('cryptoBalanceDisplay').innerHTML = `◎ SOL Balance: <span id="solBalance">${wallet.SOL.toFixed(4)}</span>`;
-  }
-
-  // Fetch live price from CoinGecko
-  async function fetchPrice(pair) {
-    const mapping = { BTC: "bitcoin", ETH: "ethereum", SOL: "solana" };
-    const id = mapping[pair];
+  async function fetchPrice() {
     try {
-      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd&include_24hr_change=true`);
+      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${currentPair}&vs_currencies=usd`);
       const data = await res.json();
-      const price = data[id]?.usd;
-      const change24h = data[id]?.usd_24h_change || 0;
-      if (price) {
-        currentPrice = price;
-        document.getElementById('currentPrice').innerText = `$${price.toFixed(2)}`;
-        const changeElem = document.getElementById('priceChange');
-        changeElem.innerText = `24h: ${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%`;
-        changeElem.className = change24h >= 0 ? 'change-positive' : 'change-negative';
-        // update chart
-        priceHistory.push(price);
-        if (priceHistory.length > 30) priceHistory.shift();
-        if (priceChart) {
-          priceChart.data.datasets[0].data = priceHistory;
-          priceChart.update();
-        } else {
-          // initial chart creation
-          const ctx = document.getElementById('priceChart').getContext('2d');
-          priceChart = new Chart(ctx, {
-            type: 'line',
-            data: { labels: priceHistory.map((_, i) => i), datasets: [{ label: `${pair}/USD`, data: priceHistory, borderColor: '#facc15', fill: false, tension: 0.1 }] },
-            options: { responsive: true, maintainAspectRatio: true }
-          });
-        }
-        return price;
+      currentPrice = data[currentPair]?.usd;
+      if (currentPrice) {
+        document.getElementById('price').innerText = `$${currentPrice.toFixed(2)}`;
+        document.getElementById('status').innerHTML = '✅ Live price';
       } else {
-        addLog(`⚠️ Error fetching price for ${pair}`, true);
-        return null;
+        document.getElementById('status').innerHTML = '⚠️ Price error';
       }
     } catch (err) {
-      addLog(`❌ Network error: ${err.message}`, true);
-      return null;
+      document.getElementById('status').innerHTML = '❌ Network error';
     }
   }
 
-  // Execute a trade (buy or sell)
-  async function executeTrade(type, amount, amountIsUSD = true) {
-    if (!currentPrice) {
-      addLog("❌ Price not loaded. Please wait.", true);
-      return;
-    }
-    let cryptoAmount, usdAmount;
-    if (amountIsUSD) {
-      usdAmount = amount;
-      cryptoAmount = usdAmount / currentPrice;
-    } else {
-      cryptoAmount = amount;
-      usdAmount = cryptoAmount * currentPrice;
-    }
-    // Minimum trade checks
-    const minCrypto = { BTC: 0.0001, ETH: 0.001, SOL: 0.01 };
-    const minUSD = 1;
-    if (usdAmount < minUSD) {
-      addLog(`❌ Minimum trade is $${minUSD} USD`, true);
-      return;
-    }
-    if (cryptoAmount < minCrypto[currentPair]) {
-      addLog(`❌ Minimum crypto amount is ${minCrypto[currentPair]} ${currentPair}`, true);
-      return;
-    }
+  function updateUI() {
+    document.getElementById('usd').innerText = wallet.USD.toFixed(2);
+    if (currentPair === 'bitcoin') document.getElementById('cryptoBalance').innerHTML = `₿ BTC: ${wallet.BTC.toFixed(8)}`;
+    else if (currentPair === 'ethereum') document.getElementById('cryptoBalance').innerHTML = `⟠ ETH: ${wallet.ETH.toFixed(6)}`;
+    else document.getElementById('cryptoBalance').innerHTML = `◎ SOL: ${wallet.SOL.toFixed(4)}`;
+  }
 
+  async function executeTrade(type, usdAmount) {
+    if (!currentPrice) { addLog('❌ Price not loaded'); return; }
+    const cryptoAmount = usdAmount / currentPrice;
     if (type === 'buy') {
-      if (wallet.USD < usdAmount) {
-        addLog(`❌ Insufficient USD balance. Need $${usdAmount.toFixed(2)}`, true);
-        return;
-      }
+      if (wallet.USD < usdAmount) { addLog(`❌ Insufficient USD`); return; }
       wallet.USD -= usdAmount;
-      if (currentPair === "BTC") wallet.BTC += cryptoAmount;
-      else if (currentPair === "ETH") wallet.ETH += cryptoAmount;
+      if (currentPair === 'bitcoin') wallet.BTC += cryptoAmount;
+      else if (currentPair === 'ethereum') wallet.ETH += cryptoAmount;
       else wallet.SOL += cryptoAmount;
-      addLog(`✅ BOUGHT ${cryptoAmount.toFixed(8)} ${currentPair} for $${usdAmount.toFixed(2)} (price $${currentPrice.toFixed(2)})`);
-    } else if (type === 'sell') {
-      let currentCryptoBalance = 0;
-      if (currentPair === "BTC") currentCryptoBalance = wallet.BTC;
-      else if (currentPair === "ETH") currentCryptoBalance = wallet.ETH;
-      else currentCryptoBalance = wallet.SOL;
-      if (currentCryptoBalance < cryptoAmount) {
-        addLog(`❌ Insufficient ${currentPair} balance. Need ${cryptoAmount.toFixed(8)}`, true);
-        return;
-      }
-      if (currentPair === "BTC") wallet.BTC -= cryptoAmount;
-      else if (currentPair === "ETH") wallet.ETH -= cryptoAmount;
+      addLog(`✅ Bought ${cryptoAmount.toFixed(8)} ${currentPair.toUpperCase()} for $${usdAmount.toFixed(2)}`);
+    } else {
+      let balance = 0;
+      if (currentPair === 'bitcoin') balance = wallet.BTC;
+      else if (currentPair === 'ethereum') balance = wallet.ETH;
+      else balance = wallet.SOL;
+      if (balance < cryptoAmount) { addLog(`❌ Insufficient ${currentPair.toUpperCase()}`); return; }
+      if (currentPair === 'bitcoin') wallet.BTC -= cryptoAmount;
+      else if (currentPair === 'ethereum') wallet.ETH -= cryptoAmount;
       else wallet.SOL -= cryptoAmount;
       wallet.USD += usdAmount;
-      addLog(`✅ SOLD ${cryptoAmount.toFixed(8)} ${currentPair} for $${usdAmount.toFixed(2)} (price $${currentPrice.toFixed(2)})`);
+      addLog(`✅ Sold ${cryptoAmount.toFixed(8)} ${currentPair.toUpperCase()} for $${usdAmount.toFixed(2)}`);
     }
-    updateBalancesUI();
+    updateUI();
   }
 
-  // UI event handlers
-  document.getElementById('buyBtn').addEventListener('click', () => {
-    const amountInput = document.getElementById('tradeAmount').value;
-    if (!amountInput) return addLog("❌ Enter an amount", true);
-    const amount = parseFloat(amountInput);
-    if (isNaN(amount) || amount <= 0) return addLog("❌ Invalid amount", true);
-    // By default, amount is interpreted as USD for simplicity. User can also enter crypto by prefixing?
-    // We'll assume USD. For crypto, we could add a checkbox, but for simplicity we use USD.
-    executeTrade('buy', amount, true);
-  });
-
-  document.getElementById('sellBtn').addEventListener('click', () => {
-    const amountInput = document.getElementById('tradeAmount').value;
-    if (!amountInput) return addLog("❌ Enter an amount", true);
-    const amount = parseFloat(amountInput);
-    if (isNaN(amount) || amount <= 0) return addLog("❌ Invalid amount", true);
-    executeTrade('sell', amount, true);
-  });
-
-  document.getElementById('pairSelect').addEventListener('change', async (e) => {
+  document.getElementById('buyBtn').onclick = () => {
+    const amount = parseFloat(document.getElementById('amount').value);
+    if (isNaN(amount) || amount <= 0) return addLog('❌ Invalid amount');
+    executeTrade('buy', amount);
+  };
+  document.getElementById('sellBtn').onclick = () => {
+    const amount = parseFloat(document.getElementById('amount').value);
+    if (isNaN(amount) || amount <= 0) return addLog('❌ Invalid amount');
+    executeTrade('sell', amount);
+  };
+  document.getElementById('pair').onchange = (e) => {
     currentPair = e.target.value;
-    // reset chart
-    priceHistory = [];
-    if (priceChart) {
-      priceChart.destroy();
-      priceChart = null;
-    }
-    await fetchPrice(currentPair);
-    updateBalancesUI();
-    addLog(`🔄 Switched to ${currentPair}/USD`);
-  });
+    fetchPrice();
+    updateUI();
+  };
 
-  // Periodic price refresh (every 5 seconds)
-  async function refreshPrices() {
-    await fetchPrice(currentPair);
-  }
-  setInterval(refreshPrices, 5000);
-
-  // Initial load
-  (async () => {
-    await fetchPrice(currentPair);
-    updateBalancesUI();
-    addLog("🚀 Micro Trading Bot initialized. Use Buy/Sell to simulate trades.");
-  })();
+  fetchPrice();
+  setInterval(fetchPrice, 10000);
+  updateUI();
+  addLog('🚀 Bot ready – use Buy/Sell to simulate trades.');
 </script>
 </body>
 </html>
