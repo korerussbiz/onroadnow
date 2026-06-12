@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OnRoadNow – Auto Trader Bot</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+  <!-- Stripe for card payments -->
+  <script src="https://js.stripe.com/v3/"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+    .card { background: white; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 2rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+    .btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-success { background: #10b981; color: white; }
+    .price { font-size: 2rem; font-weight: bold; color: #2563eb; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div id="auth"></div>
+<div id="traderContent" class="hidden">
+  <div class="card">
+    <h1>🤖 Auto‑Trader Bot</h1>
+    <p>Access our fully automated trading bot that scans for arbitrage opportunities on multiple chains. Pay a small fee to activate.</p>
+    <div id="paymentSection">
+      <h3>Select plan</h3>
+      <div>
+        <button id="planWeek" class="btn">1 week – $5 USD / 500 JMD</button>
+        <button id="planMonth" class="btn">1 month – $15 USD / 1500 JMD</button>
+        <button id="planCrypto" class="btn">1 month – 0.05 SOL</button>
+      </div>
+      <div id="paymentStatus"></div>
+    </div>
+    <div id="botAccess" class="hidden">
+      <h3>📊 Bot Dashboard</h3>
+      <p>Your bot access is active until <span id="expiryDate"></span>.</p>
+      <button id="viewLogs" class="btn btn-primary">View recent signals</button>
+      <pre id="logs" style="background:#f1f5f9; padding:1rem; border-radius:1rem; margin-top:1rem;"></pre>
+    </div>
+  </div>
+</div>
+<script>
+  // Firebase Config (same as main site)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBrldf3h28e9_Dwjrp2zZL21EJzxp_1MSk",
+    authDomain: "onroadnow-3aabb.firebaseapp.com",
+    projectId: "onroadnow-3aabb",
+    storageBucket: "onroadnow-3aabb.appspot.com",
+    appId: "1:134628093591:web:xxx"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // Stripe (replace with your publishable key)
+  const stripe = Stripe('YOUR_STRIPE_PUBLISHABLE_KEY');
+
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      document.getElementById('auth').innerHTML = `<p>Logged in as ${user.email} <button id="logoutBtn">Logout</button></p>`;
+      document.getElementById('logoutBtn').onclick = () => auth.signOut();
+      document.getElementById('traderContent').classList.remove('hidden');
+      // Check if user has active access
+      const doc = await db.collection('traderAccess').doc(user.uid).get();
+      const expiry = doc.exists ? doc.data().expiry?.toDate() : null;
+      if (expiry && expiry > new Date()) {
+        document.getElementById('paymentSection').classList.add('hidden');
+        document.getElementById('botAccess').classList.remove('hidden');
+        document.getElementById('expiryDate').innerText = expiry.toLocaleString();
+        // Load logs from backend
+        fetchLogs();
+      } else {
+        document.getElementById('paymentSection').classList.remove('hidden');
+        document.getElementById('botAccess').classList.add('hidden');
+      }
+    } else {
+      document.getElementById('auth').innerHTML = `<div class="card"><button id="googleLogin">Sign in with Google</button></div>`;
+      document.getElementById('googleLogin').onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+      document.getElementById('traderContent').classList.add('hidden');
+    }
+  });
+
+  async function fetchLogs() {
+    const res = await fetch('/api/trader-logs');
+    const logs = await res.json();
+    document.getElementById('logs').innerText = logs.join('\n');
+  }
+
+  document.getElementById('planWeek')?.addEventListener('click', () => createCheckout('week'));
+  document.getElementById('planMonth')?.addEventListener('click', () => createCheckout('month'));
+  document.getElementById('planCrypto')?.addEventListener('click', () => cryptoPayment());
+
+  async function createCheckout(plan) {
+    const response = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan, userId: auth.currentUser.uid })
+    });
+    const session = await response.json();
+    await stripe.redirectToCheckout({ sessionId: session.id });
+  }
+
+  function cryptoPayment() {
+    const amount = 0.05;
+    const solAddress = "9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2";
+    alert(`Send exactly ${amount} SOL to ${solAddress}. After payment, your access will be granted manually or via a webhook.`);
+    // In production, you'd monitor the blockchain and update Firestore.
+  }
+</script>
+</body>
+</html>
