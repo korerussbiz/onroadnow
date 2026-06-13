@@ -1,22 +1,27 @@
-const admin = require('firebase-admin');
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const cookie = require('cookie');
+const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 const GOOGLE_CLIENT_ID = '134628093591-61nk4mneo6d1o6of5da3e3fijgtd5dd0.apps.googleusercontent.com';
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-// In-memory storage
 let users = [];
 let listings = [];
 let sales = [];
 let requests = [];
 let deliveries = [];
-
-// ------------------- Helper for auto-trader (per-user) -------------------
 let userTraderStates = new Map();
+
+function hashPassword(pwd) {
+  return crypto.createHash('sha256').update(pwd).digest('hex');
+}
+function verifyPassword(pwd, hash) {
+  return hashPassword(pwd) === hash;
+}
+
 function getUserTraderState(userId) {
   if (!userTraderStates.has(userId)) {
     userTraderStates.set(userId, { running: false, userProfit: 0, ownerFees: 0, log: [], history: [] });
@@ -28,10 +33,6 @@ function addTraderLog(userId, msg) {
   state.log.unshift(`[${new Date().toISOString()}] ${msg}`);
   if (state.log.length > 100) state.log.pop();
 }
-
-// ------------------- Existing auth (simplified) -------------------
-function hashPassword(pwd) { return require('crypto').createHash('sha256').update(pwd).digest('hex'); }
-function verifyPassword(pwd, hash) { return hashPassword(pwd) === hash; }
 
 module.exports = async (req, res) => {
   const url = req.url;
@@ -51,7 +52,7 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (method === 'OPTIONS') return res.status(200).end();
 
-  // ---------- Authentication ----------
+  // ---------- Auth ----------
   if (url === '/api/signup' && method === 'POST') {
     const { email, password, name } = req.body;
     if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
@@ -64,12 +65,12 @@ module.exports = async (req, res) => {
     return;
   }
   if (url === '/api/login' && method === 'POST') {
-    const { email } = req.body; // simplified: no password check for demo
-    let user = users.find(u => u.email === email);
-    if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+    const { email, password } = req.body;
+    const user = users.find(u => u.email === email);
+    if (!user || !verifyPassword(password, user.passwordHash)) return res.status(401).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
     res.setHeader('Set-Cookie', cookie.serialize('token', token, { httpOnly: true, secure: true, sameSite: 'none', path: '/', maxAge: 604800 }));
-    res.status(200).json({ user });
+    res.status(200).json({ message: 'Login successful', user: { id: user.id, email: user.email, name: user.name } });
     return;
   }
   if (url === '/api/logout' && method === 'POST') {
@@ -91,7 +92,6 @@ module.exports = async (req, res) => {
     res.status(200).json({ message: 'Profile updated' });
     return;
   }
-  // ---------- Google OAuth ----------
   if (url === '/api/auth/google' && method === 'POST') {
     const { credential } = req.body;
     try {
@@ -211,4 +211,48 @@ module.exports = async (req, res) => {
   if (url === '/api/updateLocation' && method === 'POST') { res.status(200).json({}); return; }
   if (url.startsWith('/api/getLocation')) { res.status(200).json({ location: null }); return; }
 
-  
+  // ---------- Auto‑Trader endpoints ----------
+  if (url === '/api/auto-trader/start' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const state = getUserTraderState(userId);
+    state.running = true;
+    addTraderLog(userId, 'Trader started');
+    res.status(200).json({ message: 'started' });
+    return;
+  }
+  if (url === '/api/auto-trader/stop' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const state = getUserTraderState(userId);
+    state.running = false;
+    addTraderLog(userId, 'Trader stopped');
+    res.status(200).json({ message: 'stopped' });
+    return;
+  }
+  if (url === '/api/auto-trader/status' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const state = getUserTraderState(userId);
+    res.status(200).json({
+      running: state.running,
+      userProfit: state.userProfit,
+      ownerFees: state.ownerFees,
+      log: state.log,
+      history: state.history
+    });
+    return;
+  }
+  if (url === '/api/auto-trader/report-profit' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { profitJMD, feePercent } = req.body;
+    if (!profitJMD || profitJMD <= 0) return res.status(400).json({ error: 'Invalid profit' });
+    const fee = profitJMD * (Math.min(10, Math.max(3, feePercent)) / 100);
+    const userGain = profitJMD - fee;
+    const state = getUserTraderState(userId);
+    state.userProfit += userGain;
+    state.ownerFees += fee;
+    addTraderLog(userId, `Trade: profit ${profitJMD} JMD, fee ${feePercent}% → user +${userGain}, owner +${fee}`);
+    res.status(200).json({ userGain, fee, newUserBalance: state.userProfit, newOwnerFees: state.ownerFees });
+    return;
+  }
+
+  res.status(404).json({ error: 'Not found' });
+};

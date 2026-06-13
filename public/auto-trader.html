@@ -1,85 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
   <title>OnRoadNow – Auto‑Trader</title>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
-    body { font-family: monospace; padding: 2rem; background: #0f172a; color: #eee; }
-    .card { background: #1e293b; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; }
-    button { background: #3b82f6; border: none; padding: 0.5rem 1rem; border-radius: 2rem; color: white; cursor: pointer; }
-    input { padding: 0.5rem; border-radius: 1rem; border: none; }
-    .log { background: #0f172a; padding: 1rem; border-radius: 1rem; max-height: 300px; overflow-y: auto; }
+    body { font-family: Arial; max-width: 600px; margin: 2rem auto; padding: 1rem; background: #f4f4f4; }
+    .card { background: white; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    button { background: #2563eb; color: white; border: none; padding: 0.5rem 1rem; border-radius: 2rem; cursor: pointer; }
+    input { padding: 0.5rem; width: 100%; margin: 0.5rem 0; border-radius: 0.5rem; border: 1px solid #ccc; }
+    .log { background: #1e293b; color: #94a3b8; padding: 1rem; border-radius: 0.5rem; max-height: 300px; overflow-y: auto; font-family: monospace; }
   </style>
 </head>
 <body>
 <h1>🤖 Auto‑Trader</h1>
-<div id="loginPanel"></div>
-<div id="traderPanel" style="display:none;">
+<div id="auth"></div>
+<div id="trader" style="display:none;">
   <div class="card">
+    <h3>Your Stats</h3>
     <div>Profit: $<span id="userProfit">0</span></div>
     <div>Platform fees: $<span id="ownerFees">0</span></div>
-    <input type="number" id="amount" placeholder="USD amount">
-    <button id="buyBtn">Buy</button>
-    <button id="sellBtn">Sell</button>
+    <input type="number" id="amount" placeholder="Trade amount (USD)">
+    <button id="buyBtn">Buy (simulate profit)</button>
+    <button id="sellBtn">Sell (simulate profit)</button>
   </div>
-  <div class="card log" id="log"></div>
+  <div class="card">
+    <h3>Log</h3>
+    <div id="log" class="log"></div>
+  </div>
 </div>
 <script>
-  // Force redirect to main login if not authenticated
-  (async () => {
-    const me = await fetch('/api/me', { credentials: 'include' }).then(r => r.json());
-    if (!me.id) {
-      document.getElementById('loginPanel').innerHTML = '<div class="card">🔐 Please <a href="/">log in on the main site</a> first.</div>';
-      return;
-    }
-    document.getElementById('loginPanel').innerHTML = `<div class="card">✅ Logged in as ${me.email}</div>`;
-    document.getElementById('traderPanel').style.display = 'block';
-  })();
-
   async function apiCall(endpoint, options = {}) {
-    const res = await fetch(`/api/auto-trader/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+    const res = await fetch(`/api/auto-trader/${endpoint}`, {
+      ...options,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
     return res.json();
   }
 
-  function addLog(msg) {
-    const logDiv = document.getElementById('log');
-    const p = document.createElement('div');
-    p.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    logDiv.appendChild(p);
-  }
-
-  async function refreshBalance() {
+  async function refresh() {
     const state = await apiCall('status');
     document.getElementById('userProfit').innerText = (state.userProfit || 0).toFixed(2);
     document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2);
   }
 
-  async function reportProfit(profit, feePercent) {
-    const res = await apiCall('report-profit', {
-      method: 'POST',
-      body: JSON.stringify({ profitJMD: profit, feePercent })
-    });
-    if (res.error) addLog(`❌ ${res.error}`);
-    else addLog(`✅ Trade: profit ${profit} → user +${res.userGain}, owner +${res.fee}`);
-    refreshBalance();
+  function addLog(msg) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
   }
 
-  document.getElementById('buyBtn')?.addEventListener('click', async () => {
+  async function trade() {
     const usd = parseFloat(document.getElementById('amount').value);
-    if (isNaN(usd) || usd <= 0) return addLog("Invalid amount");
+    if (isNaN(usd) || usd <= 0) {
+      addLog("Invalid amount");
+      return;
+    }
     const profit = usd * (Math.random() * 0.1 + 0.02);
     const fee = 3 + Math.random() * 7;
-    await reportProfit(profit, fee);
-  });
-  document.getElementById('sellBtn')?.addEventListener('click', async () => {
-    const usd = parseFloat(document.getElementById('amount').value);
-    if (isNaN(usd) || usd <= 0) return addLog("Invalid amount");
-    const profit = usd * (Math.random() * 0.1 + 0.02);
-    const fee = 3 + Math.random() * 7;
-    await reportProfit(profit, fee);
-  });
-  refreshBalance();
+    addLog(`Trade: amount $${usd}, profit $${profit.toFixed(2)}, fee ${fee.toFixed(1)}%`);
+    const res = await apiCall('report-profit', {
+      method: 'POST',
+      body: JSON.stringify({ profitJMD: profit, feePercent: fee })
+    });
+    if (res.error) addLog(`Error: ${res.error}`);
+    else addLog(`✅ Recorded: user gain $${res.userGain.toFixed(2)}, owner fee $${res.fee.toFixed(2)}`);
+    refresh();
+  }
+
+  // Check authentication first
+  (async () => {
+    const me = await fetch('/api/me', { credentials: 'include' }).then(r => r.json());
+    if (!me.id) {
+      document.getElementById('auth').innerHTML = '<div class="card">🔐 Please <a href="/">log in</a> first.</div>';
+      return;
+    }
+    document.getElementById('auth').innerHTML = `<div class="card">✅ Logged in as ${me.email}</div>`;
+    document.getElementById('trader').style.display = 'block';
+    refresh();
+    document.getElementById('buyBtn').onclick = trade;
+    document.getElementById('sellBtn').onclick = trade;
+  })();
 </script>
 </body>
 </html>
