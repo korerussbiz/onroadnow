@@ -256,3 +256,68 @@ module.exports = async (req, res) => {
 
   res.status(404).json({ error: 'Not found' });
 };
+
+// ---------- Stripe Connect (for card deposits & payouts) ----------
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+// We'll store Stripe customer IDs and connected account IDs per user
+let stripeCustomers = new Map(); // userId -> stripeCustomerId
+
+// Deposit via card (creates a PaymentIntent)
+if (url === '/api/deposit' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { amount, currency = 'usd' } = req.body;
+  if (!amount || amount < 1) return res.status(400).json({ error: 'Minimum amount 1 USD' });
+  try {
+    let customerId = stripeCustomers.get(userId);
+    if (!customerId) {
+      const customer = await stripe.customers.create({ metadata: { userId } });
+      customerId = customer.id;
+      stripeCustomers.set(userId, customerId);
+    }
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount * 100),
+      currency,
+      customer: customerId,
+      automatic_payment_methods: { enabled: true },
+    });
+    res.status(200).json({ clientSecret: paymentIntent.client_secret });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+  return;
+}
+
+// Withdraw to bank account (requires Stripe Connected Account – for production, user must onboard first)
+if (url === '/api/withdraw' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { amount } = req.body;
+  if (!amount || amount < 10) return res.status(400).json({ error: 'Minimum withdrawal 10 USD' });
+  const user = users.find(u => u.id === userId);
+  if (!user || (user.balance || 0) < amount) return res.status(400).json({ error: 'Insufficient balance' });
+  // In production, you would create a payout to the user's connected bank account.
+  // For demo, we just deduct and log.
+  user.balance = (user.balance || 0) - amount;
+  res.status(200).json({ message: `Withdrawal of $${amount} initiated (simulated).` });
+  return;
+}
+
+// Get user's balance (including crypto and fiat)
+if (url === '/api/balance' && method === 'GET') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const user = users.find(u => u.id === userId);
+  res.status(200).json({ fiat: user?.balance || 0, crypto: user?.cryptoBalance || {} });
+  return;
+}
+
+// WalletConnect session handling (store user's wallet address)
+if (url === '/api/wallet/connect' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { address, chain } = req.body;
+  const user = users.find(u => u.id === userId);
+  if (user) {
+    user.walletAddress = address;
+    user.walletChain = chain;
+  }
+  res.status(200).json({ message: 'Wallet connected' });
+  return;
+}
