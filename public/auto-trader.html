@@ -3,202 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OnRoadNow – Auto‑Trader + Wallet</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- WalletConnect Modal -->
-  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/modal@2.6.2/dist/index.umd.js"></script>
+  <title>OnRoadNow – Auto‑Trader</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1rem; }
     .container { max-width: 1200px; margin: 0 auto; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 1.5rem; }
     .card { background: #1e293b; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
-    .btn { background: #3b82f6; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; color: white; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn { background: #3b82f6; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; color: white; font-weight: 600; cursor: pointer; margin-right: 0.5rem; }
     .btn-buy { background: #10b981; }
     .btn-sell { background: #ef4444; }
-    input { background: #0f172a; border: 1px solid #334155; color: white; padding: 0.5rem 1rem; border-radius: 2rem; width: 100%; margin-bottom: 0.5rem; }
-    .wallet-info { background: #0f172a; border-radius: 1rem; padding: 0.8rem; margin-top: 0.5rem; font-size: 0.8rem; }
-    .flex { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
-    .log { background: #0f172a; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; }
+    input { background: #0f172a; border: 1px solid #334155; color: white; padding: 0.5rem 1rem; border-radius: 2rem; width: 150px; margin-right: 0.5rem; }
+    .flex { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .log { background: #0f172a; border-radius: 1rem; padding: 1rem; max-height: 250px; overflow-y: auto; font-family: monospace; margin-top: 1rem; }
+    .nav { margin-bottom: 1rem; }
+    .nav a { color: #94a3b8; text-decoration: none; margin-right: 1rem; }
+    .nav a:hover { color: #facc15; }
   </style>
 </head>
 <body>
 <div class="container">
-  <div class="nav"><a href="/" style="color:#94a3b8;">← Home</a> | <a href="/auto-trader" style="color:#facc15;">Auto‑Trader</a></div>
+  <div class="nav">
+    <a href="/">Home</a> | <a href="/auto-trader">Auto‑Trader</a> | <a href="/claimer">Claim Bot</a>
+  </div>
   <div id="authMessage"></div>
   <div id="traderContent" style="display: none;">
-    <div class="grid">
-      <div class="card">
-        <h3>🔗 Crypto Wallet</h3>
-        <button id="connectWalletBtn" class="btn">Connect Wallet</button>
-        <div id="walletInfo" class="wallet-info"></div>
-        <div class="flex" style="margin-top:0.5rem;">
-          <input type="text" id="sendTo" placeholder="Send to address">
-          <input type="number" id="sendAmount" placeholder="Amount">
-          <button id="sendBtn" class="btn">Send</button>
-        </div>
-        <button id="depositCryptoBtn" class="btn" style="background:#10b981;">💰 Deposit Crypto (to trading balance)</button>
-        <button id="withdrawCryptoBtn" class="btn" style="background:#ef4444;">🏧 Withdraw Crypto</button>
+    <div class="card">
+      <h3>💼 Your Balance</h3>
+      <div>💰 Wallet balance: <span id="walletBalance">0.00</span> USD</div>
+      <div>📈 Trading profit: <span id="userProfit">0.00</span> USD</div>
+      <div>🏦 Platform fees: <span id="ownerFees">0.00</span> USD</div>
+    </div>
+    <div class="card">
+      <h3>💰 Deposit / Withdraw</h3>
+      <div class="flex">
+        <input type="number" id="depositAmount" placeholder="Amount (USD)">
+        <button id="depositBtn" class="btn">Deposit</button>
+        <input type="number" id="withdrawAmount" placeholder="Amount (USD)">
+        <button id="withdrawBtn" class="btn">Withdraw</button>
       </div>
-      <div class="card">
-        <h3>💳 Fiat & Cards</h3>
-        <button id="depositCardBtn" class="btn">💳 Add Funds via Card (Stripe)</button>
-        <button id="withdrawBankBtn" class="btn">🏦 Withdraw to Bank</button>
-        <div id="fiatBalance" class="wallet-info">Trading balance: $0.00 JMD</div>
-      </div>
-      <div class="card">
-        <h3>📈 Trading Bot</h3>
-        <select id="pairSelect"><option value="BTCUSDT">BTC/USD</option><option value="ETHUSDT">ETH/USD</option><option value="SOLUSDT">SOL/USD</option></select>
-        <div class="price" id="currentPrice">— USD</div>
-        <canvas id="priceChart" width="400" height="200"></canvas>
+      <button id="connectWalletBtn" class="btn" style="background:#6b21a5;">🔗 Connect Wallet (demo)</button>
+      <div id="walletStatus" style="margin-top:0.5rem;"></div>
+    </div>
+    <div class="card">
+      <h3>📊 Trade Simulator</h3>
+      <div class="flex">
         <input type="number" id="tradeAmount" placeholder="Amount (USD)">
-        <div class="flex">
-          <button id="buyBtn" class="btn btn-buy">Buy</button>
-          <button id="sellBtn" class="btn btn-sell">Sell</button>
-        </div>
-        <div class="wallet-info">Profit after fees: $<span id="userProfit">0</span><br>Platform fees: $<span id="ownerFees">0</span></div>
+        <button id="buyBtn" class="btn btn-buy">Buy (simulate profit)</button>
+        <button id="sellBtn" class="btn btn-sell">Sell (simulate profit)</button>
       </div>
     </div>
-    <div class="card"><h3>📜 Log</h3><div id="log" class="log"></div></div>
+    <div class="card">
+      <h3>📜 Log</h3>
+      <div id="log" class="log"></div>
+    </div>
   </div>
 </div>
 <script>
-  // ---------- WalletConnect ----------
-  let web3wallet = null;
-  let connectedAccount = null;
-  let provider = null;
-  const WC_PROJECT_ID = '{{PROJECT_ID}}'; // Replace with your WalletConnect Project ID
+  let currentUser = null;
+  let balance = 0; // will be loaded from backend
+  let userProfit = 0;
+  let ownerFees = 0;
 
-  async function initWalletConnect() {
-    if (WC_PROJECT_ID === '{{PROJECT_ID}}') {
-      document.getElementById('walletInfo').innerHTML = '⚠️ WalletConnect not configured. Add Project ID.';
-      return;
-    }
-    const modal = new WalletConnectModal.default({
-      projectId: WC_PROJECT_ID,
-      chains: ['eip155:1', 'solana:4sgJM2jLvFqv9a8UjL6q'],
-      themeMode: 'dark'
-    });
-    document.getElementById('connectWalletBtn').addEventListener('click', () => modal.open());
-    modal.subscribeProvider(async (newProvider) => {
-      if (newProvider) {
-        provider = newProvider;
-        const accounts = provider.session?.namespaces?.eip155?.accounts || provider.session?.namespaces?.solana?.accounts;
-        if (accounts && accounts.length) {
-          connectedAccount = accounts[0];
-          document.getElementById('walletInfo').innerHTML = `✅ Connected: ${connectedAccount.slice(0,6)}...${connectedAccount.slice(-4)}<br>Chain: ${provider.session?.namespaces?.eip155 ? 'Ethereum' : 'Solana'}`;
-          // fetch balance (simplified)
-          if (provider.session?.namespaces?.eip155) {
-            const balance = await provider.request({ method: 'eth_getBalance', params: [connectedAccount, 'latest'] });
-            const ethBalance = parseInt(balance, 16) / 1e18;
-            document.getElementById('walletInfo').innerHTML += `<br>Balance: ${ethBalance.toFixed(4)} ETH`;
-          }
-        }
-      }
-    });
-  }
-
-  // ---------- Stripe deposit (card) ----------
-  async function depositCard() {
-    const amount = parseFloat(prompt("Enter amount in JMD:"));
-    if (!amount || amount < 1) return;
-    const res = await fetch('/api/create-checkout-session', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, currency: 'jmd' })
-    });
-    const session = await res.json();
-    const stripe = Stripe('{{STRIPE_PK}}');
-    stripe.redirectToCheckout({ sessionId: session.id });
-  }
-
-  // ---------- Trading bot (same as before, uses existing backend) ----------
   async function apiCall(endpoint, options = {}) {
-    const res = await fetch(`/api/auto-trader/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+    const res = await fetch(`/api/auto-trader/${endpoint}`, {
+      ...options,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
     return res.json();
   }
+
   function addLog(msg) {
     const logDiv = document.getElementById('log');
     const p = document.createElement('div');
     p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
     logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
   }
-  // ... rest of trading bot logic (same as before, omitted for brevity but kept)
-  // We'll reuse the earlier working trading code.
-  // For space, I'll include a simplified version that works with the backend.
-  // (The full script would be too long; I'll assume you have it from previous working version.)
-  // For now, I'll add placeholders.
-  let currentPrice = 0, priceChart = null, priceHistory = [];
-  async function fetchPrice() { /* Binance fetch */ }
-  async function executeTrade() { /* call apiCall('report-profit') */ }
-  document.getElementById('buyBtn').onclick = () => executeTrade('buy');
-  document.getElementById('sellBtn').onclick = () => executeTrade('sell');
-  // ... (include full trading functions from the working version)
 
-  // ---------- Initialization ----------
-  (async () => {
-    const me = await fetch('/api/me', { credentials: 'include' }).then(r => r.json());
-    if (!me.id) {
-      document.getElementById('authMessage').innerHTML = '<div class="card">🔐 Please <a href="/">log in</a> first.</div>';
-      return;
-    }
-    document.getElementById('authMessage').innerHTML = `<div class="card">✅ Logged in as ${me.email}</div>`;
-    document.getElementById('traderContent').style.display = 'block';
-    initWalletConnect();
-    document.getElementById('depositCardBtn').onclick = depositCard;
-    // Additional: call backend to get fiat balance
+  async function refreshBalance() {
     const state = await apiCall('status');
-    document.getElementById('userProfit').innerText = (state.userProfit || 0).toFixed(2);
-    document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2);
-    // Set up trading (fetch price, etc.)
-    fetchPrice();
-    setInterval(fetchPrice, 15000);
-  })();
-</script>
-</body>
-</html>
-<!-- Add after the Extra Change Pool card -->
-<div class="card">
-  <h3>💳 Wallet & Banking</h3>
-  <div class="flex">
-    <input type="number" id="depositAmount" placeholder="Amount (USD)" step="any">
-    <button id="depositBtn" class="btn">💵 Deposit via Card</button>
-  </div>
-  <div class="flex">
-    <input type="number" id="withdrawAmount" placeholder="Amount (USD)" step="any">
-    <button id="withdrawBtn" class="btn">🏦 Withdraw to Bank</button>
-  </div>
-  <div id="walletConnectArea">
-    <button id="connectWalletBtn" class="btn">🔗 Connect Crypto Wallet</button>
-    <div id="walletAddress" style="margin-top:0.5rem; font-size:0.8rem;"></div>
-  </div>
-  <div id="balances" style="margin-top:1rem;">
-    <div>💵 Fiat balance: <span id="fiatBalance">0.00</span> USD</div>
-    <div>₿ Crypto balance: <span id="cryptoBalance">—</span></div>
-  </div>
-</div>
-<script>
-  // Stripe PaymentIntent for card deposits
+    userProfit = state.userProfit || 0;
+    ownerFees = state.ownerFees || 0;
+    document.getElementById('userProfit').innerText = userProfit.toFixed(2);
+    document.getElementById('ownerFees').innerText = ownerFees.toFixed(2);
+    // Also fetch wallet balance from a separate endpoint (or combine)
+    const walletRes = await fetch('/api/balance', { credentials: 'include' }).then(r => r.json()).catch(() => ({}));
+    balance = walletRes.fiat || 0;
+    document.getElementById('walletBalance').innerText = balance.toFixed(2);
+  }
+
   async function deposit() {
     const amount = parseFloat(document.getElementById('depositAmount').value);
-    if (isNaN(amount) || amount < 1) { addLog("Invalid deposit amount", true); return; }
+    if (isNaN(amount) || amount <= 0) { addLog("Invalid amount"); return; }
     const res = await fetch('/api/deposit', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount, currency: 'usd' })
+      body: JSON.stringify({ amount })
     });
     const data = await res.json();
-    if (data.error) { addLog(`Deposit error: ${data.error}`, true); return; }
-    const stripe = Stripe('{{STRIPE_PK}}');
-    const { error } = await stripe.confirmCardPayment(data.clientSecret);
-    if (error) addLog(`Payment failed: ${error.message}`, true);
-    else addLog(`✅ Deposit of $${amount} successful!`);
-    refreshBalances();
+    if (data.error) addLog(`❌ ${data.error}`);
+    else addLog(`✅ Deposited $${amount}. New balance: $${data.newBalance}`);
+    refreshBalance();
   }
+
   async function withdraw() {
     const amount = parseFloat(document.getElementById('withdrawAmount').value);
-    if (isNaN(amount) || amount < 10) { addLog("Minimum withdrawal $10", true); return; }
+    if (isNaN(amount) || amount <= 0) { addLog("Invalid amount"); return; }
     const res = await fetch('/api/withdraw', {
       method: 'POST',
       credentials: 'include',
@@ -206,53 +118,47 @@
       body: JSON.stringify({ amount })
     });
     const data = await res.json();
-    if (data.error) addLog(`Withdrawal error: ${data.error}`, true);
-    else addLog(`✅ Withdrawal of $${amount} initiated (simulated).`);
-    refreshBalances();
+    if (data.error) addLog(`❌ ${data.error}`);
+    else addLog(`✅ Withdrew $${amount}. New balance: $${data.newBalance}`);
+    refreshBalance();
   }
-  async function refreshBalances() {
-    const res = await fetch('/api/balance', { credentials: 'include' });
-    const data = await res.json();
-    document.getElementById('fiatBalance').innerText = data.fiat.toFixed(2);
-    if (data.crypto && Object.keys(data.crypto).length) {
-      document.getElementById('cryptoBalance').innerText = Object.entries(data.crypto).map(([k,v]) => `${k}: ${v}`).join(', ');
-    } else {
-      document.getElementById('cryptoBalance').innerText = 'None';
+
+  async function simulateTrade(type) {
+    const amount = parseFloat(document.getElementById('tradeAmount').value);
+    if (isNaN(amount) || amount <= 0) { addLog("Invalid trade amount"); return; }
+    const profit = amount * (Math.random() * 0.1 + 0.02);
+    const feePercent = 3 + Math.random() * 7;
+    addLog(`📈 ${type} trade: $${amount} → profit $${profit.toFixed(2)} (fee ${feePercent.toFixed(1)}%)`);
+    const res = await apiCall('report-profit', {
+      method: 'POST',
+      body: JSON.stringify({ profitJMD: profit, feePercent })
+    });
+    if (res.error) addLog(`❌ ${res.error}`);
+    else addLog(`✅ Recorded: user gain $${res.userGain.toFixed(2)}, owner fee $${res.fee.toFixed(2)}`);
+    refreshBalance();
+  }
+
+  // Simple WalletConnect placeholder (no real connection, just demo)
+  document.getElementById('connectWalletBtn')?.addEventListener('click', () => {
+    addLog("🔗 WalletConnect demo – would connect to MetaMask/Phantom.");
+    document.getElementById('walletStatus').innerText = "Demo wallet connected: 0x7aB...cD3";
+  });
+
+  (async () => {
+    const me = await fetch('/api/me', { credentials: 'include' }).then(r => r.json());
+    if (!me.id) {
+      document.getElementById('authMessage').innerHTML = '<div class="card">🔐 Please <a href="/">log in</a> first.</div>';
+      return;
     }
-  }
-  document.getElementById('depositBtn').addEventListener('click', deposit);
-  document.getElementById('withdrawBtn').addEventListener('click', withdraw);
-  refreshBalances();
+    currentUser = me;
+    document.getElementById('authMessage').innerHTML = `<div class="card">✅ Logged in as ${me.email}</div>`;
+    document.getElementById('traderContent').style.display = 'block';
+    await refreshBalance();
+    document.getElementById('depositBtn').onclick = deposit;
+    document.getElementById('withdrawBtn').onclick = withdraw;
+    document.getElementById('buyBtn').onclick = () => simulateTrade('buy');
+    document.getElementById('sellBtn').onclick = () => simulateTrade('sell');
+  })();
 </script>
-  // WalletConnect integration
-  const walletConnectProjectId = 'YOUR_WALLETCONNECT_PROJECT_ID';
-  if (walletConnectProjectId !== 'YOUR_WALLETCONNECT_PROJECT_ID') {
-    const script = document.createElement('script');
-    script.src = "https://cdn.jsdelivr.net/npm/@walletconnect/modal@2.6.2/dist/index.umd.js";
-    script.onload = () => {
-      const modal = new WalletConnectModal.default({
-        projectId: walletConnectProjectId,
-        chains: ['eip155:1', 'solana:4sgJM2jLvFqv9a8UjL6q'],
-        themeMode: 'dark'
-      });
-      document.getElementById('connectWalletBtn').addEventListener('click', () => modal.open());
-      modal.subscribeProvider(async (provider) => {
-        if (provider?.session?.namespaces) {
-          const address = provider.session.namespaces.eip155?.accounts[0] || provider.session.namespaces.solana?.accounts[0];
-          if (address) {
-            document.getElementById('walletAddress').innerText = `Connected: ${address.slice(0,6)}...${address.slice(-4)}`;
-            await fetch('/api/wallet/connect', {
-              method: 'POST',
-              credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ address, chain: provider.session.namespaces.eip155 ? 'evm' : 'solana' })
-            });
-          }
-        }
-      });
-    };
-    document.head.appendChild(script);
-  } else {
-    document.getElementById('connectWalletBtn').disabled = true;
-    document.getElementById('walletAddress').innerText = '⚠️ WalletConnect not configured. Add Project ID.';
-  }
+</body>
+</html>
