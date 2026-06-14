@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OnRoadNow – Claim Bot</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card { background: #1e293b; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .btn { background: #3b82f6; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; color: white; font-weight: 600; cursor: pointer; margin-right: 0.5rem; }
+    .btn-success { background: #10b981; }
+    .log { background: #0f172a; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; margin-top: 1rem; }
+    .claim-item { background: #0f172a; margin: 0.5rem 0; padding: 0.5rem; border-radius: 0.5rem; }
+    .nav { margin-bottom: 1rem; }
+    .nav a { color: #94a3b8; text-decoration: none; margin-right: 1rem; }
+    .nav a:hover { color: #facc15; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">Home</a> | <a href="/auto-trader">Auto‑Trader</a> | <a href="/claimer">Claim Bot</a>
+  </div>
+  <div class="card">
+    <h2>🤖 Auto‑Claim Bot</h2>
+    <p>Scans blockchain for unclaimed tokens, airdrops, or sweepable dust. (Simulated – replace with real RPC calls)</p>
+    <button id="scanBtn" class="btn">🔍 Scan for Claims</button>
+    <button id="claimAllBtn" class="btn btn-success">💰 Claim All</button>
+  </div>
+  <div class="card">
+    <h3>📋 Found Claims</h3>
+    <div id="claimsList"></div>
+  </div>
+  <div class="card">
+    <h3>📜 Log</h3>
+    <div id="log" class="log"></div>
+  </div>
+</div>
+<script>
+  let mockClaims = [];
+  function addLog(msg) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+  async function scan() {
+    addLog("Scanning blockchain for claimable tokens...");
+    await new Promise(r => setTimeout(r, 1500));
+    // Mock data – replace with actual API call
+    mockClaims = [
+      { token: "USDC", amount: 0.05, chain: "Ethereum", contract: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" },
+      { token: "SOL", amount: 0.002, chain: "Solana", contract: "So11111111111111111111111111111111111111112" },
+      { token: "BONK", amount: 12345, chain: "Solana", contract: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263" }
+    ];
+    const container = document.getElementById('claimsList');
+    container.innerHTML = '';
+    mockClaims.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'claim-item';
+      div.innerHTML = `<strong>${c.token}</strong> – ${c.amount} on ${c.chain}<br><small>${c.contract}</small>`;
+      container.appendChild(div);
+    });
+    addLog(`Found ${mockClaims.length} claimable items.`);
+  }
+  async function claimAll() {
+    if (mockClaims.length === 0) { addLog("No claims to process. Run scan first."); return; }
+    addLog("Attempting to claim all...");
+    for (let c of mockClaims) {
+      await new Promise(r => setTimeout(r, 800));
+      addLog(`✅ Claimed ${c.amount} ${c.token} from ${c.chain}`);
+    }
+    addLog("All claims processed.");
+    mockClaims = [];
+    document.getElementById('claimsList').innerHTML = '<div style="color:#94a3b8;">No pending claims</div>';
+  }
+  document.getElementById('scanBtn').onclick = scan;
+  document.getElementById('claimAllBtn').onclick = claimAll;
+  scan(); // initial scan
+</script>
+</body>
+</html>
