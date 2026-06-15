@@ -10,107 +10,59 @@
     .container { max-width: 800px; margin: 0 auto; }
     .card { background: #1e293b; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
     .btn { background: #3b82f6; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; color: white; font-weight: 600; cursor: pointer; margin-right: 0.5rem; }
+    .btn-danger { background: #ef4444; }
     .btn-success { background: #10b981; }
-    .btn-warning { background: #f59e0b; }
-    .log { background: #0f172a; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; margin-top: 1rem; }
-    .claim-item { background: #0f172a; margin: 0.5rem 0; padding: 0.5rem; border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
-    .status { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 0.5rem; }
-    .status-active { background: #10b981; box-shadow: 0 0 5px #10b981; }
+    .log { background: #0f172a; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; margin-top: 1rem; font-size: 0.8rem; }
+    .claim-item { background: #0f172a; margin: 0.5rem 0; padding: 0.5rem; border-radius: 0.5rem; }
     .nav { margin-bottom: 1rem; }
     .nav a { color: #94a3b8; text-decoration: none; margin-right: 1rem; }
-    .nav a:hover { color: #facc15; }
+    .flex { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+    .status { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 0.5rem; }
+    .status-running { background: #10b981; box-shadow: 0 0 5px #10b981; }
+    .status-stopped { background: #ef4444; }
   </style>
 </head>
 <body>
 <div class="container">
-  <div class="nav">
-    <a href="/">Home</a> | <a href="/auto-trader">Auto‑Trader</a> | <a href="/claimer">Claim Bot</a>
+  <div class="nav"><a href="/">Home</a> | <a href="/auto-trader">Auto‑Trader</a> | <a href="/claimer">Claim Bot</a></div>
+  <div class="card">
+    <h2>🤖 Auto‑Claim Bot (Optimized)</h2>
+    <div class="flex">
+      <button id="startAutoBtn" class="btn btn-success">▶️ Start Auto Mode</button>
+      <button id="stopAutoBtn" class="btn btn-danger">⏹️ Stop Auto Mode</button>
+      <span id="autoStatus" style="display: inline-flex; align-items: center;"><span class="status status-stopped"></span> Stopped</span>
+    </div>
+    <button id="scanNowBtn" class="btn">🔍 Scan Now (manual)</button>
+    <button id="claimAllBtn" class="btn">💰 Claim All (manual)</button>
   </div>
   <div class="card">
-    <h2>🤖 Auto‑Claim Bot</h2>
-    <p>Automatically scans blockchain for unclaimed tokens, airdrops, or sweepable dust. Claims will be processed automatically.</p>
-    <div style="margin-top: 1rem;">
-      <span class="status status-active"></span> <span id="botStatus">Active – scanning every 60 seconds</span>
-    </div>
-    <div style="margin-top: 1rem;">
-      <button id="scanNowBtn" class="btn">🔍 Scan Now</button>
-      <button id="claimAllBtn" class="btn btn-success">💰 Claim All Now</button>
-      <button id="toggleAutoBtn" class="btn btn-warning">⏸️ Pause Auto</button>
-    </div>
-  </div>
-  <div class="card">
-    <h3>📋 Found Claims</h3>
+    <h3>📋 Pending Claims</h3>
     <div id="claimsList"></div>
   </div>
   <div class="card">
-    <h3>📜 Log</h3>
+    <h3>📜 Activity Log</h3>
     <div id="log" class="log"></div>
   </div>
 </div>
 <script>
-  let mockClaims = [];
   let autoInterval = null;
-  let autoEnabled = true;
+  let isAutoRunning = false;
+  let mockClaims = []; // store current discovered claims
 
-  function addLog(msg) {
+  function addLog(msg, isError = false) {
     const logDiv = document.getElementById('log');
     const p = document.createElement('div');
-    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    p.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    if (isError) p.style.color = '#f87171';
     logDiv.appendChild(p);
     logDiv.scrollTop = logDiv.scrollHeight;
+    // keep only last 100 lines
+    while (logDiv.children.length > 100) logDiv.removeChild(logDiv.firstChild);
   }
 
-  async function scan() {
-    addLog("Scanning blockchain for claimable tokens...");
-    // Simulate API delay
-    await new Promise(r => setTimeout(r, 1500));
-    // Randomly generate 1-3 new claims each scan (to simulate real world)
-    const newClaims = [];
-    const possibleTokens = [
-      { token: "USDC", chain: "Ethereum", contract: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", minAmount: 0.01, maxAmount: 0.5 },
-      { token: "SOL", chain: "Solana", contract: "So11111111111111111111111111111111111111112", minAmount: 0.001, maxAmount: 0.05 },
-      { token: "BONK", chain: "Solana", contract: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263", minAmount: 5000, maxAmount: 50000 },
-      { token: "ETH", chain: "Ethereum", contract: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2", minAmount: 0.001, maxAmount: 0.01 },
-      { token: "MATIC", chain: "Polygon", contract: "0x7D1AfA7B718fb893dB30A3aBc0Cfc608AaCfeBB0", minAmount: 0.1, maxAmount: 2 }
-    ];
-    const numNew = Math.floor(Math.random() * 3) + 1; // 1-3 new claims
-    for (let i = 0; i < numNew; i++) {
-      const t = possibleTokens[Math.floor(Math.random() * possibleTokens.length)];
-      const amount = t.minAmount + Math.random() * (t.maxAmount - t.minAmount);
-      // Avoid duplicates (simple check by contract)
-      if (!mockClaims.some(c => c.contract === t.contract)) {
-        newClaims.push({
-          token: t.token,
-          amount: parseFloat(amount.toFixed(6)),
-          chain: t.chain,
-          contract: t.contract
-        });
-      }
-    }
-    if (newClaims.length) {
-      mockClaims.push(...newClaims);
-      addLog(`🔍 Found ${newClaims.length} new claimable item(s).`);
-      updateClaimsList();
-    } else {
-      addLog("No new claims found this scan.");
-    }
-  }
-
-  async function claimAll() {
-    if (mockClaims.length === 0) { addLog("No claims to process."); return; }
-    addLog(`Attempting to claim ${mockClaims.length} item(s)...`);
-    for (let c of mockClaims) {
-      await new Promise(r => setTimeout(r, 800));
-      addLog(`✅ Claimed ${c.amount} ${c.token} from ${c.chain}`);
-    }
-    addLog(`All claims processed. Total claimed: ${mockClaims.reduce((sum, c) => sum + c.amount, 0).toFixed(4)} tokens.`);
-    mockClaims = [];
-    updateClaimsList();
-  }
-
-  function updateClaimsList() {
+  function updateClaimsUI() {
     const container = document.getElementById('claimsList');
-    if (mockClaims.length === 0) {
+    if (!mockClaims.length) {
       container.innerHTML = '<div style="color:#94a3b8;">No pending claims</div>';
       return;
     }
@@ -118,56 +70,87 @@
     mockClaims.forEach(c => {
       const div = document.createElement('div');
       div.className = 'claim-item';
-      div.innerHTML = `
-        <div><strong>${c.token}</strong> – ${c.amount} on ${c.chain}<br><small>${c.contract}</small></div>
-        <button class="btn btn-success" style="padding:0.2rem 0.8rem;" onclick="claimSingle('${c.contract}')">Claim</button>
-      `;
+      div.innerHTML = `<strong>${c.token}</strong> – ${c.amount} on ${c.chain}<br><small>${c.contract}</small>`;
       container.appendChild(div);
     });
   }
 
-  window.claimSingle = async (contract) => {
-    const idx = mockClaims.findIndex(c => c.contract === contract);
-    if (idx === -1) return;
-    const c = mockClaims[idx];
-    await new Promise(r => setTimeout(r, 500));
-    addLog(`✅ Claimed ${c.amount} ${c.token} from ${c.chain}`);
-    mockClaims.splice(idx, 1);
-    updateClaimsList();
-  };
-
-  function startAutoScan() {
-    if (autoInterval) clearInterval(autoInterval);
-    autoInterval = setInterval(() => {
-      if (autoEnabled) scan();
-    }, 60000); // every 60 seconds
-    document.getElementById('botStatus').innerHTML = 'Active – scanning every 60 seconds';
-    document.getElementById('toggleAutoBtn').innerHTML = '⏸️ Pause Auto';
+  // Simulated API call to fetch claimable tokens
+  async function fetchClaims() {
+    addLog("Scanning blockchain for claimable tokens...");
+    // Simulate network delay
+    await new Promise(r => setTimeout(r, 1200));
+    // Mock data – replace with real RPC calls (e.g., Alchemy, Solana RPC)
+    const newClaims = [
+      { token: "USDC", amount: 0.05, chain: "Ethereum", contract: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" },
+      { token: "SOL", amount: 0.002, chain: "Solana", contract: "So11111111111111111111111111111111111111112" },
+      { token: "BONK", amount: 12345, chain: "Solana", contract: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263" }
+    ];
+    // In production, you would compare with existing claims to avoid duplicates.
+    // For demo, we just replace.
+    mockClaims = newClaims;
+    updateClaimsUI();
+    addLog(`✅ Found ${mockClaims.length} claimable items.`);
+    return mockClaims;
   }
 
-  function stopAutoScan() {
-    if (autoInterval) clearInterval(autoInterval);
-    autoInterval = null;
-    document.getElementById('botStatus').innerHTML = 'Paused – auto scan off';
-    document.getElementById('toggleAutoBtn').innerHTML = '▶️ Resume Auto';
-  }
-
-  document.getElementById('scanNowBtn').onclick = () => scan();
-  document.getElementById('claimAllBtn').onclick = () => claimAll();
-  document.getElementById('toggleAutoBtn').onclick = () => {
-    if (autoInterval) {
-      autoEnabled = false;
-      stopAutoScan();
-    } else {
-      autoEnabled = true;
-      startAutoScan();
+  async function claimAll() {
+    if (mockClaims.length === 0) {
+      addLog("No claims to process. Run scan first.");
+      return;
     }
-  };
+    addLog("Attempting to claim all pending items...");
+    for (let c of mockClaims) {
+      await new Promise(r => setTimeout(r, 600)); // simulate on-chain transaction
+      addLog(`✅ Claimed ${c.amount} ${c.token} from ${c.chain}`);
+    }
+    addLog("All claims processed.");
+    mockClaims = [];
+    updateClaimsUI();
+  }
 
-  // Start the bot automatically
-  startAutoScan();
+  async function autoCycle() {
+    if (!isAutoRunning) return;
+    addLog("🔄 Auto‑cycle: scanning...");
+    await fetchClaims();
+    if (mockClaims.length > 0) {
+      addLog(`💰 Auto‑claiming ${mockClaims.length} items...`);
+      await claimAll();
+    } else {
+      addLog("No claims found, waiting for next cycle.");
+    }
+  }
+
+  function startAutoMode() {
+    if (autoInterval) clearInterval(autoInterval);
+    isAutoRunning = true;
+    autoInterval = setInterval(autoCycle, 30000); // run every 30 seconds
+    document.getElementById('autoStatus').innerHTML = '<span class="status status-running"></span> Running (every 30s)';
+    addLog("🚀 Auto Mode started. Bot will scan and claim automatically every 30 seconds.");
+    // run first cycle immediately
+    autoCycle();
+  }
+
+  function stopAutoMode() {
+    if (autoInterval) {
+      clearInterval(autoInterval);
+      autoInterval = null;
+    }
+    isAutoRunning = false;
+    document.getElementById('autoStatus').innerHTML = '<span class="status status-stopped"></span> Stopped';
+    addLog("⏹️ Auto Mode stopped.");
+  }
+
+  // Manual controls
+  document.getElementById('startAutoBtn').onclick = startAutoMode;
+  document.getElementById('stopAutoBtn').onclick = stopAutoMode;
+  document.getElementById('scanNowBtn').onclick = async () => {
+    await fetchClaims();
+  };
+  document.getElementById('claimAllBtn').onclick = claimAll;
+
   // Initial scan
-  scan();
+  fetchClaims();
 </script>
 </body>
 </html>
