@@ -23,18 +23,18 @@
   </div>
 </div>
 <script>
-  async function fetchEarnings() {
-    const res = await fetch('/api/referral/earnings', { credentials: 'include' });
-    const data = await res.json();
-    document.getElementById('earnings').innerHTML = `Earnings: $${data.earnings?.toFixed(2) || '0.00'}`;
-    document.getElementById('downline').innerHTML = `Your downline: ${data.downline?.length || 0} users`;
-  }
-  fetchEarnings();
-  document.getElementById('copyBtn').onclick = () => {
-    const link = window.location.origin + '/?ref=' + (document.cookie?.match(/userId=([^;]+)/)?.[1] || '');
-    navigator.clipboard?.writeText(link);
-    alert('Link copied!');
-  };
+async function fetchEarnings() {
+  const res = await fetch('/api/referral/earnings', { credentials: 'include' });
+  const data = await res.json();
+  document.getElementById('earnings').innerHTML = `Earnings: $${data.earnings?.toFixed(2) || '0.00'}`;
+  document.getElementById('downline').innerHTML = `Your downline: ${data.downline?.length || 0} users`;
+}
+fetchEarnings();
+document.getElementById('copyBtn').onclick = () => {
+  const link = window.location.origin + '/?ref=' + (document.cookie?.match(/userId=([^;]+)/)?.[1] || '');
+  navigator.clipboard?.writeText(link);
+  alert('Link copied!');
+};
 </script>
 </body>
 </html>

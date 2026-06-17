@@ -32,47 +32,40 @@
   </div>
 </div>
 <script>
-  async function apiCall(endpoint, options = {}) {
-    const res = await fetch(`/api/stock/${endpoint}`, {
-      ...options,
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    return res.json();
-  }
-
-  function addLog(msg) {
-    const logDiv = document.getElementById('stockLog');
-    const p = document.createElement('div');
-    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    logDiv.appendChild(p);
-    logDiv.scrollTop = logDiv.scrollHeight;
-  }
-
-  async function getPrice() {
-    const symbol = document.getElementById('symbol').value;
-    const data = await apiCall(`price?symbol=${symbol}`);
-    if (data.error) addLog(`❌ ${data.error}`);
-    else document.getElementById('priceDisplay').innerText = `Price: $${data.price} (${data.currency})`;
-  }
-
-  document.getElementById('getPriceBtn').onclick = getPrice;
-  document.getElementById('buyBtn').onclick = async () => {
-    const symbol = document.getElementById('symbol').value;
-    const amount = parseFloat(document.getElementById('amount').value);
-    if (isNaN(amount) || amount <= 0) { addLog("Invalid amount"); return; }
-    const data = await apiCall('trade', { method: 'POST', body: JSON.stringify({ symbol, amount }) });
-    if (data.error) addLog(`❌ ${data.error}`);
-    else addLog(`✅ Bought ${data.shares.toFixed(4)} shares at $${data.price} → profit $${data.netGain.toFixed(4)}`);
-  };
-  document.getElementById('sellBtn').onclick = async () => {
-    const symbol = document.getElementById('symbol').value;
-    const amount = parseFloat(document.getElementById('amount').value);
-    if (isNaN(amount) || amount <= 0) { addLog("Invalid amount"); return; }
-    const data = await apiCall('trade', { method: 'POST', body: JSON.stringify({ symbol, amount }) });
-    if (data.error) addLog(`❌ ${data.error}`);
-    else addLog(`✅ Sold ${data.shares.toFixed(4)} shares at $${data.price} → profit $${data.netGain.toFixed(4)}`);
-  };
+async function apiCall(endpoint, options = {}) {
+  const res = await fetch(`/api/stock/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+  return res.json();
+}
+function addLog(msg) {
+  const logDiv = document.getElementById('stockLog');
+  const p = document.createElement('div');
+  p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  logDiv.appendChild(p);
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+async function getPrice() {
+  const symbol = document.getElementById('symbol').value;
+  const data = await apiCall(`price?symbol=${symbol}`);
+  if (data.error) addLog(`❌ ${data.error}`);
+  else document.getElementById('priceDisplay').innerText = `Price: $${data.price} (${data.currency})`;
+}
+document.getElementById('getPriceBtn').onclick = getPrice;
+document.getElementById('buyBtn').onclick = async () => {
+  const symbol = document.getElementById('symbol').value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  if (isNaN(amount) || amount <= 0) { addLog("Invalid amount"); return; }
+  const data = await apiCall('trade', { method: 'POST', body: JSON.stringify({ symbol, amount }) });
+  if (data.error) addLog(`❌ ${data.error}`);
+  else addLog(`✅ Bought ${data.shares.toFixed(4)} shares at $${data.price} → profit $${data.netGain.toFixed(4)}`);
+};
+document.getElementById('sellBtn').onclick = async () => {
+  const symbol = document.getElementById('symbol').value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  if (isNaN(amount) || amount <= 0) { addLog("Invalid amount"); return; }
+  const data = await apiCall('trade', { method: 'POST', body: JSON.stringify({ symbol, amount }) });
+  if (data.error) addLog(`❌ ${data.error}`);
+  else addLog(`✅ Sold ${data.shares.toFixed(4)} shares at $${data.price} → profit $${data.netGain.toFixed(4)}`);
+};
 </script>
 </body>
 </html>
