@@ -7,8 +7,12 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/auto-trader", "dest": "/public/auto-trader.html" },
+    { "src": "/stock-trader", "dest": "/public/stock-trader.html" },
     { "src": "/claimer", "dest": "/public/claimer.html" },
-    { "src": "/marketplace", "dest": "/public/marketplace.html" },
+    { "src": "/receipt", "dest": "/public/receipt.html" },
+    { "src": "/referral", "dest": "/public/referral.html" },
+    { "src": "/history", "dest": "/public/history.html" },
+    { "src": "/", "dest": "/public/index.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }

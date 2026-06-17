@@ -202,3 +202,145 @@ module.exports = async (req, res) => {
 
   res.status(404).json({ error: 'Not found' });
 };
+// ---------- Real stock market data (Yahoo Finance) ----------
+const yahooFinance = require('yahoo-finance2').default;
+
+// ---------- MLM Referral System ----------
+let referrals = new Map(); // userId -> { referrerId, earnings, downline: [] }
+
+if (url === '/api/referral/register' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { referrerId } = req.body;
+  if (referrerId && referrerId !== userId && !referrals.has(referrerId)) {
+    return res.status(400).json({ error: 'Referrer not found' });
+  }
+  const user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  user.referrerId = referrerId;
+  if (referrerId) {
+    const referrer = referrals.get(referrerId) || { earnings: 0, downline: [] };
+    referrer.downline.push(userId);
+    referrals.set(referrerId, referrer);
+    // Add initial bonus (10% of referrer's first deposit? – we'll simulate)
+    const bonus = 0.10;
+    referrer.earnings += bonus;
+    addTraderLog(referrerId, `💰 Referral bonus $${bonus} from ${userId}`);
+  }
+  res.status(200).json({ message: 'Referral registered' });
+  return;
+}
+
+if (url === '/api/referral/earnings' && method === 'GET') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const data = referrals.get(userId) || { earnings: 0, downline: [] };
+  res.status(200).json(data);
+  return;
+}
+
+// ---------- Stock price endpoint (real-time) ----------
+if (url === '/api/stock/price' && method === 'GET') {
+  const { symbol } = req.query;
+  if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
+  try {
+    const quote = await yahooFinance.quote(symbol);
+    res.status(200).json({ symbol, price: quote.regularMarketPrice, currency: quote.currency });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+  return;
+}
+
+// ---------- Trade stocks with change (micro-trades) ----------
+if (url === '/api/stock/trade' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { symbol, amount } = req.body;
+  if (!symbol || !amount || amount <= 0) return res.status(400).json({ error: 'Invalid trade' });
+  try {
+    const quote = await yahooFinance.quote(symbol);
+    const price = quote.regularMarketPrice;
+    const shares = amount / price;
+    // Simulated trade execution (paper trading) – replace with real exchange later
+    const profit = amount * (Math.random() * 0.02 - 0.01); // ±1%
+    const feePercent = 1; // fixed fee for stock trading (1%)
+    const fee = amount * (feePercent / 100);
+    const netGain = profit - fee;
+    const state = getUserTraderState(userId);
+    state.userProfit += netGain;
+    addTraderLog(userId, `📈 Stock trade: ${symbol} $${amount} → ${shares.toFixed(4)} shares, profit $${profit.toFixed(4)}, fee $${fee.toFixed(4)}`);
+    res.status(200).json({ shares, price, profit, fee, netGain });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+  return;
+}
+// ---------- Real stock market data (Yahoo Finance) ----------
+const yahooFinance = require('yahoo-finance2').default;
+
+// ---------- MLM Referral System ----------
+let referrals = new Map(); // userId -> { referrerId, earnings, downline: [] }
+
+if (url === '/api/referral/register' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { referrerId } = req.body;
+  if (referrerId && referrerId !== userId && !referrals.has(referrerId)) {
+    return res.status(400).json({ error: 'Referrer not found' });
+  }
+  const user = users.find(u => u.id === userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  user.referrerId = referrerId;
+  if (referrerId) {
+    const referrer = referrals.get(referrerId) || { earnings: 0, downline: [] };
+    referrer.downline.push(userId);
+    referrals.set(referrerId, referrer);
+    // Add initial bonus (10% of referrer's first deposit? – we'll simulate)
+    const bonus = 0.10;
+    referrer.earnings += bonus;
+    addTraderLog(referrerId, `💰 Referral bonus $${bonus} from ${userId}`);
+  }
+  res.status(200).json({ message: 'Referral registered' });
+  return;
+}
+
+if (url === '/api/referral/earnings' && method === 'GET') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const data = referrals.get(userId) || { earnings: 0, downline: [] };
+  res.status(200).json(data);
+  return;
+}
+
+// ---------- Stock price endpoint (real-time) ----------
+if (url === '/api/stock/price' && method === 'GET') {
+  const { symbol } = req.query;
+  if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
+  try {
+    const quote = await yahooFinance.quote(symbol);
+    res.status(200).json({ symbol, price: quote.regularMarketPrice, currency: quote.currency });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+  return;
+}
+
+// ---------- Trade stocks with change (micro-trades) ----------
+if (url === '/api/stock/trade' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { symbol, amount } = req.body;
+  if (!symbol || !amount || amount <= 0) return res.status(400).json({ error: 'Invalid trade' });
+  try {
+    const quote = await yahooFinance.quote(symbol);
+    const price = quote.regularMarketPrice;
+    const shares = amount / price;
+    // Simulated trade execution (paper trading) – replace with real exchange later
+    const profit = amount * (Math.random() * 0.02 - 0.01); // ±1%
+    const feePercent = 1; // fixed fee for stock trading (1%)
+    const fee = amount * (feePercent / 100);
+    const netGain = profit - fee;
+    const state = getUserTraderState(userId);
+    state.userProfit += netGain;
+    addTraderLog(userId, `📈 Stock trade: ${symbol} $${amount} → ${shares.toFixed(4)} shares, profit $${profit.toFixed(4)}, fee $${fee.toFixed(4)}`);
+    res.status(200).json({ shares, price, profit, fee, netGain });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+  return;
+}

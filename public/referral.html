@@ -1,2 +1,40 @@
 <!DOCTYPE html>
-<html><body><h1>Referral System</h1><p>Coming soon – track your referrals and commissions.</p><a href="/">Back</a></body></html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referral & MLM</title>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card { background: #1e293b; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .btn { background: #3b82f6; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; color: white; cursor: pointer; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card"><a href="/">← Home</a></div>
+  <div class="card">
+    <h2>👥 Referral & MLM</h2>
+    <p>Your referral link: <span id="refLink">Loading...</span></p>
+    <button id="copyBtn" class="btn">📋 Copy Link</button>
+    <div id="earnings" style="margin-top:1rem;">Earnings: $0.00</div>
+    <div id="downline" style="margin-top:1rem;">Your downline: None</div>
+  </div>
+</div>
+<script>
+  async function fetchEarnings() {
+    const res = await fetch('/api/referral/earnings', { credentials: 'include' });
+    const data = await res.json();
+    document.getElementById('earnings').innerHTML = `Earnings: $${data.earnings?.toFixed(2) || '0.00'}`;
+    document.getElementById('downline').innerHTML = `Your downline: ${data.downline?.length || 0} users`;
+  }
+  fetchEarnings();
+  document.getElementById('copyBtn').onclick = () => {
+    const link = window.location.origin + '/?ref=' + (document.cookie?.match(/userId=([^;]+)/)?.[1] || '');
+    navigator.clipboard?.writeText(link);
+    alert('Link copied!');
+  };
+</script>
+</body>
+</html>
