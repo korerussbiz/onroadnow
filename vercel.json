@@ -9,9 +9,6 @@
     { "src": "/auto-trader", "dest": "/public/auto-trader.html" },
     { "src": "/claimer", "dest": "/public/claimer.html" },
     { "src": "/marketplace", "dest": "/public/marketplace.html" },
-    { "src": "/terms", "dest": "/public/terms.html" },
-    { "src": "/share-banner", "dest": "/public/share-banner.html" },
-    { "src": "/trader", "dest": "/public/trader.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
