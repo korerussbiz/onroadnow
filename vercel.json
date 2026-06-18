@@ -1,26 +1,83 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/index.js", "use": "@vercel/node" },
-    { "src": "public/**", "use": "@vercel/static" }
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
   ],
   "routes": [
-    { "src": "/roundup", "dest": "/public/roundup.html" },
-    { "src": "/receipt-invest", "dest": "/public/receipt-invest.html" },
-    { "src": "/stock-trader", "dest": "/public/stock-trader.html" },
-    { "src": "/referral", "dest": "/public/referral.html" },
-    { "src": "/history", "dest": "/public/history.html" },
-    { "src": "/stock-trader", "dest": "/public/stock-trader.html" },
-    { "src": "/referral", "dest": "/public/referral.html" },
-    { "src": "/history", "dest": "/public/history.html" },
-    { "src": "/api/(.*)", "dest": "/api/index.js" },
-    { "src": "/auto-trader", "dest": "/public/auto-trader.html" },
-    { "src": "/stock-trader", "dest": "/public/stock-trader.html" },
-    { "src": "/claimer", "dest": "/public/claimer.html" },
-    { "src": "/receipt", "dest": "/public/receipt.html" },
-    { "src": "/referral", "dest": "/public/referral.html" },
-    { "src": "/history", "dest": "/public/history.html" },
-    { "src": "/", "dest": "/public/index.html" },
-    { "src": "/(.*)", "dest": "/public/$1" }
+    {
+      "src": "/roundup",
+      "dest": "/public/roundup.html"
+    },
+    {
+      "src": "/receipt-invest",
+      "dest": "/public/receipt-invest.html"
+    },
+    {
+      "src": "/stock-trader",
+      "dest": "/public/stock-trader.html"
+    },
+    {
+      "src": "/referral",
+      "dest": "/public/referral.html"
+    },
+    {
+      "src": "/history",
+      "dest": "/public/history.html"
+    },
+    {
+      "src": "/stock-trader",
+      "dest": "/public/stock-trader.html"
+    },
+    {
+      "src": "/referral",
+      "dest": "/public/referral.html"
+    },
+    {
+      "src": "/history",
+      "dest": "/public/history.html"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/auto-trader",
+      "dest": "/public/auto-trader.html"
+    },
+    {
+      "src": "/stock-trader",
+      "dest": "/public/stock-trader.html"
+    },
+    {
+      "src": "/claimer",
+      "dest": "/public/claimer.html"
+    },
+    {
+      "src": "/receipt",
+      "dest": "/public/receipt.html"
+    },
+    {
+      "src": "/referral",
+      "dest": "/public/referral.html"
+    },
+    {
+      "src": "/history",
+      "dest": "/public/history.html"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
   ]
 }
