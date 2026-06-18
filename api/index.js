@@ -616,4 +616,418 @@ module.exports = async (req, res) => {
     return;
   }
 
+
+  // ---------- 1. Watchlist ----------
+  let watchlists = new Map(); // userId -> [symbols]
+  if (url === '/api/watchlist' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const list = watchlists.get(userId) || [];
+    res.status(200).json({ watchlist: list });
+    return;
+  }
+  if (url === '/api/watchlist' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { symbol } = req.body;
+    if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
+    let list = watchlists.get(userId) || [];
+    if (!list.includes(symbol)) list.push(symbol);
+    watchlists.set(userId, list);
+    res.status(200).json({ message: 'Added to watchlist', watchlist: list });
+    return;
+  }
+  if (url === '/api/watchlist' && method === 'DELETE') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { symbol } = req.body;
+    if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
+    let list = watchlists.get(userId) || [];
+    list = list.filter(s => s !== symbol);
+    watchlists.set(userId, list);
+    res.status(200).json({ message: 'Removed from watchlist', watchlist: list });
+    return;
+  }
+
+  // ---------- 2. Price Alerts ----------
+  let alerts = new Map(); // userId -> [{symbol, price, direction, triggered}]
+  if (url === '/api/alerts' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const userAlerts = alerts.get(userId) || [];
+    res.status(200).json({ alerts: userAlerts });
+    return;
+  }
+  if (url === '/api/alerts' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { symbol, price, direction } = req.body; // direction: 'above' | 'below'
+    if (!symbol || !price || !direction) return res.status(400).json({ error: 'Missing fields' });
+    const userAlerts = alerts.get(userId) || [];
+    userAlerts.push({ symbol, price, direction, triggered: false, id: Date.now().toString(36) });
+    alerts.set(userId, userAlerts);
+    res.status(200).json({ message: 'Alert set', alerts: userAlerts });
+    return;
+  }
+  if (url === '/api/alerts' && method === 'DELETE') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { alertId } = req.body;
+    if (!alertId) return res.status(400).json({ error: 'Missing alertId' });
+    let userAlerts = alerts.get(userId) || [];
+    userAlerts = userAlerts.filter(a => a.id !== alertId);
+    alerts.set(userId, userAlerts);
+    res.status(200).json({ message: 'Alert removed', alerts: userAlerts });
+    return;
+  }
+
+  // ---------- 3. Limit Orders ----------
+  let limitOrders = new Map(); // userId -> [{symbol, price, amount, status}]
+  if (url === '/api/orders/limit' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { symbol, price, amount, side } = req.body; // side: 'buy' | 'sell'
+    if (!symbol || !price || !amount || !side) return res.status(400).json({ error: 'Missing fields' });
+    const order = { id: Date.now().toString(36), symbol, price, amount, side, status: 'pending', createdAt: Date.now() };
+    const userOrders = limitOrders.get(userId) || [];
+    userOrders.push(order);
+    limitOrders.set(userId, userOrders);
+    res.status(200).json({ message: 'Limit order placed', order });
+    return;
+  }
+  if (url === '/api/orders/limit' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const userOrders = limitOrders.get(userId) || [];
+    res.status(200).json({ orders: userOrders });
+    return;
+  }
+  if (url === '/api/orders/limit' && method === 'DELETE') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { orderId } = req.body;
+    if (!orderId) return res.status(400).json({ error: 'Missing orderId' });
+    let userOrders = limitOrders.get(userId) || [];
+    userOrders = userOrders.filter(o => o.id !== orderId);
+    limitOrders.set(userId, userOrders);
+    res.status(200).json({ message: 'Order cancelled' });
+    return;
+  }
+
+  // ---------- 4. Stop‑Loss / Take‑Profit ----------
+  let stopLosses = new Map(); // userId -> [{symbol, stopPrice, takeProfit, amount}]
+  if (url === '/api/risk/stoploss' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { symbol, stopPrice, takeProfit, amount } = req.body;
+    if (!symbol || !stopPrice || !amount) return res.status(400).json({ error: 'Missing fields' });
+    const sl = { id: Date.now().toString(36), symbol, stopPrice, takeProfit: takeProfit || null, amount, status: 'active' };
+    const userSL = stopLosses.get(userId) || [];
+    userSL.push(sl);
+    stopLosses.set(userId, userSL);
+    res.status(200).json({ message: 'Stop-loss set', sl });
+    return;
+  }
+  if (url === '/api/risk/stoploss' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const userSL = stopLosses.get(userId) || [];
+    res.status(200).json({ stopLosses: userSL });
+    return;
+  }
+
+  // ---------- 5. Portfolio ----------
+  let portfolios = new Map(); // userId -> [{symbol, shares, avgPrice}]
+  if (url === '/api/portfolio' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const port = portfolios.get(userId) || [];
+    // enrich with current prices
+    const enriched = await Promise.all(port.map(async item => {
+      try {
+        let price;
+        if (item.symbol.length <= 5 && /^[A-Z]+$/.test(item.symbol)) price = await getStockPrice(item.symbol);
+        else price = await getCryptoPrice(item.symbol);
+        return { ...item, currentPrice: price, value: price * item.shares };
+      } catch { return { ...item, currentPrice: 0, value: 0 }; }
+    }));
+    res.status(200).json({ portfolio: enriched });
+    return;
+  }
+  if (url === '/api/portfolio' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { symbol, shares, avgPrice } = req.body;
+    if (!symbol || !shares) return res.status(400).json({ error: 'Missing fields' });
+    const port = portfolios.get(userId) || [];
+    const existing = port.find(p => p.symbol === symbol);
+    if (existing) {
+      existing.shares += shares;
+      existing.avgPrice = (existing.avgPrice * existing.shares + avgPrice * shares) / (existing.shares + shares);
+    } else {
+      port.push({ symbol, shares, avgPrice: avgPrice || 0 });
+    }
+    portfolios.set(userId, port);
+    res.status(200).json({ message: 'Portfolio updated', portfolio: port });
+    return;
+  }
+
+  // ---------- 6. News Feed ----------
+  if (url === '/api/news' && method === 'GET') {
+    const { symbol } = req.query;
+    if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
+    try {
+      // Use a free news API (replace with real key later)
+      const news = [
+        { title: `${symbol} announces new product`, date: new Date().toISOString() },
+        { title: `${symbol} earnings beat estimates`, date: new Date(Date.now() - 86400000).toISOString() },
+        { title: `${symbol} stock surges on strong demand`, date: new Date(Date.now() - 172800000).toISOString() }
+      ];
+      res.status(200).json({ news });
+    } catch(e) { res.status(500).json({ error: e.message }); }
+    return;
+  }
+
+  // ---------- 7. Social Trading (copy trades) ----------
+  let socialTrades = new Map(); // userId -> [trade]
+  if (url === '/api/social/copy' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { targetUserId, symbol, amount } = req.body;
+    if (!targetUserId || !symbol || !amount) return res.status(400).json({ error: 'Missing fields' });
+    // Simulate copying: we'll just replicate the trade for the user
+    const tradeResult = await executeTrade(userId, symbol, amount, 'buy', true);
+    const copyRecord = { from: targetUserId, symbol, amount, timestamp: Date.now(), result: tradeResult };
+    const userCopies = socialTrades.get(userId) || [];
+    userCopies.push(copyRecord);
+    socialTrades.set(userId, userCopies);
+    res.status(200).json({ message: 'Copy trade executed', copy: copyRecord });
+    return;
+  }
+  if (url === '/api/social/copies' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const copies = socialTrades.get(userId) || [];
+    res.status(200).json({ copies });
+    return;
+  }
+
+  // ---------- 8. Leaderboard ----------
+  let leaderboardCache = [];
+  function updateLeaderboard() {
+    const entries = [];
+    for (const [id, state] of userTraderStates) {
+      const user = users.find(u => u.id === id);
+      if (user) entries.push({ userId: id, username: user.username, profit: state.userProfit || 0 });
+    }
+    entries.sort((a,b) => b.profit - a.profit);
+    leaderboardCache = entries.slice(0, 20);
+  }
+  if (url === '/api/leaderboard' && method === 'GET') {
+    updateLeaderboard();
+    res.status(200).json({ leaderboard: leaderboardCache });
+    return;
+  }
+
+  // ---------- 9. Staking ----------
+  let stakes = new Map(); // userId -> [{amount, asset, startDate, reward}]
+  if (url === '/api/staking' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { amount, asset } = req.body;
+    if (!amount || !asset) return res.status(400).json({ error: 'Missing fields' });
+    const stake = { id: Date.now().toString(36), amount, asset, startDate: Date.now(), reward: 0, status: 'active' };
+    const userStakes = stakes.get(userId) || [];
+    userStakes.push(stake);
+    stakes.set(userId, userStakes);
+    res.status(200).json({ message: 'Stake created', stake });
+    return;
+  }
+  if (url === '/api/staking' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const userStakes = stakes.get(userId) || [];
+    res.status(200).json({ stakes: userStakes });
+    return;
+  }
+
+  // ---------- 10. Yield Farming (simulated) ----------
+  if (url === '/api/yield/farm' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { amount } = req.body;
+    if (!amount) return res.status(400).json({ error: 'Missing amount' });
+    // Simulate yield
+    const yieldReturn = amount * (0.05 + Math.random() * 0.05); // 5-10% APY simulation
+    const state = getUserTraderState(userId);
+    state.userProfit += yieldReturn;
+    addTraderLog(userId, `Yield farming: $${amount} → +$${yieldReturn.toFixed(2)}`);
+    res.status(200).json({ message: 'Yield farmed', yield: yieldReturn });
+    return;
+  }
+
+  // ---------- 11. NFT Viewer ----------
+  if (url === '/api/nft' && method === 'GET') {
+    const { address } = req.query;
+    if (!address) return res.status(400).json({ error: 'Missing address' });
+    // Mock NFTs
+    const nfts = [
+      { name: 'Pixel Cat #123', tokenId: '123', image: 'https://picsum.photos/200' },
+      { name: 'CyberPunk #456', tokenId: '456', image: 'https://picsum.photos/200' }
+    ];
+    res.status(200).json({ nfts });
+    return;
+  }
+
+  // ---------- 12. Loan / Credit ----------
+  let loans = new Map(); // userId -> [{amount, interest, dueDate}]
+  if (url === '/api/loan/request' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { amount, duration } = req.body; // duration in months
+    if (!amount || !duration) return res.status(400).json({ error: 'Missing fields' });
+    const interest = amount * 0.05 * (duration/12);
+    const due = Date.now() + duration * 30 * 24 * 60 * 60 * 1000;
+    const loan = { id: Date.now().toString(36), amount, interest, dueDate: due, status: 'active' };
+    const userLoans = loans.get(userId) || [];
+    userLoans.push(loan);
+    loans.set(userId, userLoans);
+    // Credit user's balance
+    const state = getUserTraderState(userId);
+    state.userProfit += amount;
+    res.status(200).json({ message: 'Loan approved', loan });
+    return;
+  }
+  if (url === '/api/loan' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const userLoans = loans.get(userId) || [];
+    res.status(200).json({ loans: userLoans });
+    return;
+  }
+
+  // ---------- 13. Two-Factor Auth (TOTP simulation) ----------
+  let twoFactor = new Map(); // userId -> {enabled, secret}
+  if (url === '/api/2fa/enable' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    twoFactor.set(userId, { enabled: true, secret: 'ABCDEFGHIJKLMNOP' });
+    res.status(200).json({ message: '2FA enabled', secret: 'ABCDEFGHIJKLMNOP' });
+    return;
+  }
+  if (url === '/api/2fa/verify' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { code } = req.body;
+    if (code === '123456') { // simple mock
+      res.status(200).json({ verified: true });
+    } else {
+      res.status(401).json({ error: 'Invalid code' });
+    }
+    return;
+  }
+
+  // ---------- 14. Withdrawal (real money) ----------
+  if (url === '/api/withdrawal/request' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { amount, address } = req.body;
+    if (!amount || !address) return res.status(400).json({ error: 'Missing fields' });
+    const state = getUserTraderState(userId);
+    if (state.userProfit < amount) return res.status(400).json({ error: 'Insufficient balance' });
+    state.userProfit -= amount;
+    const data = loadEarnings();
+    data.withdrawals.push({ userId, amount, address, timestamp: Date.now(), status: 'pending' });
+    saveEarnings(data);
+    res.status(200).json({ message: 'Withdrawal requested', remaining: state.userProfit });
+    return;
+  }
+
+  // ---------- 15. Deposit History ----------
+  if (url === '/api/deposits/history' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    // Mock deposits
+    res.status(200).json({ deposits: [{ amount: 100, date: Date.now() - 86400000, status: 'completed' }] });
+    return;
+  }
+
+  // ---------- 16. Trading Bots (multiple strategies) ----------
+  if (url === '/api/bots' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const state = getUserTraderState(userId);
+    const bots = [
+      { id: 'bot1', name: 'Scalper', running: state.running, strategy: 'scalp' },
+      { id: 'bot2', name: 'Momentum', running: false, strategy: 'momentum' }
+    ];
+    res.status(200).json({ bots });
+    return;
+  }
+  if (url === '/api/bots/start' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { botId } = req.body;
+    const state = getUserTraderState(userId);
+    state.running = true;
+    res.status(200).json({ message: `Bot ${botId} started` });
+    return;
+  }
+
+  // ---------- 17. Backtesting ----------
+  if (url === '/api/backtest' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { symbol, strategy, start, end } = req.body;
+    // Mock results
+    res.status(200).json({
+      initialBalance: 10000,
+      finalBalance: 11000,
+      trades: 25,
+      winRate: 0.6,
+      sharpeRatio: 1.2
+    });
+    return;
+  }
+
+  // ---------- 18. Market Sentiment ----------
+  if (url === '/api/sentiment' && method === 'GET') {
+    const { symbol } = req.query;
+    if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
+    const sentiment = { symbol, score: Math.random() * 100, bullish: Math.random() > 0.5 };
+    res.status(200).json(sentiment);
+    return;
+  }
+
+  // ---------- 19. Economic Calendar ----------
+  if (url === '/api/calendar' && method === 'GET') {
+    const events = [
+      { event: 'Fed Rate Decision', date: new Date(Date.now() + 86400000 * 2).toISOString(), impact: 'High' },
+      { event: 'Employment Report', date: new Date(Date.now() + 86400000 * 5).toISOString(), impact: 'Medium' }
+    ];
+    res.status(200).json({ events });
+    return;
+  }
+
+  // ---------- 20. User Settings ----------
+  if (url === '/api/settings' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const user = users.find(u => u.id === userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.status(200).json({ username: user.username, settings: { theme: 'dark', notifications: true } });
+    return;
+  }
+  if (url === '/api/settings' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { theme, notifications } = req.body;
+    // We just store in memory (or could save to Firestore)
+    res.status(200).json({ message: 'Settings updated' });
+    return;
+  }
+
+  // ---------- 21. Referral Earnings Detail ----------
+  if (url === '/api/referral/earnings/detail' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const tree = referralTree.get(userId);
+    const earnings = getUserTraderState(userId).userProfit || 0;
+    const referrals = tree?.referrals || [];
+    const detail = referrals.map(id => ({ userId: id, commission: (Math.random() * 10).toFixed(2) }));
+    res.status(200).json({ totalEarnings: earnings, details: detail });
+    return;
+  }
+
+  // ---------- 22. Quick Trade (one-click) ----------
+  if (url === '/api/trade/quick' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { symbol, amount } = req.body;
+    if (!symbol || !amount) return res.status(400).json({ error: 'Missing fields' });
+    const result = await executeTrade(userId, symbol, amount, 'buy', true);
+    res.status(200).json(result);
+    return;
+  }
+
+  // ---------- 23. Earn Interest (Savings) ----------
+  if (url === '/api/savings/deposit' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { amount } = req.body;
+    if (!amount) return res.status(400).json({ error: 'Missing amount' });
+    const state = getUserTraderState(userId);
+    state.userProfit += amount * 0.001; // 0.1% daily interest
+    res.status(200).json({ message: 'Interest earned' });
+    return;
+  }
+
 };
