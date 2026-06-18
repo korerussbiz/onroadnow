@@ -5,6 +5,7 @@
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/features", "dest": "/public/features.html" },
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/auto-trader", "dest": "/public/auto-trader.html" },
     { "src": "/stock-trader", "dest": "/public/stock-trader.html" },
