@@ -927,4 +927,174 @@ if (url === '/api/auto-trader/report-profit' && method === 'POST') {
     return;
   }
 
+
+  // ---------- Firebase Integration (Persistence) ----------
+  const admin = require('firebase-admin');
+
+  // Initialize Firebase Admin SDK from environment variables
+  let firestore = null;
+  let isFirebaseReady = false;
+
+  try {
+    // Option 1: Use a single JSON environment variable
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+      firestore = admin.firestore();
+      isFirebaseReady = true;
+      console.log('🔥 Firebase initialized from FIREBASE_SERVICE_ACCOUNT');
+    }
+    // Option 2: Use individual env vars (projectId, clientEmail, privateKey)
+    else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: privateKey
+        })
+      });
+      firestore = admin.firestore();
+      isFirebaseReady = true;
+      console.log('🔥 Firebase initialized from individual env vars');
+    } else {
+      console.log('ℹ️ Firebase credentials not set – using in-memory/JSON storage.');
+    }
+  } catch (err) {
+    console.error('❌ Firebase initialization failed:', err.message);
+  }
+
+  // Helper: get Firestore collection reference
+  function getCollection(name) {
+    if (isFirebaseReady && firestore) {
+      return firestore.collection(name);
+    }
+    return null;
+  }
+
+  // Override loadEarnings and saveEarnings to use Firestore
+  const originalLoadEarnings = loadEarnings;
+  const originalSaveEarnings = saveEarnings;
+
+  // Re-define loadEarnings with Firestore support
+  loadEarnings = async function() {
+    if (!isFirebaseReady) {
+      // Fallback to JSON file
+      return originalLoadEarnings();
+    }
+    try {
+      const doc = await firestore.collection('system').doc('earnings').get();
+      if (doc.exists) {
+        return doc.data();
+      } else {
+        // Initialize empty document
+        const empty = { totalOwnerFees: 0, withdrawals: [], users: {}, roundups: {}, receipts: {} };
+        await firestore.collection('system').doc('earnings').set(empty);
+        return empty;
+      }
+    } catch (err) {
+      console.error('Firestore load error:', err);
+      return originalLoadEarnings();
+    }
+  };
+
+  saveEarnings = async function(data) {
+    if (!isFirebaseReady) {
+      return originalSaveEarnings(data);
+    }
+    try {
+      await firestore.collection('system').doc('earnings').set(data);
+    } catch (err) {
+      console.error('Firestore save error:', err);
+      originalSaveEarnings(data); // fallback to JSON
+    }
+  };
+
+  // Also persist users, trades, referralTree, etc. to Firestore collections
+  // We'll create async versions of the save functions
+  async function persistUser(user) {
+    if (!isFirebaseReady) return;
+    try {
+      await firestore.collection('users').doc(user.id).set(user);
+    } catch (err) { console.error('Failed to persist user:', err); }
+  }
+
+  async function persistTrade(trade) {
+    if (!isFirebaseReady) return;
+    try {
+      await firestore.collection('trades').add(trade);
+    } catch (err) { console.error('Failed to persist trade:', err); }
+  }
+
+  // Patch the existing functions to also save to Firestore
+  // We'll wrap the original push/update functions
+  const originalUsersPush = users.push;
+  users.push = function(...args) {
+    const result = originalUsersPush.apply(users, args);
+    for (const user of args) {
+      persistUser(user);
+    }
+    return result;
+  };
+
+  const originalTradesPush = trades.push;
+  trades.push = function(...args) {
+    const result = originalTradesPush.apply(trades, args);
+    for (const trade of args) {
+      persistTrade(trade);
+    }
+    return result;
+  };
+
+  // For referralTree, we need to persist changes when set
+  const originalReferralTreeSet = referralTree.set;
+  referralTree.set = function(key, value) {
+    const result = originalReferralTreeSet.call(referralTree, key, value);
+    if (isFirebaseReady) {
+      firestore.collection('referrals').doc(key).set(value).catch(err => console.error('Referral persist error:', err));
+    }
+    return result;
+  };
+
+  // Load initial data from Firestore on startup
+  async function loadInitialData() {
+    if (!isFirebaseReady) return;
+    try {
+      // Load users
+      const userSnapshot = await firestore.collection('users').get();
+      userSnapshot.forEach(doc => {
+        const user = doc.data();
+        if (!users.find(u => u.id === user.id)) users.push(user);
+      });
+      // Load trades
+      const tradeSnapshot = await firestore.collection('trades').get();
+      tradeSnapshot.forEach(doc => {
+        const trade = doc.data();
+        trades.push(trade);
+      });
+      // Load referrals
+      const refSnapshot = await firestore.collection('referrals').get();
+      refSnapshot.forEach(doc => {
+        referralTree.set(doc.id, doc.data());
+      });
+      console.log(`🔥 Loaded ${users.length} users, ${trades.length} trades, ${referralTree.size} referrals from Firestore.`);
+    } catch (err) {
+      console.error('Failed to load initial data from Firestore:', err);
+    }
+  }
+
+  // Call load on startup (will not block)
+  loadInitialData();
+
+  // Also periodically flush in-memory changes to Firestore
+  setInterval(async () => {
+    if (!isFirebaseReady) return;
+    try {
+      const data = await loadEarnings();
+      await saveEarnings(data);
+    } catch (err) { /* ignore */ }
+  }, 60000); // every 60 seconds
+
 };
