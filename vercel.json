@@ -5,6 +5,8 @@
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/store-dashboard", "dest": "/public/store-dashboard.html" },
+    { "src": "/customer-portal", "dest": "/public/customer-portal.html" },
     { "src": "/features", "dest": "/public/features.html" },
     { "src": "/api/(.*)", "dest": "/api/index.js" },
     { "src": "/auto-trader", "dest": "/public/auto-trader.html" },

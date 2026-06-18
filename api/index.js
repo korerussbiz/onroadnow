@@ -1030,4 +1030,242 @@ module.exports = async (req, res) => {
     return;
   }
 
+
+  // ---------- Global Meta Receipt System ----------
+  // Stores registry
+  let stores = new Map(); // storeId -> { name, location, cashiers: [], totalDeposits: 0, totalRoundups: 0 }
+  // Customer deposits
+  let deposits = new Map(); // depositId -> { customerId, storeId, amount, roundup, total, timestamp, invested }
+  // Customer accounts (linked to phone/email)
+  let customerAccounts = new Map(); // customerId -> { name, phone, email, balance, deposits: [] }
+
+  // Generate unique IDs
+  function generateStoreId() { return 'ST' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase(); }
+  function generateDepositId() { return 'DP' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase(); }
+  function generateCustomerId() { return 'CU' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase(); }
+
+  // Register a new store
+  if (url === '/api/store/register' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { name, location } = req.body;
+    if (!name) return res.status(400).json({ error: 'Store name required' });
+    const storeId = generateStoreId();
+    stores.set(storeId, { id: storeId, name, location: location || '', cashiers: [userId], totalDeposits: 0, totalRoundups: 0 });
+    res.status(201).json({ storeId, message: 'Store registered' });
+    return;
+  }
+
+  // Get store info
+  if (url === '/api/store/info' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    // Find store where user is cashier
+    let store = null;
+    for (const [id, s] of stores) {
+      if (s.cashiers.includes(userId)) { store = { ...s, id }; break; }
+    }
+    if (!store) return res.status(404).json({ error: 'Store not found' });
+    res.status(200).json(store);
+    return;
+  }
+
+  // Get or create customer account
+  async function getCustomerAccount(identifier) {
+    // identifier can be phone or email
+    let customer = null;
+    for (const [id, c] of customerAccounts) {
+      if (c.phone === identifier || c.email === identifier) {
+        customer = { ...c, id };
+        break;
+      }
+    }
+    if (!customer) {
+      const newId = generateCustomerId();
+      customerAccounts.set(newId, {
+        id: newId,
+        name: '',
+        phone: identifier.includes('@') ? '' : identifier,
+        email: identifier.includes('@') ? identifier : '',
+        balance: 0,
+        deposits: []
+      });
+      customer = { ...customerAccounts.get(newId), id: newId };
+    }
+    return customer;
+  }
+
+  // Create a deposit (cashier creates this)
+  if (url === '/api/deposit/create' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { storeId, amount, customerName, customerId, phone, email } = req.body;
+    if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
+    if (!storeId || !stores.has(storeId)) return res.status(400).json({ error: 'Invalid store' });
+
+    // Compute round-up (to nearest dollar or custom)
+    const rounded = Math.ceil(amount);
+    const roundup = rounded - amount;
+    const totalPaid = rounded; // customer pays rounded amount
+    if (roundup <= 0.001) return res.status(400).json({ error: 'No spare change' });
+
+    // Find or create customer
+    let customer;
+    if (customerId && customerAccounts.has(customerId)) {
+      customer = customerAccounts.get(customerId);
+    } else if (phone || email) {
+      const identifier = phone || email;
+      customer = await getCustomerAccount(identifier);
+      if (customerName) customer.name = customerName;
+    } else {
+      // Guest: create a temporary account
+      const newId = generateCustomerId();
+      customerAccounts.set(newId, { id: newId, name: customerName || 'Guest', phone: '', email: '', balance: 0, deposits: [] });
+      customer = customerAccounts.get(newId);
+    }
+
+    // Create deposit record
+    const depositId = generateDepositId();
+    const deposit = {
+      id: depositId,
+      customerId: customer.id,
+      storeId,
+      amount,
+      roundup,
+      total: totalPaid,
+      timestamp: Date.now(),
+      invested: false,
+      investedAmount: 0,
+      status: 'pending' // pending investment
+    };
+    deposits.set(depositId, deposit);
+
+    // Update store totals
+    const store = stores.get(storeId);
+    store.totalDeposits += amount;
+    store.totalRoundups += roundup;
+    stores.set(storeId, store);
+
+    // Credit customer balance (round-up amount)
+    customer.balance += roundup;
+    customer.deposits.push(depositId);
+    customerAccounts.set(customer.id, customer);
+
+    // Now automatically invest the round-up using the trading engine
+    let invested = 0;
+    let symbol = 'SPY'; // default investment
+    try {
+      // Use existing executeTrade function (or the round-up invest logic)
+      // We'll use the round-up invest logic from earlier
+      const tradeResult = await executeTrade(customer.id, symbol, roundup, 'buy', true);
+      invested = tradeResult.userGain || roundup; // net gain after fees
+      deposit.invested = true;
+      deposit.investedAmount = invested;
+      deposit.status = 'completed';
+      deposits.set(depositId, deposit);
+      // Also update customer's invested balance (we already added roundup to balance)
+      // The balance already includes the round-up; but we want to show both balance and invested.
+      // We'll add a separate field "investedBalance"
+      customer.investedBalance = (customer.investedBalance || 0) + invested;
+      customerAccounts.set(customer.id, customer);
+    } catch (err) {
+      deposit.status = 'failed';
+      deposits.set(depositId, deposit);
+      console.error('Auto-invest failed:', err.message);
+    }
+
+    // Generate receipt (meta receipt) – return deposit ID and QR code
+    const qrData = `${process.env.BASE_URL || 'https://onroadnow.vercel.app'}/deposit/${depositId}`;
+    const QRCode = require('qrcode');
+    const qrCode = await QRCode.toDataURL(qrData);
+
+    res.status(201).json({
+      depositId,
+      roundup,
+      total: totalPaid,
+      invested: deposit.invested,
+      investedAmount: deposit.investedAmount || 0,
+      customerId: customer.id,
+      customerName: customer.name || 'Guest',
+      qrCode,
+      claimUrl: qrData,
+      message: 'Deposit created and invested successfully.'
+    });
+    return;
+  }
+
+  // Get deposit details (for customer)
+  if (url === '/api/deposit/view' && method === 'GET') {
+    const { depositId } = req.query;
+    if (!depositId) return res.status(400).json({ error: 'Missing depositId' });
+    const deposit = deposits.get(depositId);
+    if (!deposit) return res.status(404).json({ error: 'Deposit not found' });
+    // If userId is provided, verify it matches the customer
+    if (userId && deposit.customerId !== userId) {
+      // Allow if admin
+      if (userId !== 'admin' && req.headers['x-admin-key'] !== process.env.ADMIN_KEY) {
+        return res.status(403).json({ error: 'Not authorized' });
+      }
+    }
+    res.status(200).json(deposit);
+    return;
+  }
+
+  // Customer dashboard (all deposits for a user)
+  if (url === '/api/customer/dashboard' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const customer = customerAccounts.get(userId);
+    if (!customer) return res.status(404).json({ error: 'Customer not found' });
+    // Get all deposits for this customer
+    const customerDeposits = [];
+    for (const depId of customer.deposits || []) {
+      const dep = deposits.get(depId);
+      if (dep) customerDeposits.push(dep);
+    }
+    // Also get current investments from the trader state
+    const state = getUserTraderState(userId);
+    res.status(200).json({
+      customer,
+      deposits: customerDeposits,
+      tradingProfit: state.userProfit || 0,
+      totalInvested: customer.investedBalance || 0,
+      currentBalance: customer.balance || 0
+    });
+    return;
+  }
+
+  // Store dashboard (for store admins)
+  if (url === '/api/store/dashboard' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    let store = null;
+    for (const [id, s] of stores) {
+      if (s.cashiers.includes(userId)) { store = { ...s, id }; break; }
+    }
+    if (!store) return res.status(404).json({ error: 'Store not found' });
+    // Get today's deposits for this store
+    const now = Date.now();
+    const dayStart = new Date(now);
+    dayStart.setHours(0,0,0,0);
+    const todayDeposits = [];
+    let totalToday = 0;
+    let totalRoundupToday = 0;
+    for (const [depId, dep] of deposits) {
+      if (dep.storeId === store.id && dep.timestamp >= dayStart.getTime()) {
+        todayDeposits.push(dep);
+        totalToday += dep.amount;
+        totalRoundupToday += dep.roundup;
+      }
+    }
+    res.status(200).json({
+      store,
+      today: { count: todayDeposits.length, totalAmount: totalToday, totalRoundup: totalRoundupToday },
+      allTime: { totalDeposits: store.totalDeposits, totalRoundups: store.totalRoundups }
+    });
+    return;
+  }
+
+  // Global leaderboard of stores (by total deposits)
+  if (url === '/api/store/leaderboard' && method === 'GET') {
+    const sorted = Array.from(stores.values()).sort((a,b) => b.totalDeposits - a.totalDeposits).slice(0, 20);
+    res.status(200).json({ leaderboard: sorted });
+    return;
+  }
+
 };
