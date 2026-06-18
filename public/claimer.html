@@ -1,25 +1,127 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Claim Bot</title>
-<style>body{font-family:sans-serif;background:#0f172a;color:#e2e8f0;padding:1rem;}.container{max-width:800px;margin:auto;}.card{background:#1e293b;padding:1.5rem;border-radius:1rem;}.btn{background:#3b82f6;border:none;padding:0.5rem 1.2rem;border-radius:2rem;color:white;cursor:pointer;}</style>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claim Bot</title>
+  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/modal@2.6.2/dist/index.umd.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1.5rem; font-size: 1.2rem; }
+    .container { max-width: 900px; margin: auto; }
+    .card { background: #1e293b; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; }
+    .nav { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.3rem; }
+    .nav a { color: #60a5fa; text-decoration: none; font-weight: 600; }
+    .nav a:hover { color: #facc15; }
+    .flex { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin: 1rem 0; }
+    .btn { background: #3b82f6; border: none; padding: 0.8rem 1.8rem; border-radius: 2rem; color: white; font-weight: 600; font-size: 1.2rem; cursor: pointer; }
+    .btn-success { background: #10b981; }
+    .btn-danger { background: #ef4444; }
+    .btn-lg { font-size: 1.4rem; padding: 1rem 2.5rem; }
+    .log { background: #0f172a; border-radius: 1rem; padding: 1.2rem; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 1rem; margin-top: 1.5rem; }
+    .address { font-size: 1.3rem; background: #0f172a; padding: 0.8rem; border-radius: 1rem; margin: 0.5rem 0; }
+    .claim-item { background: #0f172a; padding: 1rem; border-radius: 1rem; margin: 0.5rem 0; font-size: 1.2rem; }
+  </style>
 </head>
 <body>
 <div class="container">
-<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem;">
-  <a href="/" style="color:#2563eb;">🏠 Home</a>
-  <a href="/auto-trader" style="color:#2563eb;">🤖 Auto‑Trader</a>
-  <a href="/stock-trader" style="color:#2563eb;">📈 Stocks</a>
-  <a href="/claimer" style="color:#2563eb;">💰 Claim</a>
-  <a href="/referral" style="color:#2563eb;">👥 Referrals</a>
-  <a href="/roundup" style="color:#2563eb;">🪙 Round‑Up</a>
-  <a href="/receipt-invest" style="color:#2563eb;">🧾 Receipt</a>
-  <a href="/history" style="color:#2563eb;">📜 History</a>
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/auto-trader">🤖 Auto‑Trader</a>
+    <a href="/stock-trader">📈 Stocks</a>
+    <a href="/claimer">💰 Claim</a>
+    <a href="/referral">👥 Referrals</a>
+    <a href="/roundup">🪙 Round‑Up</a>
+    <a href="/receipt-invest">🧾 Receipt</a>
+    <a href="/history">📜 History</a>
+  </div>
+
+  <div class="card">
+    <h1>💰 Claim Bot</h1>
+    <p>Connect your wallet and scan for claimable tokens (airdrop, NFTs, etc.)</p>
+    <div class="flex">
+      <button id="connectBtn" class="btn btn-lg">🔗 Connect Wallet</button>
+      <button id="scanBtn" class="btn btn-success btn-lg">🔍 Scan Now</button>
+      <button id="claimBtn" class="btn btn-lg">💸 Claim All</button>
+    </div>
+    <div id="walletAddress" class="address">Not connected</div>
+    <div id="claimsList"><p>No claims found.</p></div>
+    <div id="log" class="log">Ready.</div>
+  </div>
 </div>
-<div class="card">
-<h1>Claim Bot</h1>
-<p>This page is under construction. Check back soon!</p>
-<button class="btn" onclick="alert('Coming soon!')">Learn More</button>
-</div>
-</div>
+<script>
+  const projectId = '{{WC_PROJECT_ID}}'; // will be replaced by sed
+  let web3Modal, provider, walletAddress;
+
+  function addLog(msg, isError = false) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    if (isError) p.style.color = '#f87171';
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  async function connectWallet() {
+    try {
+      if (!web3Modal) {
+        web3Modal = new WalletConnectModal.default({
+          projectId,
+          chains: ['eip155:1'],
+          themeMode: 'dark'
+        });
+      }
+      await web3Modal.open();
+      const session = web3Modal.getProvider();
+      if (session) {
+        const accounts = await session.request({ method: 'eth_accounts' });
+        walletAddress = accounts[0];
+        document.getElementById('walletAddress').innerHTML = `✅ Connected: ${walletAddress.slice(0,6)}...${walletAddress.slice(-4)}`;
+        addLog(`✅ Wallet connected: ${walletAddress}`);
+      }
+    } catch(e) { addLog(`❌ Connection error: ${e.message}`, true); }
+  }
+
+  async function scanClaims() {
+    if (!walletAddress) { addLog('❌ Connect wallet first', true); return; }
+    addLog('🔍 Scanning for claimable tokens...');
+    try {
+      const res = await fetch('/api/claim/scan-evm', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: walletAddress })
+      });
+      const data = await res.json();
+      if (data.error) { addLog(`❌ ${data.error}`, true); return; }
+      const claims = data.claims || [];
+      const container = document.getElementById('claimsList');
+      container.innerHTML = '';
+      if (claims.length === 0) {
+        container.innerHTML = '<p>No claimable tokens found.</p>';
+        addLog('No claims found.');
+      } else {
+        claims.forEach(c => {
+          const div = document.createElement('div');
+          div.className = 'claim-item';
+          div.innerHTML = `<strong>${c.name}</strong> – ${c.amount} (contract: ${c.contract.slice(0,10)}...)`;
+          container.appendChild(div);
+        });
+        addLog(`✅ Found ${claims.length} claimable items.`);
+      }
+    } catch(e) { addLog(`❌ Scan error: ${e.message}`, true); }
+  }
+
+  async function claimAll() {
+    if (!walletAddress) { addLog('❌ Connect wallet first', true); return; }
+    addLog('💸 Claiming all... (simulated)');
+    // In a real implementation, you would sign transactions.
+    setTimeout(() => addLog('✅ Claim simulation complete.'), 2000);
+  }
+
+  document.getElementById('connectBtn').onclick = connectWallet;
+  document.getElementById('scanBtn').onclick = scanClaims;
+  document.getElementById('claimBtn').onclick = claimAll;
+</script>
 </body>
 </html>
