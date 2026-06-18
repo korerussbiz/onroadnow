@@ -13,5 +13,14 @@
 <p><strong>7. Governing Law</strong><br>Jamaica.</p>
 <p><strong>8. No Legal Responsibility for User‑to‑User Transactions</strong><br>All transactions are solely between users. OnRoadNow is not a party and does not warrant any items.</p>
 <p>By using OnRoadNow, you acknowledge that you have read and agreed to these terms.</p>
+  <button id="depositBtn" class="btn" style="background:#f7931a;font-size:1.2rem;padding:0.8rem 2rem;">💰 Deposit</button>
+  <script>
+  document.getElementById("depositBtn")?.addEventListener("click", async function() {
+    const res = await fetch("/api/deposit", { credentials: "include" });
+    const data = await res.json();
+    if (data.url) window.open(data.url, "_blank");
+    else alert("Deposit URL not set.");
+  });
+  </script>
 </body>
 </html>

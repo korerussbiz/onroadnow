@@ -607,4 +607,13 @@ module.exports = async (req, res) => {
     return;
   }
 
+
+  // ---------- Deposit Endpoint (real money) ----------
+  if (url === '/api/deposit' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const depositUrl = process.env.DEPOSIT_URL || 'https://paypal.me/yourhandle';
+    res.status(200).json({ url: depositUrl });
+    return;
+  }
+
 };

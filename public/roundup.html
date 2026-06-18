@@ -91,5 +91,14 @@
   refreshBalance();
   setInterval(refreshBalance, 30000);
 </script>
+  <button id="depositBtn" class="btn" style="background:#f7931a;font-size:1.2rem;padding:0.8rem 2rem;">💰 Deposit</button>
+  <script>
+  document.getElementById("depositBtn")?.addEventListener("click", async function() {
+    const res = await fetch("/api/deposit", { credentials: "include" });
+    const data = await res.json();
+    if (data.url) window.open(data.url, "_blank");
+    else alert("Deposit URL not set.");
+  });
+  </script>
 </body>
 </html>
