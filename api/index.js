@@ -755,4 +755,176 @@ if (url === '/api/auto-trader/report-profit' && method === 'POST') {
     return;
   }
 
+
+  // ---------- Receipt Investment System (Cents on the Dollar + Invoice) ----------
+  // Extend earnings.json with receipt records
+  function loadReceipts(userId) {
+    const data = loadEarnings();
+    if (!data.receipts) data.receipts = {};
+    if (!data.receipts[userId]) data.receipts[userId] = [];
+    saveEarnings(data);
+    return data.receipts[userId];
+  }
+
+  function saveReceipt(userId, receipt) {
+    const data = loadEarnings();
+    if (!data.receipts) data.receipts = {};
+    if (!data.receipts[userId]) data.receipts[userId] = [];
+    data.receipts[userId].push(receipt);
+    saveEarnings(data);
+  }
+
+  // Simulate OCR (if GOOGLE_VISION_API_KEY is set, you can call Vision API)
+  async function extractTotalFromImage(imageBuffer) {
+    // For now, simply return a random total (demo)
+    return 4.30 + Math.random() * 10; // simulate $4.30 ~ $14.30
+  }
+
+  // Generate invoice HTML (can be converted to PDF later)
+  function generateInvoice(receipt) {
+    const invoiceNumber = 'INV-' + Date.now().toString(36).toUpperCase();
+    const date = new Date().toISOString().slice(0,10);
+    const subtotal = receipt.total;
+    const roundup = receipt.roundup;
+    const fee = roundup * 0.02; // 2% platform fee
+    const tax = roundup * 0.05; // 5% VAT/GST (adjust)
+    const totalPaid = roundup + fee + tax;
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head><title>Invoice ${invoiceNumber}</title>
+      <style>body{font-family:monospace;max-width:600px;margin:auto;padding:2rem;}
+      .invoice{background:#1e293b;color:#e2e8f0;padding:2rem;border-radius:1rem;}
+      h1{color:#facc15;} .row{display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #334155;}
+      .total{font-weight:bold;font-size:1.2rem;border-top:2px solid #facc15;margin-top:1rem;padding-top:1rem;}
+      </style></head>
+      <body>
+      <div class="invoice">
+        <h1>🧾 OnRoadNow Investment Invoice</h1>
+        <p><strong>Invoice #:</strong> ${invoiceNumber}</p>
+        <p><strong>Date:</strong> ${date}</p>
+        <p><strong>User ID:</strong> ${receipt.userId}</p>
+        <hr/>
+        <div class="row"><span>Purchase Total</span><span>$${subtotal.toFixed(2)}</span></div>
+        <div class="row"><span>Round‑up Amount</span><span>$${roundup.toFixed(2)}</span></div>
+        <div class="row"><span>Platform Fee (2%)</span><span>$${fee.toFixed(2)}</span></div>
+        <div class="row"><span>VAT/GST (5%)</span><span>$${tax.toFixed(2)}</span></div>
+        <div class="row total"><span>Total Paid</span><span>$${totalPaid.toFixed(2)}</span></div>
+        <p style="margin-top:2rem;color:#94a3b8;">This invoice records the investment of your spare change into financial assets.</p>
+      </div>
+      </body>
+      </html>
+    `;
+  }
+
+  // Endpoint: upload receipt (file or manual total)
+  if (url === '/api/receipt/upload' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { total, image } = req.body; // manual total or base64 image
+    let finalTotal = total ? parseFloat(total) : null;
+    if (!finalTotal && image) {
+      // Simulate OCR – replace with actual Vision API call
+      const buffer = Buffer.from(image, 'base64');
+      finalTotal = await extractTotalFromImage(buffer);
+    }
+    if (!finalTotal || finalTotal <= 0) return res.status(400).json({ error: 'Could not extract a valid total' });
+
+    // Round up to nearest dollar (or any unit)
+    const rounded = Math.ceil(finalTotal);
+    const roundup = rounded - finalTotal;
+    if (roundup <= 0.001) return res.status(400).json({ error: 'No spare change, already rounded' });
+
+    // Record receipt
+    const receipt = {
+      id: Date.now().toString(36) + userId.slice(0,4),
+      userId,
+      total: finalTotal,
+      rounded,
+      roundup,
+      date: new Date().toISOString(),
+      invested: false
+    };
+    // Save receipt record
+    saveReceipt(userId, receipt);
+
+    // Update round-up balance (using the same system)
+    const userRoundup = loadRoundup(userId);
+    userRoundup.balance += roundup;
+    // Also add to receipt history
+    userRoundup.history.push({ amount: roundup, date: receipt.date, receiptId: receipt.id });
+    if (userRoundup.history.length > 100) userRoundup.history.shift();
+    saveRoundup(userId, userRoundup);
+
+    // Auto-invest if threshold met
+    let invested = 0;
+    let symbol = ROUNDUP_CONFIG.defaultSymbol;
+    if (userRoundup.balance >= ROUNDUP_CONFIG.investThreshold) {
+      try {
+        const tradeResult = await executeTrade(userId, symbol, userRoundup.balance, 'buy');
+        userRoundup.balance = 0;
+        userRoundup.invested += tradeResult.userGain;
+        saveRoundup(userId, userRoundup);
+        invested = tradeResult.userGain;
+        receipt.invested = true;
+        receipt.investedAmount = invested;
+        receipt.investSymbol = symbol;
+        // Update receipt record
+        const allReceipts = loadReceipts(userId);
+        const idx = allReceipts.findIndex(r => r.id === receipt.id);
+        if (idx !== -1) allReceipts[idx] = receipt;
+        saveEarnings(loadEarnings()); // force save
+      } catch (err) {
+        console.error('Auto‑invest failed:', err.message);
+      }
+    }
+
+    // Generate invoice (stored in receipt)
+    const invoiceHtml = generateInvoice(receipt);
+    receipt.invoiceHtml = invoiceHtml; // store for later retrieval
+
+    // Update receipt in storage
+    const allReceipts = loadReceipts(userId);
+    const idx2 = allReceipts.findIndex(r => r.id === receipt.id);
+    if (idx2 !== -1) allReceipts[idx2] = receipt;
+    saveEarnings(loadEarnings());
+
+    res.status(200).json({
+      receiptId: receipt.id,
+      total: finalTotal,
+      roundup,
+      newBalance: userRoundup.balance,
+      invested: invested > 0 ? invested : 'pending',
+      invoiceUrl: `/api/receipt/invoice/${receipt.id}`,
+      message: invested > 0 ? `Auto‑invested $${invested.toFixed(2)}` : 'Spare change added – ready to invest.'
+    });
+    return;
+  }
+
+  // Endpoint: get invoice HTML
+  if (url.startsWith('/api/receipt/invoice/') && method === 'GET') {
+    const receiptId = url.split('/').pop();
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const receipts = loadReceipts(userId);
+    const receipt = receipts.find(r => r.id === receiptId);
+    if (!receipt) return res.status(404).json({ error: 'Receipt not found' });
+    res.setHeader('Content-Type', 'text/html');
+    res.status(200).send(receipt.invoiceHtml || '<p>No invoice generated</p>');
+    return;
+  }
+
+  // Endpoint: get receipt history
+  if (url === '/api/receipt/history' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const receipts = loadReceipts(userId);
+    res.status(200).json(receipts.map(r => ({
+      id: r.id,
+      total: r.total,
+      roundup: r.roundup,
+      date: r.date,
+      invested: r.invested || false,
+      investedAmount: r.investedAmount || 0
+    })));
+    return;
+  }
+
 };
