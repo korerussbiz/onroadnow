@@ -1,161 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OnRoadNow – Real Claim Bot</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1rem; }
-    .container { max-width: 800px; margin: 0 auto; }
-    .card { background: #1e293b; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
-    .btn { background: #3b82f6; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; color: white; font-weight: 600; cursor: pointer; margin-right: 0.5rem; }
-    .btn-success { background: #10b981; }
-    .btn-danger { background: #ef4444; }
-    .log { background: #0f172a; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; margin-top: 1rem; }
-    .nav { margin-bottom: 1rem; }
-    .nav a { color: #94a3b8; text-decoration: none; margin-right: 1rem; }
-    .flex { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
-    .status { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 0.5rem; }
-    .status-running { background: #10b981; box-shadow: 0 0 5px #10b981; }
-    .status-stopped { background: #ef4444; }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/@walletconnect/modal@2.6.2/dist/index.umd.js"></script>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Claim Bot</title>
+<style>body{font-family:sans-serif;background:#0f172a;color:#e2e8f0;padding:1rem;}.container{max-width:800px;margin:auto;}.card{background:#1e293b;padding:1.5rem;border-radius:1rem;}.btn{background:#3b82f6;border:none;padding:0.5rem 1.2rem;border-radius:2rem;color:white;cursor:pointer;}</style>
 </head>
 <body>
 <div class="container">
-  <div class="nav"><a href="/">Home</a> | <a href="/auto-trader">Auto‑Trader</a> | <a href="/claimer">Claim Bot</a></div>
-  <div class="card">
-    <h2>🤖 Real Claim Bot</h2>
-    <p>Connect your wallet, scan for real claimable tokens, and auto‑claim them.</p>
-    <div class="flex">
-      <button id="connectBtn" class="btn">🔗 Connect Wallet</button>
-      <button id="scanBtn" class="btn">🔍 Scan Now</button>
-      <button id="claimBtn" class="btn btn-success">💰 Claim All</button>
-      <button id="startAutoBtn" class="btn">▶️ Auto Mode</button>
-      <button id="stopAutoBtn" class="btn btn-danger">⏹️ Stop</button>
-      <span id="statusDisplay"><span class="status status-stopped"></span> Disconnected</span>
-    </div>
-    <div id="walletAddress" style="margin-top:0.5rem;"></div>
-  </div>
-  <div class="card">
-    <h3>📋 Found Claims</h3>
-    <div id="claimsList"></div>
-  </div>
-  <div class="card">
-    <h3>📜 Activity Log</h3>
-    <div id="log" class="log"></div>
-  </div>
+<div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:2rem;">
+  <a href="/" style="color:#2563eb;">🏠 Home</a>
+  <a href="/auto-trader" style="color:#2563eb;">🤖 Auto‑Trader</a>
+  <a href="/stock-trader" style="color:#2563eb;">📈 Stocks</a>
+  <a href="/claimer" style="color:#2563eb;">💰 Claim</a>
+  <a href="/referral" style="color:#2563eb;">👥 Referrals</a>
+  <a href="/roundup" style="color:#2563eb;">🪙 Round‑Up</a>
+  <a href="/receipt-invest" style="color:#2563eb;">🧾 Receipt</a>
+  <a href="/history" style="color:#2563eb;">📜 History</a>
 </div>
-<script>
-  // WalletConnect configuration
-  const projectId = 'YOUR_WALLETCONNECT_PROJECT_ID';
-  let web3Modal, provider, signer, walletAddress;
-  let autoInterval = null;
-  let isAutoRunning = false;
-
-  function addLog(msg, isError = false) {
-    const logDiv = document.getElementById('log');
-    const p = document.createElement('div');
-    p.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    if (isError) p.style.color = '#f87171';
-    logDiv.appendChild(p);
-    logDiv.scrollTop = logDiv.scrollHeight;
-    while (logDiv.children.length > 100) logDiv.removeChild(logDiv.firstChild);
-  }
-
-  function updateStatus(text, color) {
-    const status = document.getElementById('statusDisplay');
-    status.innerHTML = `<span class="status" style="background:${color};box-shadow:0 0 5px ${color};"></span> ${text}`;
-  }
-
-  async function connectWallet() {
-    try {
-      if (!web3Modal) {
-        web3Modal = new WalletConnectModal.default({
-          projectId,
-          chains: ['eip155:1'],
-          themeMode: 'dark'
-        });
-      }
-      await web3Modal.open();
-      // Wait for provider to be ready (simplified)
-      const session = web3Modal.getProvider();
-      if (session) {
-        const accounts = await session.request({ method: 'eth_accounts' });
-        walletAddress = accounts[0];
-        document.getElementById('walletAddress').innerText = `Connected: ${walletAddress.slice(0,6)}...${walletAddress.slice(-4)}`;
-        updateStatus('Connected', '#10b981');
-        addLog(`✅ Wallet connected: ${walletAddress}`);
-      }
-    } catch(e) {
-      addLog(`❌ Connection error: ${e.message}`, true);
-    }
-  }
-
-  async function scanClaims() {
-    if (!walletAddress) { addLog("Connect wallet first", true); return; }
-    addLog("Scanning for claimable tokens...");
-    updateStatus('Scanning', '#facc15');
-    try {
-      const res = await fetch('/api/claim/scan-evm', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: walletAddress })
-      });
-      const data = await res.json();
-      if (data.error) { addLog(`❌ ${data.error}`, true); return; }
-      const claims = data.claims || [];
-      const container = document.getElementById('claimsList');
-      container.innerHTML = '';
-      if (claims.length === 0) {
-        container.innerHTML = '<div style="color:#94a3b8;">No claimable tokens found.</div>';
-        addLog("No claims found.");
-      } else {
-        claims.forEach(c => {
-          const div = document.createElement('div');
-          div.className = 'claim-item';
-          div.innerHTML = `<strong>${c.name}</strong> – ${c.amount} (contract: ${c.contract.slice(0,10)}...)`;
-          container.appendChild(div);
-        });
-        addLog(`✅ Found ${claims.length} claimable items.`);
-      }
-      updateStatus('Connected', '#10b981');
-    } catch(e) {
-      addLog(`❌ Scan error: ${e.message}`, true);
-      updateStatus('Error', '#ef4444');
-    }
-  }
-
-  async function claimAll() {
-    if (!walletAddress) { addLog("Connect wallet first", true); return; }
-    addLog("Claiming all...");
-    // In production, you'd iterate over claims and send transactions.
-    // For now, just log.
-    addLog("✅ Claiming simulation – replace with actual tx signing.");
-  }
-
-  function startAuto() {
-    if (autoInterval) clearInterval(autoInterval);
-    isAutoRunning = true;
-    autoInterval = setInterval(scanClaims, 60000);
-    addLog("🚀 Auto mode started (every 60s)");
-    updateStatus('Auto Running', '#10b981');
-  }
-
-  function stopAuto() {
-    if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
-    isAutoRunning = false;
-    addLog("⏹️ Auto mode stopped");
-    updateStatus('Connected', '#10b981');
-  }
-
-  document.getElementById('connectBtn').onclick = connectWallet;
-  document.getElementById('scanBtn').onclick = scanClaims;
-  document.getElementById('claimBtn').onclick = claimAll;
-  document.getElementById('startAutoBtn').onclick = startAuto;
-  document.getElementById('stopAutoBtn').onclick = stopAuto;
-</script>
+<div class="card">
+<h1>Claim Bot</h1>
+<p>This page is under construction. Check back soon!</p>
+<button class="btn" onclick="alert('Coming soon!')">Learn More</button>
+</div>
+</div>
 </body>
 </html>
