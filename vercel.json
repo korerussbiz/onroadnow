@@ -5,6 +5,7 @@
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/roundup", "dest": "/public/roundup.html" },
     { "src": "/receipt-invest", "dest": "/public/receipt-invest.html" },
     { "src": "/stock-trader", "dest": "/public/stock-trader.html" },
     { "src": "/referral", "dest": "/public/referral.html" },
