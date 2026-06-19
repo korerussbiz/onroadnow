@@ -1503,4 +1503,50 @@ module.exports = async (req, res) => {
     return;
   }
 
+
+  // ---------- MINING SYSTEM (Real Pool Stats) ----------
+  const MINING_WALLET = '9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2';
+  const POOL_API = 'https://supportxmr.com/api/miner';
+  let miningCache = { data: null, timestamp: 0 };
+
+  if (url === '/api/mining/stats' && method === 'GET') {
+    // Check cache (30 seconds)
+    const now = Date.now();
+    if (miningCache.data && (now - miningCache.timestamp < 30000)) {
+      res.status(200).json(miningCache.data);
+      return;
+    }
+    try {
+      // Fetch from pool
+      const [poolRes, priceRes] = await Promise.all([
+        axios.get(`${POOL_API}/${MINING_WALLET}/stats`),
+        axios.get('https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd')
+      ]);
+      const pool = poolRes.data;
+      const price = priceRes.data.monero?.usd || 0;
+      const unpaid = (pool.amtDue || 0) / 1e12;
+
+      const stats = {
+        wallet: MINING_WALLET,
+        hashrate: pool.hashrate || 0,
+        hashrateUnit: 'H/s',
+        totalHashes: pool.totalHashes || 0,
+        unpaidBalance: unpaid,
+        valueUSD: unpaid * price,
+        lastShare: pool.lastShare || 0,
+        xmrPrice: price,
+        poolName: 'supportxmr.com',
+        minersOnline: pool.minersOnline || 0,
+        poolHashrate: pool.networkHashrate || 0,
+        poolHashrateUnit: 'MH/s'
+      };
+      miningCache.data = stats;
+      miningCache.timestamp = now;
+      res.status(200).json(stats);
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch mining stats' });
+    }
+    return;
+  }
+
 };
