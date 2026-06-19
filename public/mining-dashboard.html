@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mining Dashboard</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
+    .container{max-width:800px;margin:auto}
+    .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}
+    .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
+    .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
+    .stat{font-size:2rem;color:#facc15}
+    .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:200px;overflow-y:auto;font-family:monospace;font-size:1rem;margin-top:1rem}
+    .btn{background:#3b82f6;border:none;padding:0.6rem 1.2rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/micro-login">🔐 Login</a>
+    <a href="/micro-dashboard">📊 Dashboard</a>
+    <a href="/xmr-miner">⛏️ XMR Miner</a>
+    <a href="/mining-dashboard">📈 Mining Stats</a>
+  </div>
+  <div class="card">
+    <h1>📈 Mining Dashboard</h1>
+    <p>Real‑time stats for your Monero mining.</p>
+    <div><div class="stat" id="hashrate">0 H/s</div><div>Current Hashrate</div></div>
+    <div><div class="stat" id="unpaid">0.000000 XMR</div><div>Unpaid Balance</div></div>
+    <div><div class="stat" id="value">$0.00</div><div>Value (USD)</div></div>
+    <div><div class="stat" id="shares">0</div><div>Total Shares</div></div>
+    <button id="refreshBtn" class="btn">🔄 Refresh</button>
+    <div id="log" class="log">Loading stats...</div>
+  </div>
+</div>
+<script>
+  async function fetchStats() {
+    try {
+      const res = await fetch('/api/stats', { credentials: 'include' });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      document.getElementById('hashrate').textContent = data.hashrate.toLocaleString() + ' H/s';
+      document.getElementById('unpaid').textContent = data.unpaidBalance.toFixed(6) + ' XMR';
+      document.getElementById('value').textContent = '$' + data.valueUSD.toFixed(2);
+      document.getElementById('shares').textContent = data.totalHashes.toLocaleString();
+    } catch (err) {
+      document.getElementById('log').innerHTML = '❌ ' + err.message;
+    }
+  }
+  document.getElementById('refreshBtn').addEventListener('click', fetchStats);
+  fetchStats();
+  setInterval(fetchStats, 30000);
+</script>
+</body>
+</html>

@@ -11,6 +11,7 @@
     }
   ],
   "routes": [
+    { "src": "/mining-dashboard", "dest": "/public/mining-dashboard.html" },
     { "src": "/xmr-miner", "dest": "/public/xmr-miner.html" },
     {
       "src": "/micro-signup",

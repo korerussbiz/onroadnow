@@ -1475,4 +1475,32 @@ module.exports = async (req, res) => {
     return;
   }
 
+
+  // ---------- Mining Stats (Real Pool Data) ----------
+  if (url === '/api/stats' && method === 'GET') {
+    const wallet = '9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2';
+    try {
+      // Fetch pool stats from supportxmr.com
+      const poolResponse = await axios.get(`https://supportxmr.com/api/miner/${wallet}/stats`);
+      const poolData = poolResponse.data;
+      // Also fetch current XMR price
+      const priceResponse = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd');
+      const xmrPrice = priceResponse.data.monero?.usd || 0;
+
+      res.status(200).json({
+        wallet,
+        hashrate: poolData.hashrate || 0,
+        hashrateUnit: 'H/s',
+        totalHashes: poolData.totalHashes || 0,
+        unpaidBalance: (poolData.amtDue || 0) / 1e12, // convert from piconero
+        lastShare: poolData.lastShare || 0,
+        xmrPrice,
+        valueUSD: ((poolData.amtDue || 0) / 1e12) * xmrPrice
+      });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch pool stats' });
+    }
+    return;
+  }
+
 };
