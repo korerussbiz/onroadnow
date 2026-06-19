@@ -3,23 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XMR Mining Dashboard</title>
+  <title>XMR Mining – Complete System</title>
   <style>
     *{box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
-    .container{max-width:900px;margin:auto}
+    .container{max-width:1000px;margin:auto}
     .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}
     .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
     .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
     .nav a:hover{color:#facc15}
+    .tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:1px solid #334155;padding-bottom:0.5rem;flex-wrap:wrap}
+    .tab{background:transparent;border:none;padding:0.6rem 1.2rem;border-radius:2rem;color:#94a3b8;cursor:pointer;font-size:1.1rem}
+    .tab.active{background:#3b82f6;color:#fff}
+    .tab-pane{display:none}
+    .tab-pane.active{display:block}
+    input,button{font-size:1.2rem;padding:0.8rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;width:100%;margin:0.5rem 0}
+    .btn{background:#3b82f6;border:none;padding:0.8rem 1.8rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;width:auto}
+    .btn-success{background:#10b981}
+    .btn-danger{background:#ef4444}
+    .btn-warning{background:#f59e0b}
+    .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:250px;overflow-y:auto;font-family:monospace;font-size:1rem;margin-top:1rem}
     .stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem}
     .stat-item{background:#0f172a;padding:1rem;border-radius:0.5rem;text-align:center}
     .stat-value{font-size:2.5rem;color:#facc15}
     .stat-label{color:#94a3b8;font-size:1rem}
-    .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:200px;overflow-y:auto;font-family:monospace;font-size:1rem;margin-top:1rem}
-    .btn{background:#3b82f6;border:none;padding:0.6rem 1.2rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer}
-    .btn-success{background:#10b981}
     .warning{background:#1e293b;border-left:4px solid #f59e0b;padding:0.8rem;margin:0.5rem 0;border-radius:0.5rem}
+    .consent-banner{background:#1e293b;border:2px solid #f59e0b;padding:1rem;border-radius:1rem;margin:1rem 0}
+    .native-cmd{background:#0f172a;padding:1rem;border-radius:0.5rem;font-family:monospace;margin:0.5rem 0;border:1px solid #334155;word-break:break-all}
+    .flex{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center}
   </style>
 </head>
 <body>
@@ -28,49 +39,308 @@
     <a href="/">🏠 Home</a>
     <a href="/micro-login">🔐 Login</a>
     <a href="/micro-dashboard">📊 Dashboard</a>
-    <a href="/xmr-miner">⛏️ XMR Dashboard</a>
-    <a href="/mining-dashboard">📈 Mining Stats</a>
+    <a href="/xmr-miner">⛏️ XMR Mining</a>
   </div>
+
   <div class="card">
-    <h1>⛏️ Monero Mining Dashboard</h1>
-    <p>Live stats from SupportXMR pool for your wallet.</p>
-    <div class="warning">
-      ⚠️ <strong>Wallet:</strong> 9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2
-    </div>
-    <div class="stats-grid">
-      <div class="stat-item">
-        <div class="stat-value" id="hashrate">0</div>
-        <div class="stat-label">Hashrate (H/s)</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="balance">0.000000</div>
-        <div class="stat-label">Unpaid Balance (XMR)</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-value" id="value">$0.00</div>
-        <div class="stat-label">Value (USD)</div>
+    <h1>⛏️ Monero (XMR) Mining System</h1>
+    <p>Complete mining solution with web miner, stats dashboard, and native miner.</p>
+
+    <!-- Consent Banner -->
+    <div class="consent-banner" id="consentBanner">
+      <p><strong>⚠️ CPU Mining Consent</strong></p>
+      <p>This page can use your device's CPU to mine Monero (XMR). Mining uses computational resources and may affect device performance.</p>
+      <p><small>By clicking "I Consent", you agree to allow CPU mining on this device. You can stop at any time.</small></p>
+      <div class="flex">
+        <button id="consentYes" class="btn btn-success">✅ I Consent</button>
+        <button id="consentNo" class="btn btn-danger">❌ No Thanks</button>
       </div>
     </div>
-    <div style="margin-top:1.5rem;">
-      <button id="refreshBtn" class="btn btn-success">🔄 Refresh Stats</button>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="web">🌐 Web Miner</button>
+      <button class="tab" data-tab="stats">📊 Stats</button>
+      <button class="tab" data-tab="native">🖥️ Native</button>
     </div>
-    <div id="log" class="log">Loading stats...</div>
+
+    <!-- ====== TAB 1: Web Miner ====== -->
+    <div id="web" class="tab-pane active">
+      <div class="warning">
+        ⚠️ <strong>Wallet:</strong> 9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2
+      </div>
+      <div class="flex">
+        <button id="startBtn" class="btn btn-success">▶ Start Mining</button>
+        <button id="stopBtn" class="btn btn-danger">⏹ Stop</button>
+        <button id="statusBtn" class="btn btn-warning">🔄 Status</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-value" id="hashrate">0</div><div class="stat-label">Hashrate (H/s)</div></div>
+        <div class="stat-item"><div class="stat-value" id="accepted">0</div><div class="stat-label">Accepted Shares</div></div>
+        <div class="stat-item"><div class="stat-value" id="totalHashes">0</div><div class="stat-label">Total Hashes</div></div>
+      </div>
+      <div id="webLog" class="log">Web miner ready. Click Start (consent required first).</div>
+    </div>
+
+    <!-- ====== TAB 2: Stats ====== -->
+    <div id="stats" class="tab-pane">
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-value" id="statHashrate">0</div><div class="stat-label">Hashrate (H/s)</div></div>
+        <div class="stat-item"><div class="stat-value" id="statBalance">0.000000</div><div class="stat-label">Unpaid Balance (XMR)</div></div>
+        <div class="stat-item"><div class="stat-value" id="statValue">$0.00</div><div class="stat-label">Value (USD)</div></div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-value" id="statPaid">0.000000</div><div class="stat-label">Total Paid (XMR)</div></div>
+        <div class="stat-item"><div class="stat-value" id="statShares">0</div><div class="stat-label">Valid Shares</div></div>
+        <div class="stat-item"><div class="stat-value" id="statLastShare">—</div><div class="stat-label">Last Share</div></div>
+      </div>
+      <button id="refreshStatsBtn" class="btn btn-success">🔄 Refresh Stats</button>
+      <div id="statsLog" class="log">Loading stats...</div>
+    </div>
+
+    <!-- ====== TAB 3: Native Miner ====== -->
+    <div id="native" class="tab-pane">
+      <div class="warning">
+        💡 <strong>Native miner</strong> uses your device's CPU directly for maximum hashrate.
+      </div>
+      <div class="flex">
+        <button id="nativeStartBtn" class="btn btn-success">▶ Start Native</button>
+        <button id="nativeStopBtn" class="btn btn-danger">⏹ Stop Native</button>
+        <button id="nativeStatusBtn" class="btn btn-warning">🔄 Check Status</button>
+      </div>
+      <p>Or run from terminal:</p>
+      <div class="native-cmd">~/start_miner.sh</div>
+      <div id="nativeLog" class="log">Native miner ready.</div>
+    </div>
   </div>
 </div>
+
 <script>
+  // ---------- Configuration ----------
+  const WALLET = "9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2";
+  let consentGiven = false;
+  let miner = null;
+  let running = false;
+  let intervalId = null;
+  let hashrateVal = 0, acceptedVal = 0, totalHashesVal = 0;
+
+  // ---------- Consent ----------
+  function checkConsent() {
+    const banner = document.getElementById('consentBanner');
+    if (localStorage.getItem('xmr_miner_consent') === 'true') {
+      consentGiven = true;
+      banner.style.display = 'none';
+    }
+  }
+
+  document.getElementById('consentYes').addEventListener('click', function() {
+    localStorage.setItem('xmr_miner_consent', 'true');
+    consentGiven = true;
+    document.getElementById('consentBanner').style.display = 'none';
+    addWebLog('✅ Consent given. You can now start mining.');
+  });
+
+  document.getElementById('consentNo').addEventListener('click', function() {
+    document.getElementById('consentBanner').style.display = 'none';
+    addWebLog('❌ Mining disabled. Reload to change consent.');
+  });
+
+  // ---------- Tab switching ----------
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      document.getElementById(this.dataset.tab).classList.add('active');
+      if (this.dataset.tab === 'stats') fetchStats();
+    });
+  });
+
+  // ---------- Web Miner (CryptoWeb WASM) ----------
+  function addWebLog(msg, isError = false) {
+    const logDiv = document.getElementById('webLog');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    if (isError) p.style.color = '#ef4444';
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  function loadCryptoWeb() {
+    return new Promise((resolve) => {
+      // Try multiple CDN sources
+      const sources = [
+        'https://cdn.jsdelivr.net/npm/@cryptoweb/core@0.1.0/dist/cryptoweb.min.js',
+        'https://unpkg.com/@cryptoweb/core@0.1.0/dist/cryptoweb.min.js'
+      ];
+      let loaded = false;
+
+      function tryLoad(index) {
+        if (index >= sources.length) { resolve(false); return; }
+        const script = document.createElement('script');
+        script.src = sources[index];
+        script.onload = () => {
+          if (typeof CryptoWeb !== 'undefined') {
+            loaded = true;
+            resolve(true);
+          } else {
+            tryLoad(index + 1);
+          }
+        };
+        script.onerror = () => tryLoad(index + 1);
+        document.head.appendChild(script);
+        setTimeout(() => {
+          if (!loaded && typeof CryptoWeb !== 'undefined') {
+            loaded = true;
+            resolve(true);
+          }
+        }, 5000);
+      }
+      tryLoad(0);
+    });
+  }
+
+  function startWasmMiner() {
+    if (!consentGiven) {
+      addWebLog('❌ Consent required. Please accept the consent banner.', true);
+      return false;
+    }
+    try {
+      miner = new CryptoWeb.Miner({
+        wallet: WALLET,
+        threads: Math.min(navigator.hardwareConcurrency || 4, 8),
+        pool: { url: 'pool.supportxmr.com:3333' }
+      });
+      miner.on('hashrate', (h) => {
+        hashrateVal = Math.round(h);
+        document.getElementById('hashrate').textContent = hashrateVal;
+      });
+      miner.on('accepted', () => {
+        acceptedVal++;
+        document.getElementById('accepted').textContent = acceptedVal;
+        addWebLog('✅ Share accepted!');
+      });
+      miner.on('totalHashes', (h) => {
+        totalHashesVal = h;
+        document.getElementById('totalHashes').textContent = totalHashesVal;
+      });
+      miner.on('error', (err) => {
+        addWebLog(`❌ WASM error: ${err}`, true);
+      });
+      miner.start();
+      running = true;
+      addWebLog('⛏️ Web mining started on pool.supportxmr.com:3333');
+      return true;
+    } catch (e) {
+      addWebLog(`❌ WASM start failed: ${e.message}`, true);
+      return false;
+    }
+  }
+
+  async function startWebMining() {
+    if (running) { addWebLog('⚠️ Already mining.'); return; }
+    if (!consentGiven) { addWebLog('❌ Please accept the consent banner first.', true); return; }
+    hashrateVal = 0; acceptedVal = 0; totalHashesVal = 0;
+    document.getElementById('hashrate').textContent = '0';
+    document.getElementById('accepted').textContent = '0';
+    document.getElementById('totalHashes').textContent = '0';
+
+    addWebLog('⏳ Loading CryptoWeb WASM...');
+    const loaded = await loadCryptoWeb();
+    if (loaded && typeof CryptoWeb !== 'undefined') {
+      addWebLog('✅ CryptoWeb loaded.');
+      startWasmMiner();
+    } else {
+      addWebLog('❌ CryptoWeb not available. Try native miner.', true);
+    }
+  }
+
+  function stopWebMining() {
+    if (miner) { miner.stop(); miner = null; }
+    running = false;
+    if (intervalId) clearInterval(intervalId);
+    addWebLog('⏹️ Web mining stopped.');
+  }
+
+  function checkWebStatus() {
+    if (running) {
+      addWebLog(`📊 Hashrate: ${hashrateVal} H/s, Accepted: ${acceptedVal}, Total: ${totalHashesVal}`);
+    } else {
+      addWebLog('⏹️ Web miner is not running.');
+    }
+  }
+
+  document.getElementById('startBtn').addEventListener('click', startWebMining);
+  document.getElementById('stopBtn').addEventListener('click', stopWebMining);
+  document.getElementById('statusBtn').addEventListener('click', checkWebStatus);
+
+  // ---------- Stats Dashboard ----------
   async function fetchStats() {
     try {
       const res = await fetch('/api/mining/stats', { credentials: 'include' });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      document.getElementById('hashrate').textContent = data.hashrate.toLocaleString();
-      document.getElementById('balance').textContent = data.balance.toFixed(6);
-      document.getElementById('value').textContent = '$' + data.valueUSD.toFixed(2);
+      document.getElementById('statHashrate').textContent = data.hashrate.toLocaleString();
+      document.getElementById('statBalance').textContent = data.balance.toFixed(6);
+      document.getElementById('statValue').textContent = '$' + data.valueUSD.toFixed(2);
+      document.getElementById('statPaid').textContent = (data.paid || 0).toFixed(6);
+      document.getElementById('statShares').textContent = data.validShares || 0;
+      document.getElementById('statLastShare').textContent = data.lastShare ? new Date(data.lastShare).toLocaleString() : '—';
     } catch (err) {
-      document.getElementById('log').innerHTML = '❌ ' + err.message;
+      document.getElementById('statsLog').innerHTML = '❌ ' + err.message;
     }
   }
-  document.getElementById('refreshBtn').addEventListener('click', fetchStats);
+  document.getElementById('refreshStatsBtn').addEventListener('click', fetchStats);
+
+  // ---------- Native Miner Controls ----------
+  function addNativeLog(msg, isError = false) {
+    const logDiv = document.getElementById('nativeLog');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    if (isError) p.style.color = '#ef4444';
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  async function startNativeMiner() {
+    try {
+      const res = await fetch('/api/miner/start', { method: 'POST', credentials: 'include' });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      addNativeLog('✅ ' + (data.message || 'Miner started.'));
+    } catch (err) {
+      addNativeLog('❌ ' + err.message, true);
+    }
+  }
+
+  async function stopNativeMiner() {
+    try {
+      const res = await fetch('/api/miner/stop', { method: 'POST', credentials: 'include' });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      addNativeLog('✅ ' + (data.message || 'Miner stopped.'));
+    } catch (err) {
+      addNativeLog('❌ ' + err.message, true);
+    }
+  }
+
+  async function checkNativeStatus() {
+    try {
+      const res = await fetch('/api/miner/status', { credentials: 'include' });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      addNativeLog(data.running ? '✅ Native miner is running.' : '⏹️ Native miner is not running.');
+    } catch (err) {
+      addNativeLog('❌ ' + err.message, true);
+    }
+  }
+
+  document.getElementById('nativeStartBtn').addEventListener('click', startNativeMiner);
+  document.getElementById('nativeStopBtn').addEventListener('click', stopNativeMiner);
+  document.getElementById('nativeStatusBtn').addEventListener('click', checkNativeStatus);
+
+  // ---------- Initialization ----------
+  checkConsent();
   fetchStats();
   setInterval(fetchStats, 30000);
 </script>
