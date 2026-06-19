@@ -22,8 +22,8 @@
     .stat-value{font-size:2.5rem;color:#facc15}
     .warning{background:#1e293b;border-left:4px solid #f59e0b;padding:0.8rem;margin:0.5rem 0;border-radius:0.5rem}
     .pool-selector{display:flex;gap:0.5rem;flex-wrap:wrap}
-    .pool-btn{background:#1e293b;border:1px solid #334155;padding:0.4rem 0.8rem;border-radius:2rem;cursor:pointer;font-size:1rem}
-    .pool-btn.active{background:#3b82f6;border-color:#60a5fa}
+    .pool-btn{background:#1e293b;border:1px solid #334155;padding:0.4rem 0.8rem;border-radius:2rem;cursor:pointer;font-size:1rem;color:#94a3b8}
+    .pool-btn.active{background:#3b82f6;border-color:#60a5fa;color:#fff}
   </style>
 </head>
 <body>
@@ -61,7 +61,6 @@
       <button id="startBtn" class="btn btn-success">▶ Start Mining</button>
       <button id="stopBtn" class="btn btn-danger">⏹ Stop</button>
       <button id="statusBtn" class="btn btn-warning">🔄 Status</button>
-      <button id="retryBtn" class="btn">↻ Reload WASM</button>
     </div>
     <div class="stats">
       <div><div class="stat-value" id="hashrate">0</div><div>Hashrate (H/s)</div></div>
@@ -73,21 +72,14 @@
 </div>
 
 <script>
-  // ------- Multiple CDN sources for WASM miner -------
-  const CDN_SOURCES = [
-    'https://cdn.jsdelivr.net/npm/webminerpool@2.0.0/webmr.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/webminerpool/2.0.0/webmr.js',
-    'https://unpkg.com/webminerpool@2.0.0/webmr.js',
-    'https://raw.githubusercontent.com/andrepolischuk/webminerpool/master/dist/webmr.js' // GitHub raw (may work)
-  ];
-
+  // -------- webminerpool integration (proper usage) --------
+  let miner = null;
   let minerRunning = false;
   let intervalId = null;
   let hashrateVal = 0;
   let acceptedVal = 0;
   let totalHashesVal = 0;
   let selectedPool = 'xmr-eu1.nanopool.org:10300';
-  let libLoaded = false;
 
   function addLog(msg, isError = false) {
     const logDiv = document.getElementById('log');
@@ -108,55 +100,33 @@
     });
   });
 
-  // Load WASM from multiple sources
-  function loadWasmMiner() {
+  // Load the library
+  function loadWebMinerLibrary() {
     return new Promise((resolve) => {
-      let attempts = 0;
-      let resolved = false;
-
-      function tryLoad(index) {
-        if (index >= CDN_SOURCES.length) {
-          if (!resolved) resolve(false);
-          return;
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/webminerpool@2.0.0/dist/webmr.js';
+      script.onload = () => {
+        if (typeof WebMiner !== 'undefined') {
+          addLog('✅ WebMiner library loaded successfully.');
+          resolve(true);
+        } else {
+          addLog('⚠️ WebMiner not defined after load.', true);
+          resolve(false);
         }
-        const src = CDN_SOURCES[index];
-        addLog(`⏳ Trying ${src}...`);
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = () => {
-          // Check if functions are available
-          if (typeof startMining === 'function' && typeof stopMining === 'function') {
-            if (!resolved) {
-              resolved = true;
-              addLog(`✅ Loaded from ${src}`);
-              resolve(true);
-            }
-          } else {
-            // Function not exposed – try next
-            tryLoad(index + 1);
-          }
-        };
-        script.onerror = () => {
-          addLog(`⚠️ Failed from ${src}`, true);
-          tryLoad(index + 1);
-        };
-        document.head.appendChild(script);
-        // Timeout: if no response, try next after 5s
-        setTimeout(() => {
-          if (!resolved) {
-            // Check again if functions appeared later
-            if (typeof startMining === 'function' && typeof stopMining === 'function') {
-              if (!resolved) {
-                resolved = true;
-                addLog(`✅ Loaded from ${src} (delayed)`);
-                resolve(true);
-              }
-            }
-          }
-        }, 5000);
-      }
-
-      tryLoad(0);
+      };
+      script.onerror = () => {
+        addLog('❌ Failed to load WebMiner library.', true);
+        resolve(false);
+      };
+      document.head.appendChild(script);
+      // Timeout fallback
+      setTimeout(() => {
+        if (typeof WebMiner !== 'undefined') {
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }, 5000);
     });
   }
 
@@ -165,57 +135,89 @@
     if (!address) { addLog('❌ Wallet address missing.', true); return; }
     if (minerRunning) { addLog('⚠️ Already mining.'); return; }
 
-    // Load library if not loaded
-    if (!libLoaded) {
-      addLog('⏳ Loading WebAssembly miner...');
-      libLoaded = await loadWasmMiner();
-      if (!libLoaded) {
-        addLog('❌ All CDN sources failed. Check connection or use native miner.', true);
+    // Ensure library is loaded
+    if (typeof WebMiner === 'undefined') {
+      addLog('⏳ Loading WebMiner library...');
+      const loaded = await loadWebMinerLibrary();
+      if (!loaded) {
+        addLog('❌ Failed to load WebMiner library. Check connection.', true);
         return;
       }
     }
 
     try {
-      // Start mining on Nanopool – use the selected pool
-      startMining(
-        selectedPool,   // pool:port
-        address,        // wallet
-        'x',            // password
-        -1              // auto threads
-      );
+      // Parse pool host and port
+      let [host, port] = selectedPool.split(':');
+      port = parseInt(port) || 10300;
+
+      // Create miner instance
+      miner = new WebMiner({
+        host: host,
+        port: port,
+        ssl: false, // nanopool uses plain stratum for port 10300
+        user: address,
+        pass: 'x',
+        threads: Math.min(navigator.hardwareConcurrency || 4, 8),
+        autodetect: true
+      });
+
+      // Event: hashrate update
+      miner.on('hashrate', function(h) {
+        hashrateVal = Math.round(h);
+        document.getElementById('hashrate').textContent = hashrateVal;
+      });
+
+      // Event: share accepted
+      miner.on('accepted', function() {
+        acceptedVal++;
+        document.getElementById('accepted').textContent = acceptedVal;
+        addLog('✅ Share accepted!');
+      });
+
+      // Event: total hashes
+      miner.on('hashes', function(h) {
+        totalHashesVal += h;
+        document.getElementById('totalHashes').textContent = totalHashesVal;
+      });
+
+      // Event: error
+      miner.on('error', function(err) {
+        addLog(`❌ Miner error: ${err}`, true);
+      });
+
+      // Start the miner
+      miner.start();
       minerRunning = true;
       addLog(`⛏️ Mining started on ${selectedPool}`);
 
-      // Clear previous interval
-      if (intervalId) clearInterval(intervalId);
+      // Monitor status
       intervalId = setInterval(() => {
-        if (typeof getHashrate === 'function') {
-          const h = getHashrate();
-          if (h > 0) {
-            hashrateVal = Math.round(h);
-            document.getElementById('hashrate').textContent = hashrateVal;
-          }
+        if (miner) {
+          // Update stats periodically (already handled by events)
+          // But we can also get stats from miner.getStats()
+          try {
+            const stats = miner.getStats();
+            if (stats && stats.accepted) {
+              acceptedVal = stats.accepted;
+              document.getElementById('accepted').textContent = acceptedVal;
+            }
+            if (stats && stats.total) {
+              totalHashesVal = stats.total;
+              document.getElementById('totalHashes').textContent = totalHashesVal;
+            }
+          } catch (e) { /* ignore */ }
         }
-        // Accepted shares – we'll use the library's callback if available,
-        // otherwise we simulate based on hashrate (real shares are reported by pool)
-        // We'll use a random chance to show share acceptance (simulation)
-        if (Math.random() < 0.03) {
-          acceptedVal++;
-          document.getElementById('accepted').textContent = acceptedVal;
-          addLog('✅ Share accepted!');
-        }
-        // Total hashes: approximate
-        totalHashesVal += Math.floor(hashrateVal / 2);
-        document.getElementById('totalHashes').textContent = totalHashesVal;
-      }, 2000);
+      }, 5000);
+
     } catch (err) {
       addLog('❌ Failed to start: ' + err.message, true);
     }
   }
 
   function stopMining() {
-    if (typeof stopMining === 'function') {
-      stopMining();
+    if (miner) {
+      miner.stop();
+      miner = null;
     }
     minerRunning = false;
     if (intervalId) clearInterval(intervalId);
@@ -230,25 +232,20 @@
     }
   }
 
-  async function retryLibrary() {
-    addLog('🔄 Retrying library load...');
-    libLoaded = false;
-    libLoaded = await loadWasmMiner();
-    if (libLoaded) addLog('✅ Library loaded successfully.');
-    else addLog('❌ Library still not available.', true);
-  }
-
   document.getElementById('startBtn').addEventListener('click', startMining);
   document.getElementById('stopBtn').addEventListener('click', stopMining);
   document.getElementById('statusBtn').addEventListener('click', checkStatus);
-  document.getElementById('retryBtn').addEventListener('click', retryLibrary);
 
-  // Pre‑load library on page load
+  // Pre‑load the library so it's ready
   (async () => {
-    addLog('⏳ Pre‑loading WASM miner...');
-    libLoaded = await loadWasmMiner();
-    if (libLoaded) addLog('✅ WASM miner ready.');
-    else addLog('⚠️ Pre‑load failed – will retry on Start or use "Reload WASM" button.', true);
+    if (typeof WebMiner === 'undefined') {
+      addLog('⏳ Pre‑loading WebMiner library...');
+      const loaded = await loadWebMinerLibrary();
+      if (loaded) addLog('✅ WebMiner ready.');
+      else addLog('⚠️ Pre‑load failed – will retry on Start.', true);
+    } else {
+      addLog('✅ WebMiner already available.');
+    }
   })();
 </script>
 </body>
