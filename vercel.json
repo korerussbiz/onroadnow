@@ -1,22 +1,87 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/index.js", "use": "@vercel/node" },
-    { "src": "public/**", "use": "@vercel/static" }
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
   ],
   "routes": [
-    { "src": "/store-dashboard", "dest": "/public/store-dashboard.html" },
-    { "src": "/customer-portal", "dest": "/public/customer-portal.html" },
-    { "src": "/features", "dest": "/public/features.html" },
-    { "src": "/api/(.*)", "dest": "/api/index.js" },
-    { "src": "/auto-trader", "dest": "/public/auto-trader.html" },
-    { "src": "/stock-trader", "dest": "/public/stock-trader.html" },
-    { "src": "/claimer", "dest": "/public/claimer.html" },
-    { "src": "/referral", "dest": "/public/referral.html" },
-    { "src": "/roundup", "dest": "/public/roundup.html" },
-    { "src": "/receipt-invest", "dest": "/public/receipt-invest.html" },
-    { "src": "/history", "dest": "/public/history.html" },
-    { "src": "/", "dest": "/public/index.html" },
-    { "src": "/(.*)", "dest": "/public/$1" }
+    {
+      "src": "/micro-signup",
+      "dest": "/public/micro-signup.html"
+    },
+    {
+      "src": "/micro-trade",
+      "dest": "/public/micro-trade.html"
+    },
+    {
+      "src": "/micro-teller",
+      "dest": "/public/micro-teller.html"
+    },
+    {
+      "src": "/micro-dashboard",
+      "dest": "/public/micro-dashboard.html"
+    },
+    {
+      "src": "/micro-login",
+      "dest": "/public/micro-login.html"
+    },
+    {
+      "src": "/store-dashboard",
+      "dest": "/public/store-dashboard.html"
+    },
+    {
+      "src": "/customer-portal",
+      "dest": "/public/customer-portal.html"
+    },
+    {
+      "src": "/features",
+      "dest": "/public/features.html"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/auto-trader",
+      "dest": "/public/auto-trader.html"
+    },
+    {
+      "src": "/stock-trader",
+      "dest": "/public/stock-trader.html"
+    },
+    {
+      "src": "/claimer",
+      "dest": "/public/claimer.html"
+    },
+    {
+      "src": "/referral",
+      "dest": "/public/referral.html"
+    },
+    {
+      "src": "/roundup",
+      "dest": "/public/roundup.html"
+    },
+    {
+      "src": "/receipt-invest",
+      "dest": "/public/receipt-invest.html"
+    },
+    {
+      "src": "/history",
+      "dest": "/public/history.html"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
   ]
 }

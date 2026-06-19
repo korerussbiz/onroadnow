@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Micro-Dashboard</title>
+  <style>
+    *{box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
+    .container{max-width:1200px;margin:auto}
+    .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}
+    .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
+    .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+    .stat{font-size:2.5rem;color:#facc15}
+    .deposit-item{background:#0f172a;padding:1rem;border-radius:0.5rem;margin:0.5rem 0}
+    .btn{background:#3b82f6;border:none;padding:0.6rem 1.2rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer}
+    .btn-success{background:#10b981}
+    .btn-danger{background:#ef4444}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/micro-login">🔐 Login</a>
+    <a href="/micro-dashboard">📊 Dashboard</a>
+    <a href="/micro-trade">📈 Trade</a>
+    <a href="/micro-teller">🧾 Teller</a>
+  </div>
+  <div class="card">
+    <h1>📊 Your Micro-Dashboard</h1>
+    <div class="grid">
+      <div><div class="stat" id="balance">$0.00</div><div>Available Balance</div></div>
+      <div><div class="stat" id="invested">$0.00</div><div>Total Invested</div></div>
+      <div><div class="stat" id="profit">$0.00</div><div>Trading Profit</div></div>
+      <div><div class="stat" id="depositsCount">0</div><div>Total Deposits</div></div>
+    </div>
+    <div style="margin-top:2rem;">
+      <h3>Recent Deposits</h3>
+      <div id="depositList"></div>
+    </div>
+    <div style="margin-top:2rem;">
+      <button id="withdrawBtn" class="btn btn-danger">Withdraw Funds</button>
+      <button id="refreshBtn" class="btn btn-success">Refresh</button>
+    </div>
+    <div id="log" style="background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:200px;overflow-y:auto;font-family:monospace;margin-top:1rem;">Loading...</div>
+  </div>
+</div>
+<script>
+  async function apiCall(endpoint, options = {}) {
+    const res = await fetch(`/api/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+    return res.json();
+  }
+  function addLog(msg) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+  async function loadDashboard() {
+    const data = await apiCall('micro/dashboard', { method: 'GET' });
+    if (data.error) { addLog(`❌ ${data.error}`); return; }
+    document.getElementById('balance').textContent = `$${(data.balance || 0).toFixed(2)}`;
+    document.getElementById('invested').textContent = `$${(data.invested || 0).toFixed(2)}`;
+    document.getElementById('profit').textContent = `$${(data.profit || 0).toFixed(2)}`;
+    document.getElementById('depositsCount').textContent = (data.deposits || []).length;
+    const list = document.getElementById('depositList');
+    list.innerHTML = '';
+    (data.deposits || []).slice().reverse().slice(0,10).forEach(d => {
+      const div = document.createElement('div');
+      div.className = 'deposit-item';
+      div.innerHTML = `
+        <strong>#${d.id}</strong> – $${d.amount.toFixed(2)}
+        <span style="float:right;color:${d.status === 'invested' ? '#10b981' : '#f59e0b'}">
+          ${d.status === 'invested' ? '✅ Invested' : '⏳ Pending'}
+        </span>
+        <br><small>${new Date(d.timestamp).toLocaleString()}</small>
+      `;
+      list.appendChild(div);
+    });
+  }
+  document.getElementById('withdrawBtn').onclick = async () => {
+    const amount = prompt('Enter amount to withdraw:');
+    if (!amount) return;
+    const address = prompt('Enter wallet address or PayPal email:');
+    if (!address) return;
+    const data = await apiCall('micro/withdraw', { method: 'POST', body: JSON.stringify({ amount: parseFloat(amount), address }) });
+    if (data.error) { alert(data.error); } else { alert('Withdrawal request submitted.'); }
+    loadDashboard();
+  };
+  document.getElementById('refreshBtn').onclick = loadDashboard;
+  loadDashboard();
+</script>
+</body>
+</html>

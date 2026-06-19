@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Micro-Login</title>
+  <style>
+    *{box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
+    .container{max-width:500px;margin:auto}
+    .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}
+    input{width:100%;padding:0.8rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;margin:0.5rem 0;font-size:1.2rem}
+    .btn{background:#3b82f6;border:none;padding:0.8rem 1.8rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;width:100%;font-size:1.2rem}
+    .btn-google{background:#db4437}
+    .btn-success{background:#10b981}
+    .flex{display:flex;gap:1rem;flex-wrap:wrap}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav" style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem">
+    <a href="/">🏠 Home</a>
+    <a href="/micro-login">🔐 Login</a>
+    <a href="/micro-dashboard">📊 Dashboard</a>
+    <a href="/micro-teller">🧾 Teller</a>
+    <a href="/micro-trade">📈 Trade</a>
+  </div>
+  <div class="card">
+    <h1>🔐 Login</h1>
+    <div id="loginForm">
+      <input type="text" id="username" placeholder="Username or Email">
+      <input type="password" id="password" placeholder="Password">
+      <button id="loginBtn" class="btn">Login</button>
+      <p style="text-align:center;margin:0.5rem 0;">— OR —</p>
+      <button id="googleBtn" class="btn btn-google">Sign in with Google</button>
+      <p style="text-align:center;margin-top:1rem;"><a href="/micro-signup" style="color:#60a5fa;">Create Account</a></p>
+    </div>
+    <div id="loggedIn" style="display:none;">
+      <p>✅ You are logged in.</p>
+      <button id="logoutBtn" class="btn" style="background:#ef4444;">Logout</button>
+    </div>
+    <div id="log" style="background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:150px;overflow-y:auto;font-family:monospace;margin-top:1rem;">Ready.</div>
+  </div>
+</div>
+<script>
+  async function apiCall(endpoint, options = {}) {
+    const res = await fetch(`/api/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+    return res.json();
+  }
+  function addLog(msg) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+  async function checkSession() {
+    const data = await apiCall('me', { method: 'GET' });
+    if (!data.error) {
+      document.getElementById('loginForm').style.display = 'none';
+      document.getElementById('loggedIn').style.display = 'block';
+      addLog(`✅ Welcome ${data.username}`);
+    } else {
+      document.getElementById('loginForm').style.display = 'block';
+      document.getElementById('loggedIn').style.display = 'none';
+    }
+  }
+  document.getElementById('loginBtn').onclick = async () => {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    if (!username || !password) { addLog('❌ Enter credentials'); return; }
+    const data = await apiCall('login', { method: 'POST', body: JSON.stringify({ username, password }) });
+    if (data.error) { addLog(`❌ ${data.error}`); return; }
+    addLog(`✅ Logged in as ${username}`);
+    checkSession();
+  };
+  document.getElementById('logoutBtn').onclick = async () => {
+    await apiCall('logout', { method: 'POST' });
+    addLog('🔓 Logged out');
+    checkSession();
+  };
+  document.getElementById('googleBtn').onclick = () => {
+    alert('Google OAuth will be implemented with the backend.');
+  };
+  checkSession();
+</script>
+</body>
+</html>
