@@ -61,6 +61,7 @@
       <button id="startBtn" class="btn btn-success">▶ Start Mining</button>
       <button id="stopBtn" class="btn btn-danger">⏹ Stop</button>
       <button id="statusBtn" class="btn btn-warning">🔄 Status</button>
+      <button id="retryBtn" class="btn">↻ Retry WASM</button>
     </div>
     <div class="stats">
       <div><div class="stat-value" id="hashrate">0</div><div>Hashrate (H/s)</div></div>
@@ -79,6 +80,8 @@
   let intervalId = null;
   let hashrateVal = 0, acceptedVal = 0, totalHashesVal = 0;
   let ws = null;
+  let minerInstance = null;
+  let mode = 'websocket'; // 'wasm' or 'websocket'
 
   function addLog(msg, isError = false) {
     const logDiv = document.getElementById('log');
@@ -98,6 +101,82 @@
     });
   });
 
+  // ---------- Load WebAssembly Miner (correct API) ----------
+  let wasmLoaded = false;
+
+  function loadWasmMiner() {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/webminerpool@2.0.0/webmr.js';
+      script.onload = () => {
+        // Check if the library exposes 'webminerpool' or 'WebMiner'
+        if (typeof webminerpool !== 'undefined' || typeof WebMiner !== 'undefined') {
+          addLog('✅ WebAssembly library loaded.');
+          wasmLoaded = true;
+          resolve(true);
+        } else {
+          addLog('⚠️ Library loaded but no global found.', true);
+          resolve(false);
+        }
+      };
+      script.onerror = () => {
+        addLog('❌ Failed to load WebAssembly library.', true);
+        resolve(false);
+      };
+      document.head.appendChild(script);
+      setTimeout(() => {
+        if (typeof webminerpool !== 'undefined' || typeof WebMiner !== 'undefined') {
+          wasmLoaded = true;
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }, 5000);
+    });
+  }
+
+  // ---------- Start WASM Miner ----------
+  function startWasmMiner() {
+    const [host, port] = selectedPool.split(':');
+    try {
+      // The library exposes either 'webminerpool' or 'WebMiner'
+      const Miner = typeof webminerpool !== 'undefined' ? webminerpool.Miner : WebMiner;
+      minerInstance = new Miner({
+        host: host,
+        port: parseInt(port) || 10300,
+        ssl: false,
+        user: WALLET,
+        pass: 'x',
+        threads: Math.min(navigator.hardwareConcurrency || 4, 8),
+        autodetect: true
+      });
+      minerInstance.on('hashrate', (h) => {
+        hashrateVal = Math.round(h);
+        document.getElementById('hashrate').textContent = hashrateVal;
+      });
+      minerInstance.on('accepted', () => {
+        acceptedVal++;
+        document.getElementById('accepted').textContent = acceptedVal;
+        addLog('✅ Share accepted!');
+      });
+      minerInstance.on('hashes', (h) => {
+        totalHashesVal += h;
+        document.getElementById('totalHashes').textContent = totalHashesVal;
+      });
+      minerInstance.on('error', (err) => {
+        addLog(`❌ WASM miner error: ${err}`, true);
+      });
+      minerInstance.start();
+      minerRunning = true;
+      mode = 'wasm';
+      addLog(`⛏️ WASM mining started on ${selectedPool}`);
+    } catch (err) {
+      addLog(`❌ Failed to start WASM miner: ${err.message}`, true);
+      // Fallback to WebSocket
+      startWebSocketMiner();
+    }
+  }
+
   // ---------- WebSocket Miner (Fallback) ----------
   let wsHashCount = 0;
   let wsLastHashTime = Date.now();
@@ -108,10 +187,11 @@
     ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-      addLog('✅ WebSocket connected.');
+      addLog('✅ WebSocket connected to nanopool.');
       const login = { method: 'login', params: { login: WALLET, pass: 'x', agent: 'XMRig/6.21.0' }, id: 1 };
       ws.send(JSON.stringify(login));
       minerRunning = true;
+      mode = 'websocket';
       addLog(`⛏️ WebSocket mining started on ${selectedPool}`);
       wsLastHashTime = Date.now();
       wsHashCount = 0;
@@ -163,32 +243,79 @@
     };
   }
 
-  // ---------- Start ----------
-  function startMining() {
+  // ---------- Main Start ----------
+  async function startMining() {
     if (minerRunning) { addLog('⚠️ Already mining.'); return; }
-    startWebSocketMiner();
+
+    // Reset stats
+    hashrateVal = 0; acceptedVal = 0; totalHashesVal = 0;
+    document.getElementById('hashrate').textContent = '0';
+    document.getElementById('accepted').textContent = '0';
+    document.getElementById('totalHashes').textContent = '0';
+
+    // Try WASM first
+    if (!wasmLoaded) {
+      addLog('⏳ Loading WebAssembly miner...');
+      const loaded = await loadWasmMiner();
+      if (!loaded) {
+        addLog('ℹ️ WASM not available – using WebSocket fallback.', true);
+        startWebSocketMiner();
+        return;
+      }
+    }
+    // Start WASM
+    startWasmMiner();
   }
 
+  // ---------- Stop ----------
   function stopMining() {
-    if (ws) { ws.close(); ws = null; }
+    if (mode === 'wasm' && minerInstance) {
+      minerInstance.stop();
+      minerInstance = null;
+    }
+    if (mode === 'websocket' && ws) {
+      ws.close();
+      ws = null;
+    }
     minerRunning = false;
     if (intervalId) clearInterval(intervalId);
     addLog('⏹️ Mining stopped.');
   }
 
+  // ---------- Status ----------
   function checkStatus() {
     if (minerRunning) {
-      addLog(`📊 Status: Hashrate ${hashrateVal} H/s, Accepted: ${acceptedVal}, Total: ${totalHashesVal}`);
+      addLog(`📊 Status: ${mode.toUpperCase()} – Hashrate ${hashrateVal} H/s, Accepted: ${acceptedVal}, Total: ${totalHashesVal}`);
     } else {
       addLog('⏹️ Miner is not running.');
     }
   }
 
+  // ---------- Retry WASM ----------
+  async function retryWasm() {
+    addLog('🔄 Retrying WASM load...');
+    wasmLoaded = false;
+    const loaded = await loadWasmMiner();
+    if (loaded) {
+      addLog('✅ WASM loaded successfully.');
+    } else {
+      addLog('❌ WASM still unavailable.', true);
+    }
+  }
+
+  // ---------- Event Listeners ----------
   document.getElementById('startBtn').addEventListener('click', startMining);
   document.getElementById('stopBtn').addEventListener('click', stopMining);
   document.getElementById('statusBtn').addEventListener('click', checkStatus);
+  document.getElementById('retryBtn').addEventListener('click', retryWasm);
 
-  addLog('🔧 Ready – Click Start to mine via WebSocket (no WASM needed).');
+  // ---------- Pre‑load ----------
+  (async () => {
+    addLog('⏳ Pre‑loading WebAssembly miner...');
+    const loaded = await loadWasmMiner();
+    if (loaded) addLog('✅ WASM available.');
+    else addLog('ℹ️ WASM not available – will use WebSocket fallback.', true);
+  })();
 </script>
 </body>
 </html>
