@@ -12,12 +12,15 @@
     .btn{background:#3b82f6;border:none;padding:0.8rem 1.8rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;width:100%;font-size:1.2rem}
     .btn-google{background:#db4437}
     .btn-success{background:#10b981}
-    .flex{display:flex;gap:1rem;flex-wrap:wrap}
+    .btn-danger{background:#ef4444}
+    .error{color:#ef4444;margin:0.5rem 0}
+    .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
+    .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
   </style>
 </head>
 <body>
 <div class="container">
-  <div class="nav" style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem">
+  <div class="nav">
     <a href="/">🏠 Home</a>
     <a href="/micro-login">🔐 Login</a>
     <a href="/micro-dashboard">📊 Dashboard</a>
@@ -26,6 +29,7 @@
   </div>
   <div class="card">
     <h1>🔐 Login</h1>
+    <div id="errorMsg" class="error"></div>
     <div id="loginForm">
       <input type="text" id="username" placeholder="Username or Email">
       <input type="password" id="password" placeholder="Password">
@@ -36,7 +40,7 @@
     </div>
     <div id="loggedIn" style="display:none;">
       <p>✅ You are logged in.</p>
-      <button id="logoutBtn" class="btn" style="background:#ef4444;">Logout</button>
+      <button id="logoutBtn" class="btn btn-danger">Logout</button>
     </div>
     <div id="log" style="background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:150px;overflow-y:auto;font-family:monospace;margin-top:1rem;">Ready.</div>
   </div>
@@ -46,31 +50,46 @@
     const res = await fetch(`/api/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
     return res.json();
   }
-  function addLog(msg) {
+  function addLog(msg, isError = false) {
     const logDiv = document.getElementById('log');
     const p = document.createElement('div');
     p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    if (isError) p.style.color = '#ef4444';
     logDiv.appendChild(p);
     logDiv.scrollTop = logDiv.scrollHeight;
   }
   async function checkSession() {
-    const data = await apiCall('me', { method: 'GET' });
-    if (!data.error) {
-      document.getElementById('loginForm').style.display = 'none';
-      document.getElementById('loggedIn').style.display = 'block';
-      addLog(`✅ Welcome ${data.username}`);
-    } else {
+    try {
+      const data = await apiCall('me', { method: 'GET' });
+      if (!data.error) {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('loggedIn').style.display = 'block';
+        addLog(`✅ Welcome ${data.username}`);
+      } else {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('loggedIn').style.display = 'none';
+      }
+    } catch (e) {
       document.getElementById('loginForm').style.display = 'block';
       document.getElementById('loggedIn').style.display = 'none';
     }
   }
   document.getElementById('loginBtn').onclick = async () => {
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    if (!username || !password) { addLog('❌ Enter credentials'); return; }
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    document.getElementById('errorMsg').textContent = '';
+    if (!username || !password) { 
+      document.getElementById('errorMsg').textContent = '❌ Enter username and password.';
+      return;
+    }
     const data = await apiCall('login', { method: 'POST', body: JSON.stringify({ username, password }) });
-    if (data.error) { addLog(`❌ ${data.error}`); return; }
+    if (data.error) {
+      document.getElementById('errorMsg').textContent = '❌ ' + data.error;
+      addLog('❌ ' + data.error, true);
+      return;
+    }
     addLog(`✅ Logged in as ${username}`);
+    document.getElementById('errorMsg').textContent = '';
     checkSession();
   };
   document.getElementById('logoutBtn').onclick = async () => {
