@@ -33,19 +33,18 @@
   </div>
   <div class="card">
     <h1>⛏️ Real Monero (XMR) Web Miner</h1>
-    <p>Mine Monero in your browser using WebAssembly – no simulation.</p>
+    <p>Mine Monero in your browser using WebAssembly via WebMiner.</p>
     <div class="warning">
       ⚠️ <strong>Security:</strong> Only enter your <strong>PUBLIC wallet address</strong> (starts with '4' or '8'). Never share your private key!
     </div>
     <div>
       <label for="walletAddress">Public Wallet Address</label>
-      <input type="text" id="walletAddress" placeholder="e.g., 44tLjmXrQNrWJ5N8RMtU5vLJL2MyAyiCnEJbj1Zxv9DdAgVwNYGjHE7ePpXkDfA6qBQbL6aH8p9Zf5dLqVpP6E4oW9mX7">
+      <input type="text" id="walletAddress" placeholder="Enter your Monero public wallet address">
     </div>
     <div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0;">
       <button id="startBtn" class="btn btn-success">▶ Start Mining</button>
       <button id="stopBtn" class="btn btn-danger">⏹ Stop Mining</button>
       <button id="statusBtn" class="btn btn-warning">🔄 Status</button>
-      <button id="retryBtn" class="btn">↻ Retry Library Load</button>
     </div>
     <div class="stats">
       <div><div class="stat-value" id="hashrate">0</div><div>Hashrate (H/s)</div></div>
@@ -56,11 +55,10 @@
   </div>
 </div>
 <script>
-  // Attempt to load CryptoWeb from multiple CDN sources
+  // Use WebMiner library (which is a wrapper around CryptoWeb)
   let miner = null;
   let isMining = false;
   let libLoaded = false;
-  let loadAttempts = 0;
 
   function addLog(msg, isError = false) {
     const logDiv = document.getElementById('log');
@@ -71,52 +69,28 @@
     logDiv.scrollTop = logDiv.scrollHeight;
   }
 
-  // Load library with multiple sources
-  function loadCryptoWeb() {
+  // Load WebMiner library
+  function loadWebMiner() {
     return new Promise((resolve) => {
-      const sources = [
-        'https://cdn.jsdelivr.net/npm/@cryptoweb/core@0.1.0/dist/cryptoweb.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/webminer/1.0.0/webminer.min.js',
-        'https://unpkg.com/@cryptoweb/core@0.1.0/dist/cryptoweb.min.js'
-      ];
-      let loaded = false;
-
-      function tryLoad(index) {
-        if (index >= sources.length) {
+      const script = document.createElement('script');
+      script.src = 'https://webminer.org/assets/js/webminer.min.js';
+      script.onload = () => {
+        if (typeof webminer !== 'undefined') {
+          resolve(true);
+        } else {
           resolve(false);
-          return;
         }
-        const script = document.createElement('script');
-        script.src = sources[index];
-        script.onload = () => {
-          if (typeof CryptoWeb !== 'undefined') {
-            loaded = true;
-            resolve(true);
-          } else {
-            tryLoad(index + 1);
-          }
-        };
-        script.onerror = () => { tryLoad(index + 1); };
-        document.head.appendChild(script);
-        // Also check after a timeout
-        setTimeout(() => {
-          if (!loaded && typeof CryptoWeb !== 'undefined') {
-            loaded = true;
-            resolve(true);
-          }
-        }, 3000);
-      }
-
-      // Start loading from first source
-      tryLoad(0);
+      };
+      script.onerror = () => resolve(false);
+      document.head.appendChild(script);
+      setTimeout(() => resolve(false), 5000);
     });
   }
 
-  // Start real mining
   async function startMining() {
     const address = document.getElementById('walletAddress').value.trim();
     if (!address) {
-      addLog('❌ Please enter a public wallet address.', true);
+      addLog('❌ Please enter your public wallet address.', true);
       return;
     }
     if (isMining) {
@@ -124,31 +98,22 @@
       return;
     }
 
-    // Ensure library is loaded
     if (!libLoaded) {
-      addLog('⏳ Loading WebAssembly miner...');
-      libLoaded = await loadCryptoWeb();
+      addLog('⏳ Loading WebMiner library...');
+      libLoaded = await loadWebMiner();
       if (!libLoaded) {
-        addLog('❌ Failed to load WebAssembly library. Try "Retry Library Load".', true);
+        addLog('❌ WebMiner library failed to load. Check your internet connection.', true);
         return;
       }
-      addLog('✅ WebAssembly library loaded.');
-    }
-
-    // Validate CryptoWeb
-    if (typeof CryptoWeb === 'undefined') {
-      addLog('❌ CryptoWeb library not available. Use "Retry Library Load".', true);
-      return;
+      addLog('✅ WebMiner library loaded.');
     }
 
     try {
-      miner = new CryptoWeb.Miner({
+      // WebMiner uses the global 'webminer' object
+      miner = new webminer.Miner({
         wallet: address,
         threads: Math.min(navigator.hardwareConcurrency || 4, 8),
-        pool: {
-          url: 'pool.supportxmr.com:3333',
-          port: 3333
-        }
+        pool: 'pool.supportxmr.com:3333'
       });
 
       miner.on('hashrate', (h) => {
@@ -193,31 +158,18 @@
     }
   }
 
-  async function retryLibrary() {
-    addLog('🔄 Retrying library load...');
-    libLoaded = false;
-    libLoaded = await loadCryptoWeb();
-    if (libLoaded) {
-      addLog('✅ Library loaded successfully.');
-    } else {
-      addLog('❌ Library still not available.', true);
-    }
-  }
-
-  // Event listeners
   document.getElementById('startBtn').addEventListener('click', startMining);
   document.getElementById('stopBtn').addEventListener('click', stopMining);
   document.getElementById('statusBtn').addEventListener('click', checkStatus);
-  document.getElementById('retryBtn').addEventListener('click', retryLibrary);
 
-  // Auto-load library on page load
+  // Pre-load library
   (async () => {
-    addLog('⏳ Loading WebAssembly library...');
-    libLoaded = await loadCryptoWeb();
+    addLog('⏳ Loading WebMiner library...');
+    libLoaded = await loadWebMiner();
     if (libLoaded) {
-      addLog('✅ WebAssembly library ready.');
+      addLog('✅ WebMiner library ready.');
     } else {
-      addLog('❌ Could not load library. Use "Retry Library Load" button.', true);
+      addLog('❌ WebMiner library not available. Check your connection.', true);
     }
   })();
 </script>
