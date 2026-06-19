@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>XMR Miner – Browser Mining</title>
+  <title>XMR Miner – Real Browser Mining</title>
   <style>
     *{box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
@@ -20,7 +20,6 @@
     .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:300px;overflow-y:auto;font-family:monospace;font-size:1rem;margin-top:1rem}
     .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;text-align:center}
     .stat-value{font-size:2rem;color:#facc15}
-    .fee-info{color:#94a3b8;font-size:0.9rem;margin-top:0.5rem}
     .warning{background:#1e293b;border-left:4px solid #f59e0b;padding:0.8rem;margin:0.5rem 0;border-radius:0.5rem}
   </style>
 </head>
@@ -33,10 +32,10 @@
     <a href="/xmr-miner">⛏️ XMR Miner</a>
   </div>
   <div class="card">
-    <h1>⛏️ Monero (XMR) Web Miner</h1>
-    <p>Mine Monero directly in your browser using WebAssembly.</p>
+    <h1>⛏️ Real Monero (XMR) Web Miner</h1>
+    <p>Mine Monero in your browser using WebAssembly – no simulation.</p>
     <div class="warning">
-      ⚠️ <strong>Security:</strong> Only enter your <strong>PUBLIC wallet address</strong> (starts with '4' or '8'). Never share your private key or mnemonic seed!
+      ⚠️ <strong>Security:</strong> Only enter your <strong>PUBLIC wallet address</strong> (starts with '4' or '8'). Never share your private key!
     </div>
     <div>
       <label for="walletAddress">Public Wallet Address</label>
@@ -45,7 +44,8 @@
     <div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0;">
       <button id="startBtn" class="btn btn-success">▶ Start Mining</button>
       <button id="stopBtn" class="btn btn-danger">⏹ Stop Mining</button>
-      <button id="statusBtn" class="btn btn-warning">🔄 Check Status</button>
+      <button id="statusBtn" class="btn btn-warning">🔄 Status</button>
+      <button id="retryBtn" class="btn">↻ Retry Library Load</button>
     </div>
     <div class="stats">
       <div><div class="stat-value" id="hashrate">0</div><div>Hashrate (H/s)</div></div>
@@ -56,10 +56,11 @@
   </div>
 </div>
 <script>
-  // CryptoWeb miner - WebAssembly XMRig
-  // Documentation: https://github.com/cryptoweb/cryptoweb
+  // Attempt to load CryptoWeb from multiple CDN sources
   let miner = null;
   let isMining = false;
+  let libLoaded = false;
+  let loadAttempts = 0;
 
   function addLog(msg, isError = false) {
     const logDiv = document.getElementById('log');
@@ -70,92 +71,136 @@
     logDiv.scrollTop = logDiv.scrollHeight;
   }
 
-  // Load the CryptoWeb library (WebAssembly miner)
-  function loadMiner() {
-    return new Promise((resolve, reject) => {
-      // Use CDN version
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@cryptoweb/core@0.1.0/dist/cryptoweb.min.js';
-      script.onload = () => {
-        addLog('✅ CryptoWeb library loaded.');
-        resolve();
-      };
-      script.onerror = () => {
-        addLog('❌ Failed to load CryptoWeb library.', true);
-        reject();
-      };
-      document.head.appendChild(script);
+  // Load library with multiple sources
+  function loadCryptoWeb() {
+    return new Promise((resolve) => {
+      const sources = [
+        'https://cdn.jsdelivr.net/npm/@cryptoweb/core@0.1.0/dist/cryptoweb.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/webminer/1.0.0/webminer.min.js',
+        'https://unpkg.com/@cryptoweb/core@0.1.0/dist/cryptoweb.min.js'
+      ];
+      let loaded = false;
+
+      function tryLoad(index) {
+        if (index >= sources.length) {
+          resolve(false);
+          return;
+        }
+        const script = document.createElement('script');
+        script.src = sources[index];
+        script.onload = () => {
+          if (typeof CryptoWeb !== 'undefined') {
+            loaded = true;
+            resolve(true);
+          } else {
+            tryLoad(index + 1);
+          }
+        };
+        script.onerror = () => { tryLoad(index + 1); };
+        document.head.appendChild(script);
+        // Also check after a timeout
+        setTimeout(() => {
+          if (!loaded && typeof CryptoWeb !== 'undefined') {
+            loaded = true;
+            resolve(true);
+          }
+        }, 3000);
+      }
+
+      // Start loading from first source
+      tryLoad(0);
     });
   }
 
-  // Initialize miner
+  // Start real mining
   async function startMining() {
     const address = document.getElementById('walletAddress').value.trim();
     if (!address) {
       addLog('❌ Please enter a public wallet address.', true);
       return;
     }
-    // Simple validation: Monero addresses start with '4' or '8' and are 95 chars.
-    if (!/^[48][0-9a-zA-Z]{94}$/.test(address)) {
-      addLog('❌ Invalid wallet address format. It should start with "4" or "8" and be 95 characters long.', true);
-      return;
-    }
     if (isMining) {
       addLog('⚠️ Already mining.');
       return;
     }
-    try {
-      // Ensure library is loaded
-      if (typeof CryptoWeb === 'undefined') {
-        await loadMiner();
+
+    // Ensure library is loaded
+    if (!libLoaded) {
+      addLog('⏳ Loading WebAssembly miner...');
+      libLoaded = await loadCryptoWeb();
+      if (!libLoaded) {
+        addLog('❌ Failed to load WebAssembly library. Try "Retry Library Load".', true);
+        return;
       }
-      // Create miner instance
+      addLog('✅ WebAssembly library loaded.');
+    }
+
+    // Validate CryptoWeb
+    if (typeof CryptoWeb === 'undefined') {
+      addLog('❌ CryptoWeb library not available. Use "Retry Library Load".', true);
+      return;
+    }
+
+    try {
       miner = new CryptoWeb.Miner({
         wallet: address,
-        threads: navigator.hardwareConcurrency || 4,
+        threads: Math.min(navigator.hardwareConcurrency || 4, 8),
         pool: {
-          url: 'pool.supportxmr.com:3333', // public pool
+          url: 'pool.supportxmr.com:3333',
+          port: 3333
         }
       });
-      miner.on('hashrate', (hashrate) => {
-        document.getElementById('hashrate').textContent = Math.round(hashrate);
+
+      miner.on('hashrate', (h) => {
+        document.getElementById('hashrate').textContent = Math.round(h);
       });
       miner.on('accepted', () => {
         const accepted = parseInt(document.getElementById('accepted').textContent) + 1;
         document.getElementById('accepted').textContent = accepted;
         addLog('✅ Share accepted!');
       });
-      miner.on('totalHashes', (hashes) => {
-        document.getElementById('totalHashes').textContent = hashes;
+      miner.on('totalHashes', (h) => {
+        document.getElementById('totalHashes').textContent = h;
       });
       miner.on('error', (err) => {
         addLog(`❌ Miner error: ${err}`, true);
       });
+
       miner.start();
       isMining = true;
-      addLog(`⛏️ Mining started to wallet ${address.slice(0,8)}...`);
+      addLog(`⛏️ Real mining started to ${address.slice(0,8)}...`);
     } catch (err) {
-      addLog(`❌ Failed to start miner: ${err.message}`, true);
+      addLog(`❌ Failed to start: ${err.message}`, true);
     }
   }
 
   function stopMining() {
     if (miner) {
       miner.stop();
-      isMining = false;
-      addLog('⏹️ Mining stopped.');
-    } else {
-      addLog('⚠️ No miner running.');
+      miner = null;
     }
+    isMining = false;
+    addLog('⏹️ Mining stopped.');
   }
 
   function checkStatus() {
-    if (miner && isMining) {
-      const hashrate = document.getElementById('hashrate').textContent;
-      const accepted = document.getElementById('accepted').textContent;
-      addLog(`📊 Status: Hashrate ${hashrate} H/s, Accepted shares: ${accepted}`);
+    if (isMining) {
+      const h = document.getElementById('hashrate').textContent;
+      const a = document.getElementById('accepted').textContent;
+      addLog(`📊 Status: Hashrate ${h} H/s, Accepted shares: ${a}`);
     } else {
       addLog('⏹️ Miner is not running.');
+    }
+  }
+
+  async function retryLibrary() {
+    addLog('🔄 Retrying library load...');
+    libLoaded = false;
+    libLoaded = await loadCryptoWeb();
+    if (libLoaded) {
+      addLog('✅ Library loaded successfully.');
+    } else {
+      addLog('❌ Library still not available.', true);
     }
   }
 
@@ -163,9 +208,18 @@
   document.getElementById('startBtn').addEventListener('click', startMining);
   document.getElementById('stopBtn').addEventListener('click', stopMining);
   document.getElementById('statusBtn').addEventListener('click', checkStatus);
+  document.getElementById('retryBtn').addEventListener('click', retryLibrary);
 
   // Auto-load library on page load
-  loadMiner().catch(() => {});
+  (async () => {
+    addLog('⏳ Loading WebAssembly library...');
+    libLoaded = await loadCryptoWeb();
+    if (libLoaded) {
+      addLog('✅ WebAssembly library ready.');
+    } else {
+      addLog('❌ Could not load library. Use "Retry Library Load" button.', true);
+    }
+  })();
 </script>
 </body>
 </html>
