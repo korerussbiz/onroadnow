@@ -12,6 +12,7 @@
     .btn{background:#10b981;border:none;padding:0.8rem 1.8rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;width:100%;font-size:1.2rem}
     .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
     .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
+    .error{color:#ef4444;margin:0.5rem 0}
   </style>
 </head>
 <body>
@@ -23,6 +24,7 @@
   </div>
   <div class="card">
     <h1>✏️ Create Account</h1>
+    <div id="errorMsg" class="error"></div>
     <input type="text" id="signupUsername" placeholder="Username">
     <input type="email" id="signupEmail" placeholder="Email">
     <input type="password" id="signupPassword" placeholder="Password">
@@ -35,10 +37,11 @@
     const res = await fetch(`/api/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
     return res.json();
   }
-  function addLog(msg) {
+  function addLog(msg, isError = false) {
     const logDiv = document.getElementById('log');
     const p = document.createElement('div');
     p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    if (isError) p.style.color = '#ef4444';
     logDiv.appendChild(p);
     logDiv.scrollTop = logDiv.scrollHeight;
   }
@@ -46,11 +49,20 @@
     const username = document.getElementById('signupUsername').value.trim();
     const email = document.getElementById('signupEmail').value.trim();
     const password = document.getElementById('signupPassword').value.trim();
-    if (!username || !email || !password) { addLog('❌ All fields required'); return; }
-    const data = await apiCall('signup', { method: 'POST', body: JSON.stringify({ username: username, email, password }) });
-    if (data.error) { addLog(`❌ ${data.error}`); return; }
-    addLog(`✅ Account created for ${username}. Please login.`);
-    setTimeout(() => { window.location.href = '/micro-login'; }, 2000);
+    document.getElementById('errorMsg').textContent = '';
+    if (!username || !email || !password) { 
+      document.getElementById('errorMsg').textContent = '❌ All fields are required.';
+      return;
+    }
+    const data = await apiCall('micro/signup', { method: 'POST', body: JSON.stringify({ username, email, password }) });
+    if (data.error) {
+      document.getElementById('errorMsg').textContent = '❌ ' + data.error;
+      addLog('❌ ' + data.error, true);
+      return;
+    }
+    addLog(`✅ Account created for ${username}. Redirecting to dashboard...`);
+    // Redirect to dashboard after a moment
+    setTimeout(() => { window.location.href = '/micro-dashboard'; }, 1500);
   };
 </script>
 </body>

@@ -1438,4 +1438,41 @@ module.exports = async (req, res) => {
     return;
   }
 
+
+  // ---------- FIXED SIGNUP (with email) ----------
+  if (url === '/api/micro/signup' && method === 'POST') {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'Missing fields' });
+    }
+    // Check if username or email already exists
+    if (users.find(u => u.username === username || u.email === email)) {
+      return res.status(400).json({ error: 'Username or email already taken' });
+    }
+    const userId = crypto.randomUUID();
+    const newUser = {
+      id: userId,
+      username,
+      email,
+      password: hashPassword(password),
+      referrerId: null
+    };
+    users.push(newUser);
+    // Auto-login: create token
+    const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
+    res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; Max-Age=604800; Secure; SameSite=None`);
+    res.status(201).json({ message: 'Account created', userId, username });
+    return;
+  }
+
+  // Also patch /api/me to include email
+  // We'll keep the existing /api/me but add an alternative /api/micro/me that returns email.
+  if (url === '/api/micro/me' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const user = users.find(u => u.id === userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.status(200).json({ id: user.id, username: user.username, email: user.email || '' });
+    return;
+  }
+
 };
