@@ -135,7 +135,6 @@
       });
       miner.on('error', (err) => {
         addLog(`❌ WASM error: ${err}`, true);
-        // If connection error, fallback to WebSocket
         if (err.includes('connect') || err.includes('timeout')) {
           addLog('🔄 Switching to WebSocket fallback...');
           stopMining();
