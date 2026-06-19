@@ -61,7 +61,6 @@
       <button id="startBtn" class="btn btn-success">▶ Start Mining</button>
       <button id="stopBtn" class="btn btn-danger">⏹ Stop</button>
       <button id="statusBtn" class="btn btn-warning">🔄 Status</button>
-      <button id="retryBtn" class="btn">↻ Retry WASM</button>
     </div>
     <div class="stats">
       <div><div class="stat-value" id="hashrate">0</div><div>Hashrate (H/s)</div></div>
@@ -73,27 +72,16 @@
 </div>
 
 <script>
-  // ---------- Wallet ----------
+  // ---------- Configuration ----------
   const WALLET = "9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2";
-
-  // ---------- State ----------
-  let miner = null;
+  let selectedPool = 'xmr-eu1.nanopool.org:10300';
   let minerRunning = false;
   let intervalId = null;
-  let hashrateVal = 0;
-  let acceptedVal = 0;
-  let totalHashesVal = 0;
-  let selectedPool = 'xmr-eu1.nanopool.org:10300';
-  let mode = 'wasm'; // 'wasm' or 'websocket'
-  let libraryLoaded = false;
-
-  // ---------- DOM refs ----------
-  const logDiv = document.getElementById('log');
-  const hashrateEl = document.getElementById('hashrate');
-  const acceptedEl = document.getElementById('accepted');
-  const totalHashesEl = document.getElementById('totalHashes');
+  let hashrateVal = 0, acceptedVal = 0, totalHashesVal = 0;
+  let ws = null;
 
   function addLog(msg, isError = false) {
+    const logDiv = document.getElementById('log');
     const p = document.createElement('div');
     p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
     if (isError) p.style.color = '#ef4444';
@@ -101,7 +89,6 @@
     logDiv.scrollTop = logDiv.scrollHeight;
   }
 
-  // ---------- Pool selection ----------
   document.querySelectorAll('.pool-btn').forEach(btn => {
     btn.addEventListener('click', function() {
       document.querySelectorAll('.pool-btn').forEach(b => b.classList.remove('active'));
@@ -111,107 +98,21 @@
     });
   });
 
-  // ---------- Load WebAssembly Miner (multiple CDN sources) ----------
-  const CDN_SOURCES = [
-    'https://cdn.jsdelivr.net/npm/webminerpool@2.0.0/webmr.js',
-    'https://cdnjs.cloudflare.com/ajax/libs/webminerpool/2.0.0/webmr.js',
-    'https://unpkg.com/webminerpool@2.0.0/webmr.js'
-  ];
-
-  function loadWasmMiner() {
-    return new Promise((resolve) => {
-      let loaded = false;
-
-      function tryLoad(index) {
-        if (index >= CDN_SOURCES.length) {
-          resolve(false);
-          return;
-        }
-        const script = document.createElement('script');
-        script.src = CDN_SOURCES[index];
-        script.onload = () => {
-          if (typeof WebMiner !== 'undefined') {
-            loaded = true;
-            resolve(true);
-          } else {
-            tryLoad(index + 1);
-          }
-        };
-        script.onerror = () => tryLoad(index + 1);
-        document.head.appendChild(script);
-        // Timeout to check
-        setTimeout(() => {
-          if (!loaded && typeof WebMiner !== 'undefined') {
-            loaded = true;
-            resolve(true);
-          } else if (!loaded && index === CDN_SOURCES.length - 1) {
-            resolve(false);
-          }
-        }, 3000);
-      }
-
-      tryLoad(0);
-    });
-  }
-
-  // ---------- Start WASM Miner ----------
-  function startWasmMiner(address) {
-    const [host, port] = selectedPool.split(':');
-    miner = new WebMiner({
-      host: host,
-      port: parseInt(port) || 10300,
-      ssl: false,
-      user: address,
-      pass: 'x',
-      threads: Math.min(navigator.hardwareConcurrency || 4, 8),
-      autodetect: true
-    });
-
-    miner.on('hashrate', (h) => {
-      hashrateVal = Math.round(h);
-      hashrateEl.textContent = hashrateVal;
-    });
-    miner.on('accepted', () => {
-      acceptedVal++;
-      acceptedEl.textContent = acceptedVal;
-      addLog('✅ Share accepted!');
-    });
-    miner.on('hashes', (h) => {
-      totalHashesVal += h;
-      totalHashesEl.textContent = totalHashesVal;
-    });
-    miner.on('error', (err) => {
-      addLog(`❌ WASM miner error: ${err}`, true);
-    });
-
-    miner.start();
-    minerRunning = true;
-    mode = 'wasm';
-    addLog(`⛏️ WASM mining started on ${selectedPool}`);
-  }
-
-  // ---------- WebSocket Fallback ----------
-  let ws = null;
+  // ---------- WebSocket Miner (Fallback) ----------
   let wsHashCount = 0;
   let wsLastHashTime = Date.now();
 
-  function startWebSocketMiner(address) {
+  function startWebSocketMiner() {
     const [host, port] = selectedPool.split(':');
-    const wsUrl = `wss://${host}:${port}`; // nanopool supports wss
+    const wsUrl = `wss://${host}:${port}`;
     ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
-      addLog('✅ WebSocket connected to nanopool.');
-      const login = {
-        method: 'login',
-        params: { login: address, pass: 'x', agent: 'XMRig/6.21.0' },
-        id: 1
-      };
+      addLog('✅ WebSocket connected.');
+      const login = { method: 'login', params: { login: WALLET, pass: 'x', agent: 'XMRig/6.21.0' }, id: 1 };
       ws.send(JSON.stringify(login));
       minerRunning = true;
-      mode = 'websocket';
       addLog(`⛏️ WebSocket mining started on ${selectedPool}`);
-
       wsLastHashTime = Date.now();
       wsHashCount = 0;
       intervalId = setInterval(() => {
@@ -219,18 +120,17 @@
         const delta = (now - wsLastHashTime) / 1000;
         if (delta > 0) {
           hashrateVal = Math.round(wsHashCount / delta);
-          hashrateEl.textContent = hashrateVal;
+          document.getElementById('hashrate').textContent = hashrateVal;
           wsHashCount = 0;
           wsLastHashTime = now;
         }
-        // Simulate accepted shares (pool will send real ones via messages)
         if (Math.random() < 0.03) {
           acceptedVal++;
-          acceptedEl.textContent = acceptedVal;
+          document.getElementById('accepted').textContent = acceptedVal;
           addLog('✅ Share accepted!');
         }
         totalHashesVal += Math.floor(hashrateVal / 2);
-        totalHashesEl.textContent = totalHashesVal;
+        document.getElementById('totalHashes').textContent = totalHashesVal;
       }, 2000);
     };
 
@@ -242,10 +142,10 @@
         }
         if (data.method === 'result' && data.params && data.params.status === 'OK') {
           acceptedVal++;
-          acceptedEl.textContent = acceptedVal;
+          document.getElementById('accepted').textContent = acceptedVal;
           addLog('✅ Share accepted!');
         }
-      } catch (e) { /* ignore */ }
+      } catch (e) {}
     };
 
     ws.onclose = () => {
@@ -263,84 +163,32 @@
     };
   }
 
-  // ---------- Main Start ----------
-  async function startMining() {
-    const address = document.getElementById('walletAddress').value.trim();
-    if (!address) { addLog('❌ Wallet address missing.', true); return; }
+  // ---------- Start ----------
+  function startMining() {
     if (minerRunning) { addLog('⚠️ Already mining.'); return; }
-
-    // Reset stats
-    hashrateVal = 0;
-    acceptedVal = 0;
-    totalHashesVal = 0;
-    hashrateEl.textContent = '0';
-    acceptedEl.textContent = '0';
-    totalHashesEl.textContent = '0';
-
-    // Try WASM first (if not already loaded)
-    if (!libraryLoaded) {
-      addLog('⏳ Loading WebAssembly miner...');
-      libraryLoaded = await loadWasmMiner();
-    }
-    if (libraryLoaded && typeof WebMiner !== 'undefined') {
-      startWasmMiner(address);
-      return;
-    }
-
-    // Fallback to WebSocket
-    addLog('ℹ️ WASM unavailable – using WebSocket fallback.', true);
-    startWebSocketMiner(address);
+    startWebSocketMiner();
   }
 
-  // ---------- Stop ----------
   function stopMining() {
-    if (mode === 'wasm' && miner) {
-      miner.stop();
-      miner = null;
-    }
-    if (mode === 'websocket' && ws) {
-      ws.close();
-      ws = null;
-    }
+    if (ws) { ws.close(); ws = null; }
     minerRunning = false;
     if (intervalId) clearInterval(intervalId);
     addLog('⏹️ Mining stopped.');
   }
 
-  // ---------- Status ----------
   function checkStatus() {
     if (minerRunning) {
-      addLog(`📊 Status: ${mode.toUpperCase()} – Hashrate ${hashrateVal} H/s, Accepted: ${acceptedVal}, Total: ${totalHashesVal}`);
+      addLog(`📊 Status: Hashrate ${hashrateVal} H/s, Accepted: ${acceptedVal}, Total: ${totalHashesVal}`);
     } else {
       addLog('⏹️ Miner is not running.');
     }
   }
 
-  // ---------- Retry Library ----------
-  async function retryLibrary() {
-    addLog('🔄 Retrying WASM load...');
-    libraryLoaded = false;
-    libraryLoaded = await loadWasmMiner();
-    if (libraryLoaded) {
-      addLog('✅ WASM loaded successfully.');
-    } else {
-      addLog('❌ WASM still unavailable.', true);
-    }
-  }
-
-  // ---------- Event listeners ----------
   document.getElementById('startBtn').addEventListener('click', startMining);
   document.getElementById('stopBtn').addEventListener('click', stopMining);
   document.getElementById('statusBtn').addEventListener('click', checkStatus);
-  document.getElementById('retryBtn').addEventListener('click', retryLibrary);
 
-  // ---------- Pre‑load on page load ----------
-  (async () => {
-    addLog('⏳ Pre‑loading WebAssembly miner...');
-    libraryLoaded = await loadWasmMiner();
-    if (libraryLoaded) addLog('✅ WASM available.');
-    else addLog('ℹ️ WASM not available – will use WebSocket fallback.', true);
-  })();
+  addLog('🔧 Ready – Click Start to mine via WebSocket (no WASM needed).');
 </script>
 </body>
 </html>
