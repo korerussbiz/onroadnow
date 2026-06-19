@@ -1595,4 +1595,38 @@ module.exports = async (req, res) => {
     return;
   }
 
+
+  // ---------- NANOPOOL MINING STATS ----------
+  if (url === '/api/mining/stats' && method === 'GET') {
+    const wallet = '9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2';
+    try {
+      // Fetch balance from nanopool
+      const balRes = await axios.get(`https://api.nanopool.org/v1/xmr/balance/${wallet}`);
+      const balData = balRes.data;
+      // Fetch hashrate
+      const hrRes = await axios.get(`https://api.nanopool.org/v1/xmr/hashrate/${wallet}`);
+      const hrData = hrRes.data;
+      // Fetch XMR price
+      const priceRes = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd');
+      const xmrPrice = priceRes.data.monero?.usd || 0;
+      if (balData.status && balData.status === 'OK') {
+        const balance = balData.data / 1e12; // piconero to XMR
+        res.status(200).json({
+          wallet,
+          balance,
+          hashrate: hrData.data || 0,
+          hashrateUnit: 'H/s',
+          xmrPrice,
+          valueUSD: balance * xmrPrice,
+          lastShare: hrData.lastShare || 0
+        });
+      } else {
+        res.status(500).json({ error: 'Nanopool API error' });
+      }
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch mining stats' });
+    }
+    return;
+  }
+
 };
