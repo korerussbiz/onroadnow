@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XMR Miner – Real WebAssembly Mining</title>
+  <title>XMR Miner – Real Stats</title>
   <style>
     *{box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
@@ -12,15 +12,12 @@
     .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
     .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
     .nav a:hover{color:#facc15}
-    input,button{font-size:1.2rem;padding:0.8rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;width:100%;margin:0.5rem 0}
-    .btn{background:#3b82f6;border:none;padding:0.8rem 1.8rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;width:auto}
-    .btn-success{background:#10b981}
-    .btn-danger{background:#ef4444}
-    .btn-warning{background:#f59e0b}
-    .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:300px;overflow-y:auto;font-family:monospace;font-size:1rem;margin-top:1rem}
     .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;text-align:center}
     .stat-value{font-size:2rem;color:#facc15}
+    .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:300px;overflow-y:auto;font-family:monospace;font-size:1rem;margin-top:1rem}
     .warning{background:#1e293b;border-left:4px solid #f59e0b;padding:0.8rem;margin:0.5rem 0;border-radius:0.5rem}
+    .btn{background:#3b82f6;border:none;padding:0.8rem 1.8rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;width:auto}
+    .btn-success{background:#10b981}
   </style>
 </head>
 <body>
@@ -32,38 +29,27 @@
     <a href="/xmr-miner">⛏️ XMR Miner</a>
   </div>
   <div class="card">
-    <h1>⛏️ Real Monero (XMR) Web Miner</h1>
-    <p>Mine Monero in your browser using WebAssembly – real hashing, real pool.</p>
+    <h1>⛏️ Real Monero (XMR) Miner Stats</h1>
+    <p>Your mining activity on pool.supportxmr.com</p>
     <div class="warning">
-      ⚠️ <strong>Security:</strong> Only enter your <strong>PUBLIC wallet address</strong> (starts with '4' or '8'). Never share your private key!
-    </div>
-    <div>
-      <label for="walletAddress">Public Wallet Address</label>
-      <input type="text" id="walletAddress" placeholder="" />
-    </div>
-    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0;">
-      <button id="startBtn" class="btn btn-success">▶ Start Mining</button>
-      <button id="stopBtn" class="btn btn-danger">⏹ Stop</button>
-      <button id="statusBtn" class="btn btn-warning">🔄 Status</button>
-      <button id="retryBtn" class="btn">↻ Retry Library</button>
+      ✅ <strong>Wallet:</strong> ${XMR_WALLET}
+      <br>Mined shares go directly to this wallet. The pool pays out when you reach the threshold.
     </div>
     <div class="stats">
       <div><div class="stat-value" id="hashrate">0</div><div>Hashrate (H/s)</div></div>
-      <div><div class="stat-value" id="accepted">0</div><div>Accepted Shares</div></div>
-      <div><div class="stat-value" id="totalHashes">0</div><div>Total Hashes</div></div>
+      <div><div class="stat-value" id="shares">0</div><div>Valid Shares</div></div>
+      <div><div class="stat-value" id="balance">0.000000</div><div>Pending XMR</div></div>
     </div>
-    <div id="log" class="log">Ready. Enter your wallet address and start mining.</div>
+    <div style="margin-top:1.5rem;">
+      <a href="https://supportxmr.com/#/dashboard/${XMR_WALLET}" target="_blank" class="btn btn-success">📊 View on Pool Dashboard</a>
+      <button id="refreshBtn" class="btn">🔄 Refresh Stats</button>
+    </div>
+    <div id="log" class="log">Loading stats...</div>
   </div>
 </div>
-
 <script>
-  // -------- WebAssembly Miner (webminerpool) --------
-  let minerReady = false;
-  let minerRunning = false;
-  let intervalId = null;
-  let hashrateVal = 0;
-  let acceptedVal = 0;
-  let totalHashesVal = 0;
+  const WALLET = "${XMR_WALLET}";
+  const API_URL = "https://supportxmr.com/api/miner/${WALLET}/stats";
 
   function addLog(msg, isError = false) {
     const logDiv = document.getElementById('log');
@@ -74,154 +60,30 @@
     logDiv.scrollTop = logDiv.scrollHeight;
   }
 
-  // Load the WebAssembly miner library from multiple CDN sources
-  function loadWasmLibrary() {
-    return new Promise((resolve) => {
-      const sources = [
-        'https://cdn.jsdelivr.net/npm/webminerpool@2.0.0/webmr.js',
-        'https://unpkg.com/webminerpool@2.0.0/webmr.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/webminerpool/2.0.0/webmr.js'
-      ];
-      let loaded = false;
-
-      function tryLoad(index) {
-        if (index >= sources.length) {
-          resolve(false);
-          return;
-        }
-        const script = document.createElement('script');
-        script.src = sources[index];
-        script.onload = () => {
-          // Check if the library exposed the necessary functions
-          if (typeof startMining === 'function' && typeof stopMining === 'function') {
-            loaded = true;
-            resolve(true);
-          } else {
-            tryLoad(index + 1);
-          }
-        };
-        script.onerror = () => tryLoad(index + 1);
-        document.head.appendChild(script);
-        // Also check after a timeout
-        setTimeout(() => {
-          if (!loaded && typeof startMining === 'function') {
-            loaded = true;
-            resolve(true);
-          }
-        }, 5000);
-      }
-
-      tryLoad(0);
-    });
-  }
-
-  async function startMining() {
-    const address = document.getElementById('walletAddress').value.trim();
-    if (!address) {
-      addLog('❌ Please enter your public wallet address.', true);
-      return;
-    }
-    if (minerRunning) {
-      addLog('⚠️ Already mining.');
-      return;
-    }
-
-    // Ensure library is loaded
-    if (!minerReady) {
-      addLog('⏳ Loading WebAssembly miner...');
-      minerReady = await loadWasmLibrary();
-      if (!minerReady) {
-        addLog('❌ Could not load WebAssembly library. Use "Retry Library" button.', true);
-        return;
-      }
-      addLog('✅ WebAssembly library loaded.');
-    }
-
+  async function fetchStats() {
     try {
-      // Start mining on moneroocean.stream
-      startMining(
-        'moneroocean.stream',   // pool
-        address,               // your public wallet
-        'x',                   // password (often ignored)
-        -1                     // auto‑detect threads
-      );
-      minerRunning = true;
-      addLog('⛏️ Mining started on moneroocean.stream');
-
-      // Start monitoring hashrate and total hashes
-      intervalId = setInterval(() => {
-        if (typeof getHashrate === 'function') {
-          const h = getHashrate();
-          if (h > 0) {
-            hashrateVal = Math.round(h);
-            document.getElementById('hashrate').textContent = hashrateVal;
-          }
-        }
-        if (typeof getTotalHashes === 'function') {
-          const total = getTotalHashes();
-          if (total > 0) {
-            totalHashesVal = total;
-            document.getElementById('totalHashes').textContent = totalHashesVal;
-          }
-        }
-        // Accepted shares are usually reported via callbacks – we'll simulate a small number.
-        // In a real miner, you'd attach a callback to 'onAccepted'.
-        if (Math.random() < 0.02) {
-          acceptedVal++;
-          document.getElementById('accepted').textContent = acceptedVal;
-          addLog('✅ Share accepted!');
-        }
-      }, 2000);
-
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error('API request failed');
+      const data = await res.json();
+      // Data structure: { hashrate, amtDue, shares, ... }
+      const hashrate = data.hashrate || 0;
+      const shares = data.shares || 0;
+      const balance = (data.amtDue || 0) / 1e12; // XMR (piconero to XMR)
+      document.getElementById('hashrate').textContent = Math.round(hashrate);
+      document.getElementById('shares').textContent = shares;
+      document.getElementById('balance').textContent = balance.toFixed(6);
+      addLog(`✅ Stats updated: ${Math.round(hashrate)} H/s, ${shares} shares, ${balance.toFixed(6)} XMR pending`);
     } catch (err) {
-      addLog('❌ Failed to start: ' + err.message, true);
+      document.getElementById('hashrate').textContent = '?';
+      document.getElementById('shares').textContent = '?';
+      document.getElementById('balance').textContent = '?';
+      addLog(`❌ Failed to fetch stats: ${err.message}`, true);
     }
   }
 
-  function stopMining() {
-    if (typeof stopMining === 'function') {
-      stopMining();
-    }
-    minerRunning = false;
-    if (intervalId) clearInterval(intervalId);
-    addLog('⏹️ Mining stopped.');
-  }
-
-  function checkStatus() {
-    if (minerRunning) {
-      addLog(`📊 Status: Hashrate ${hashrateVal} H/s, Accepted: ${acceptedVal}, Total: ${totalHashesVal}`);
-    } else {
-      addLog('⏹️ Miner is not running.');
-    }
-  }
-
-  async function retryLibrary() {
-    addLog('🔄 Retrying library load...');
-    minerReady = false;
-    minerReady = await loadWasmLibrary();
-    if (minerReady) {
-      addLog('✅ Library loaded successfully.');
-    } else {
-      addLog('❌ Library still not available.', true);
-    }
-  }
-
-  // Event listeners
-  document.getElementById('startBtn').addEventListener('click', startMining);
-  document.getElementById('stopBtn').addEventListener('click', stopMining);
-  document.getElementById('statusBtn').addEventListener('click', checkStatus);
-  document.getElementById('retryBtn').addEventListener('click', retryLibrary);
-
-  // Pre‑load the library so it's ready when the user clicks Start
-  (async () => {
-    addLog('⏳ Pre‑loading WebAssembly miner...');
-    minerReady = await loadWasmLibrary();
-    if (minerReady) {
-      addLog('✅ WASM miner ready.');
-    } else {
-      addLog('⚠️ Pre‑load failed – will retry on Start or use "Retry Library" button.', true);
-    }
-  })();
+  document.getElementById('refreshBtn').addEventListener('click', fetchStats);
+  fetchStats();
+  setInterval(fetchStats, 60000); // refresh every minute
 </script>
 </body>
 </html>
