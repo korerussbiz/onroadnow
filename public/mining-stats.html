@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mining Stats – Real Earnings</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:'Inter','Segoe UI',sans-serif;background:linear-gradient(145deg,#0f172a 0%,#1e293b 100%);color:#e2e8f0;padding:1.5rem;font-size:1.2rem;min-height:100vh}
+    .container{max-width:1000px;margin:auto}
+    .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
+    .nav a{color:#60a5fa;text-decoration:none;font-weight:600;padding:0.3rem 0.8rem;border-radius:0.5rem;transition:0.2s}
+    .nav a:hover{color:#facc15;background:#1e293b}
+    .card{background:rgba(30,41,59,0.9);backdrop-filter:blur(5px);border-radius:1.5rem;padding:2rem;margin-bottom:2rem;border:1px solid #334155;box-shadow:0 4px 20px rgba(0,0,0,0.5)}
+    h1{font-size:2.2rem;margin:0 0 0.3rem 0;color:#facc15}
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+    .stat-item{background:#0f172a;padding:1.5rem;border-radius:1rem;text-align:center}
+    .stat-value{font-size:2.5rem;font-weight:700;color:#facc15}
+    .stat-label{color:#94a3b8;font-size:0.9rem;text-transform:uppercase;letter-spacing:1px}
+    .wallet-display{font-family:monospace;word-break:break-all;background:#0f172a;padding:0.5rem;border-radius:0.5rem;font-size:0.8rem;margin:0.5rem 0}
+    .btn{background:#3b82f6;border:none;padding:0.6rem 1.2rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer}
+    .btn:hover{box-shadow:0 0 15px #3b82f6}
+    .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:150px;overflow-y:auto;font-family:monospace;font-size:0.9rem;margin-top:1rem}
+    @media(max-width:600px){.stats-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/micro-login">🔐 Login</a>
+    <a href="/micro-dashboard">📊 Dashboard</a>
+    <a href="/mining">⛏️ Mining</a>
+    <a href="/mining-stats">📈 Stats</a>
+  </div>
+
+  <div class="card">
+    <h1>📊 Real Mining Statistics</h1>
+    <p>Live data from the pool – updated every 30 seconds.</p>
+    <div class="wallet-display">
+      <span style="color:#94a3b8;">Wallet:</span>
+      <span style="color:#facc15;">9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2</span>
+    </div>
+
+    <div id="statsContainer" class="stats-grid">
+      <div class="stat-item"><div class="stat-value" id="hashrate">–</div><div class="stat-label">Hashrate (H/s)</div></div>
+      <div class="stat-item"><div class="stat-value" id="unpaid">–</div><div class="stat-label">Unpaid Balance</div></div>
+      <div class="stat-item"><div class="stat-value" id="value">–</div><div class="stat-label">Value (USD)</div></div>
+      <div class="stat-item"><div class="stat-value" id="shares">–</div><div class="stat-label">Total Shares</div></div>
+    </div>
+
+    <div style="margin-top:1rem;display:flex;gap:1rem;">
+      <button id="refreshBtn" class="btn">🔄 Refresh Now</button>
+      <span id="lastUpdate" style="color:#94a3b8;font-size:0.9rem;align-self:center;">Last update: –</span>
+    </div>
+
+    <div id="log" class="log">Loading stats...</div>
+  </div>
+</div>
+
+<script>
+  async function fetchStats() {
+    const logDiv = document.getElementById('log');
+    const lastUpdateSpan = document.getElementById('lastUpdate');
+    try {
+      const res = await fetch('/api/mining/stats', { credentials: 'include' });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      document.getElementById('hashrate').textContent = data.hashrate.toLocaleString();
+      document.getElementById('unpaid').textContent = data.unpaidBalance.toFixed(6) + ' XMR';
+      document.getElementById('value').textContent = '$' + data.valueUSD.toFixed(2);
+      document.getElementById('shares').textContent = data.totalHashes.toLocaleString();
+
+      const now = new Date();
+      lastUpdateSpan.textContent = 'Last update: ' + now.toLocaleTimeString();
+      logDiv.innerHTML = '✅ Stats updated at ' + now.toLocaleTimeString();
+    } catch (err) {
+      logDiv.innerHTML = '❌ ' + err.message;
+    }
+  }
+
+  document.getElementById('refreshBtn').addEventListener('click', fetchStats);
+  fetchStats();
+  setInterval(fetchStats, 30000);
+</script>
+</body>
+</html>

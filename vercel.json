@@ -11,6 +11,8 @@
     }
   ],
   "routes": [
+    { "src": "/mining", "dest": "/public/mining.html" },
+    { "src": "/mining-stats", "dest": "/public/mining-stats.html" },
     { "src": "/mining-dashboard", "dest": "/public/mining-dashboard.html" },
     { "src": "/xmr-miner", "dest": "/public/xmr-miner.html" },
     {
