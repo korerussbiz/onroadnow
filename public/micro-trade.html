@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Micro-Trade</title>
+  <style>
+    *{box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
+    .container{max-width:900px;margin:auto}
+    .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}
+    .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
+    .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
+    input,select{width:100%;padding:0.8rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;margin:0.5rem 0;font-size:1.2rem}
+    .btn{background:#3b82f6;border:none;padding:0.8rem 1.8rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;width:auto}
+    .btn-buy{background:#10b981}
+    .btn-sell{background:#ef4444}
+    .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:300px;overflow-y:auto;font-family:monospace;font-size:1rem}
+    .fee-info{color:#94a3b8;font-size:0.9rem}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/micro-login">🔐 Login</a>
+    <a href="/micro-dashboard">📊 Dashboard</a>
+    <a href="/micro-trade">📈 Trade</a>
+    <a href="/micro-teller">🧾 Teller</a>
+  </div>
+  <div class="card">
+    <h1>📈 Manual Trading</h1>
+    <p>Trade your balance. A 3‑9% fee applies on each trade (based on profit).</p>
+    <input type="text" id="tradeSymbol" placeholder="Symbol (e.g., BTC, AAPL)" value="BTC">
+    <input type="number" id="tradeAmount" placeholder="Amount (USD)" step="0.01">
+    <select id="tradeType">
+      <option value="buy">Buy</option>
+      <option value="sell">Sell</option>
+    </select>
+    <button id="tradeBtn" class="btn btn-buy">Execute Trade</button>
+    <div id="tradeResult" style="margin-top:1rem;"></div>
+    <div id="log" class="log">Ready.</div>
+  </div>
+</div>
+<script>
+  async function apiCall(endpoint, options = {}) {
+    const res = await fetch(`/api/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+    return res.json();
+  }
+  function addLog(msg) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+  document.getElementById('tradeBtn').onclick = async () => {
+    const symbol = document.getElementById('tradeSymbol').value.trim();
+    const amount = parseFloat(document.getElementById('tradeAmount').value);
+    const type = document.getElementById('tradeType').value;
+    if (!symbol || isNaN(amount) || amount <= 0) { addLog('❌ Enter valid symbol and amount'); return; }
+    const data = await apiCall('micro/trade', { method: 'POST', body: JSON.stringify({ symbol, amount, type }) });
+    if (data.error) { addLog(`❌ ${data.error}`); return; }
+    addLog(`✅ ${type.toUpperCase()} ${data.shares} ${symbol} at $${data.price} (fee $${data.fee.toFixed(2)})`);
+    document.getElementById('tradeResult').innerHTML = `
+      <div style="background:#0f172a;padding:1rem;border-radius:0.5rem;">
+        <p><strong>Executed:</strong> ${type.toUpperCase()} ${symbol}</p>
+        <p><strong>Price:</strong> $${data.price.toFixed(2)}</p>
+        <p><strong>Amount:</strong> $${amount.toFixed(2)}</p>
+        <p><strong>Fee:</strong> $${data.fee.toFixed(2)}</p>
+        <p><strong>Net:</strong> $${data.net.toFixed(2)}</p>
+      </div>
+    `;
+  };
+</script>
+</body>
+</html>

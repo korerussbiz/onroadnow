@@ -1268,4 +1268,174 @@ module.exports = async (req, res) => {
     return;
   }
 
+
+  // ---------- MICRO-CHANGE TRADING PLATFORM (New) ----------
+  // Extended customer accounts, deposits, fees, trading, withdrawals
+
+  // Fee configuration (3‑9% of round‑up or trade profit)
+  const MICRO_FEE_CONFIG = {
+    minFeePercent: 3,
+    maxFeePercent: 9,
+    // Fee is dynamic based on deposit amount or trade size
+  };
+
+  function calculateMicroFee(amount) {
+    // Fee scales: larger amounts get lower percentage
+    let percent;
+    if (amount < 5) percent = 9;
+    else if (amount < 20) percent = 7;
+    else if (amount < 50) percent = 5;
+    else percent = 3;
+    return { percent, fee: amount * (percent / 100) };
+  }
+
+  // Extended customer storage
+  let microCustomers = new Map(); // customerId -> { name, phone, email, balance, invested, deposits: [] }
+  let microDeposits = new Map();  // depositId -> { customerId, amount, roundup, fee, netInvested, status, timestamp }
+
+  function getMicroCustomer(userId) {
+    if (!microCustomers.has(userId)) {
+      microCustomers.set(userId, { name: '', phone: '', email: '', balance: 0, invested: 0, deposits: [] });
+    }
+    return microCustomers.get(userId);
+  }
+
+  // Create deposit (teller)
+  if (url === '/api/micro/deposit/create' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { amount, customerName, phone, email } = req.body;
+    if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
+    const rounded = Math.ceil(amount);
+    const roundup = rounded - amount;
+    if (roundup <= 0.001) return res.status(400).json({ error: 'No spare change' });
+
+    // Calculate fee
+    const { percent, fee } = calculateMicroFee(roundup);
+    const netInvested = roundup - fee;
+
+    // Get or create customer
+    const customer = getMicroCustomer(userId);
+    customer.name = customerName || customer.name;
+    customer.phone = phone || customer.phone;
+    customer.email = email || customer.email;
+    customer.balance += netInvested;  // add net amount to balance
+
+    // Generate deposit record
+    const depositId = 'MD' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+    const deposit = {
+      id: depositId,
+      customerId: userId,
+      amount,
+      roundup,
+      fee,
+      netInvested,
+      status: 'invested', // will be auto-invested
+      timestamp: Date.now()
+    };
+    microDeposits.set(depositId, deposit);
+    customer.deposits.push(depositId);
+    microCustomers.set(userId, customer);
+
+    // Auto-invest using existing executeTrade (buy SPY or default)
+    let investedAmount = 0;
+    try {
+      const tradeResult = await executeTrade(userId, 'SPY', netInvested, 'buy', true);
+      investedAmount = tradeResult.userGain || netInvested;
+      // The balance already includes netInvested; we'll track separately
+      customer.invested += investedAmount;
+      microCustomers.set(userId, customer);
+    } catch (err) {
+      // If auto-invest fails, mark as pending
+      deposit.status = 'pending';
+      microDeposits.set(depositId, deposit);
+    }
+
+    // Generate QR code
+    const QRCode = require('qrcode');
+    const claimUrl = `${process.env.BASE_URL || 'https://onroadnow.vercel.app'}/micro-dashboard?deposit=${depositId}`;
+    const qrCode = await QRCode.toDataURL(claimUrl);
+
+    res.status(201).json({
+      depositId,
+      total: rounded,
+      roundup,
+      fee,
+      netInvested,
+      customerName: customer.name,
+      claimUrl,
+      qrCode
+    });
+    return;
+  }
+
+  // Get customer dashboard
+  if (url === '/api/micro/dashboard' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const customer = microCustomers.get(userId) || { balance: 0, invested: 0, deposits: [] };
+    const depositList = customer.deposits.map(id => microDeposits.get(id)).filter(Boolean);
+    // Get trading profit from existing system
+    const state = getUserTraderState(userId);
+    const profit = state.userProfit || 0;
+    res.status(200).json({
+      balance: customer.balance || 0,
+      invested: customer.invested || 0,
+      profit,
+      deposits: depositList
+    });
+    return;
+  }
+
+  // Manual trading (with fee)
+  if (url === '/api/micro/trade' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { symbol, amount, type } = req.body;
+    if (!symbol || !amount || amount <= 0) return res.status(400).json({ error: 'Invalid trade' });
+    const customer = getMicroCustomer(userId);
+    if (customer.balance < amount && type === 'buy') {
+      return res.status(400).json({ error: 'Insufficient balance' });
+    }
+    // Execute trade using existing executeTrade
+    try {
+      const tradeResult = await executeTrade(userId, symbol, amount, type, true);
+      // Fee is already included in the tradeResult (from the original executeTrade)
+      // But we want to track additional fee for our system
+      const { percent, fee } = calculateMicroFee(amount);
+      // Deduct fee from balance (on buy)
+      if (type === 'buy') {
+        customer.balance -= fee;
+        microCustomers.set(userId, customer);
+      }
+      res.status(200).json({
+        price: tradeResult.price,
+        shares: tradeResult.units,
+        fee,
+        net: tradeResult.userGain - fee,
+        message: `Trade executed with ${percent}% fee.`
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+    return;
+  }
+
+  // Withdrawal (with fee)
+  if (url === '/api/micro/withdraw' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { amount, address } = req.body;
+    if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
+    const customer = getMicroCustomer(userId);
+    if (customer.balance < amount) return res.status(400).json({ error: 'Insufficient balance' });
+    // Withdrawal fee: 3%
+    const fee = amount * 0.03;
+    const netWithdraw = amount - fee;
+    customer.balance -= amount; // deduct full amount (fee goes to company)
+    microCustomers.set(userId, customer);
+    // Log withdrawal
+    const data = loadEarnings();
+    data.withdrawals.push({ userId, amount, fee, netWithdraw, address, timestamp: Date.now(), status: 'pending' });
+    saveEarnings(data);
+    res.status(200).json({ message: 'Withdrawal requested', netAmount: netWithdraw, fee });
+    return;
+  }
+
 };
