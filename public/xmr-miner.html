@@ -21,6 +21,7 @@
     .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;text-align:center}
     .stat-value{font-size:2rem;color:#facc15}
     .fee-info{color:#94a3b8;font-size:0.9rem;margin-top:0.5rem}
+    .warning{background:#1e293b;border-left:4px solid #f59e0b;padding:0.8rem;margin:0.5rem 0;border-radius:0.5rem}
   </style>
 </head>
 <body>
@@ -34,12 +35,12 @@
   <div class="card">
     <h1>⛏️ Monero (XMR) Web Miner</h1>
     <p>Mine Monero directly in your browser using WebAssembly.</p>
-    <div class="fee-info">
-      ⚠️ Browser mining is for demonstration/educational purposes. Performance is limited compared to native mining.
+    <div class="warning">
+      ⚠️ <strong>Security:</strong> Only enter your <strong>PUBLIC wallet address</strong> (starts with '4' or '8'). Never share your private key or mnemonic seed!
     </div>
     <div>
-      <label for="walletAddress">Wallet Address</label>
-      <input type="text" id="walletAddress" placeholder="Enter your Monero wallet address" value="44tLjmXrQNrWJ5N8RMtU5vLJL2MyAyiCnEJbj1Zxv9DdAgVwNYGjHE7ePpXkDfA6qBQbL6aH8p9Zf5dLqVpP6E4oW9mX7">
+      <label for="walletAddress">Public Wallet Address</label>
+      <input type="text" id="walletAddress" placeholder="e.g., 44tLjmXrQNrWJ5N8RMtU5vLJL2MyAyiCnEJbj1Zxv9DdAgVwNYGjHE7ePpXkDfA6qBQbL6aH8p9Zf5dLqVpP6E4oW9mX7">
     </div>
     <div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0;">
       <button id="startBtn" class="btn btn-success">▶ Start Mining</button>
@@ -51,7 +52,7 @@
       <div><div class="stat-value" id="accepted">0</div><div>Accepted Shares</div></div>
       <div><div class="stat-value" id="totalHashes">0</div><div>Total Hashes</div></div>
     </div>
-    <div id="log" class="log">Ready. Enter wallet address and start mining.</div>
+    <div id="log" class="log">Ready. Enter your public wallet address and start mining.</div>
   </div>
 </div>
 <script>
@@ -91,7 +92,12 @@
   async function startMining() {
     const address = document.getElementById('walletAddress').value.trim();
     if (!address) {
-      addLog('❌ Please enter a wallet address.', true);
+      addLog('❌ Please enter a public wallet address.', true);
+      return;
+    }
+    // Simple validation: Monero addresses start with '4' or '8' and are 95 chars.
+    if (!/^[48][0-9a-zA-Z]{94}$/.test(address)) {
+      addLog('❌ Invalid wallet address format. It should start with "4" or "8" and be 95 characters long.', true);
       return;
     }
     if (isMining) {
