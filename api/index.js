@@ -1629,4 +1629,62 @@ module.exports = async (req, res) => {
     return;
   }
 
+
+  // ---------- SupportXMR Mining Stats ----------
+  if (url === '/api/mining/stats' && method === 'GET') {
+    const wallet = '9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2';
+    try {
+      const endpoint = `https://supportxmr.com/api/miner/${wallet}/stats`;
+      const response = await axios.get(endpoint);
+      const data = response.data;
+      // Also fetch XMR price
+      const priceRes = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd');
+      const xmrPrice = priceRes.data.monero?.usd || 0;
+      const balance = (data.amtDue || 0) / 1e12; // piconero to XMR
+      res.status(200).json({
+        wallet,
+        hashrate: data.hashrate || 0,
+        balance,
+        totalHashes: data.totalHashes || 0,
+        lastShare: data.lastShare || 0,
+        xmrPrice,
+        valueUSD: balance * xmrPrice
+      });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch mining stats' });
+    }
+    return;
+  }
+
+
+  // ---------- Native Miner Controls ----------
+  const { exec } = require('child_process');
+  const MINER_SCRIPT = process.env.MINER_SCRIPT || '~/start_miner.sh';
+
+  if (url === '/api/miner/start' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    try {
+      exec(`${MINER_SCRIPT} > /dev/null 2>&1 &`, (error) => {
+        if (error) console.error(error);
+      });
+      res.status(200).json({ message: 'Miner started' });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+    return;
+  }
+
+  if (url === '/api/miner/stop' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    try {
+      exec('pkill -f xmrig || true', (error) => {
+        if (error) console.error(error);
+      });
+      res.status(200).json({ message: 'Miner stopped' });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+    return;
+  }
+
 };
