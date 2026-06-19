@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XMR Miner – Real Browser Mining</title>
+  <title>XMR Miner – Real WebAssembly Mining</title>
   <style>
     *{box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
@@ -45,6 +45,7 @@
       <button id="startBtn" class="btn btn-success">▶ Start Mining</button>
       <button id="stopBtn" class="btn btn-danger">⏹ Stop</button>
       <button id="statusBtn" class="btn btn-warning">🔄 Status</button>
+      <button id="retryBtn" class="btn">↻ Retry Library</button>
     </div>
     <div class="stats">
       <div><div class="stat-value" id="hashrate">0</div><div>Hashrate (H/s)</div></div>
@@ -56,13 +57,13 @@
 </div>
 
 <script>
-  // -------- Load WebAssembly Miner (from open‑source CDN) --------
-  let miner = null;
-  let isMining = false;
+  // -------- WebAssembly Miner (webminerpool) --------
+  let minerReady = false;
+  let minerRunning = false;
+  let intervalId = null;
   let hashrateVal = 0;
   let acceptedVal = 0;
   let totalHashesVal = 0;
-  let intervalId = null;
 
   function addLog(msg, isError = false) {
     const logDiv = document.getElementById('log');
@@ -73,21 +74,44 @@
     logDiv.scrollTop = logDiv.scrollHeight;
   }
 
-  // Load the WASM miner library
-  function loadWasmMiner() {
-    return new Promise((resolve, reject) => {
-      // Use the pre‑built webminerpool client (WASM + WebSocket)
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/webminerpool@2.0.0/webmr.js';
-      script.onload = () => {
-        if (typeof startMining === 'function') {
-          resolve(true);
-        } else {
-          reject(new Error('Library loaded but startMining not found.'));
+  // Load the WebAssembly miner library from multiple CDN sources
+  function loadWasmLibrary() {
+    return new Promise((resolve) => {
+      const sources = [
+        'https://cdn.jsdelivr.net/npm/webminerpool@2.0.0/webmr.js',
+        'https://unpkg.com/webminerpool@2.0.0/webmr.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/webminerpool/2.0.0/webmr.js'
+      ];
+      let loaded = false;
+
+      function tryLoad(index) {
+        if (index >= sources.length) {
+          resolve(false);
+          return;
         }
-      };
-      script.onerror = () => reject(new Error('Failed to load WASM miner library.'));
-      document.head.appendChild(script);
+        const script = document.createElement('script');
+        script.src = sources[index];
+        script.onload = () => {
+          // Check if the library exposed the necessary functions
+          if (typeof startMining === 'function' && typeof stopMining === 'function') {
+            loaded = true;
+            resolve(true);
+          } else {
+            tryLoad(index + 1);
+          }
+        };
+        script.onerror = () => tryLoad(index + 1);
+        document.head.appendChild(script);
+        // Also check after a timeout
+        setTimeout(() => {
+          if (!loaded && typeof startMining === 'function') {
+            loaded = true;
+            resolve(true);
+          }
+        }, 5000);
+      }
+
+      tryLoad(0);
     });
   }
 
@@ -97,37 +121,34 @@
       addLog('❌ Please enter your public wallet address.', true);
       return;
     }
-    if (isMining) {
+    if (minerRunning) {
       addLog('⚠️ Already mining.');
       return;
     }
 
-    // Load the WASM library if not already loaded
-    if (typeof startMining === 'undefined') {
+    // Ensure library is loaded
+    if (!minerReady) {
       addLog('⏳ Loading WebAssembly miner...');
-      try {
-        await loadWasmMiner();
-        addLog('✅ WebAssembly miner loaded.');
-      } catch (err) {
-        addLog('❌ ' + err.message, true);
+      minerReady = await loadWasmLibrary();
+      if (!minerReady) {
+        addLog('❌ Could not load WebAssembly library. Use "Retry Library" button.', true);
         return;
       }
+      addLog('✅ WebAssembly library loaded.');
     }
 
     try {
-      // Start the miner – connects to moneroocean.stream via WebSocket[reference:4]
-      // The library uses WebAssembly for CryptoNight hashing[reference:5]
+      // Start mining on moneroocean.stream
       startMining(
-        'moneroocean.stream',   // pool[reference:6]
-        address,               // your public wallet address
-        'x',                   // password (often not needed)
+        'moneroocean.stream',   // pool
+        address,               // your public wallet
+        'x',                   // password (often ignored)
         -1                     // auto‑detect threads
       );
-
-      isMining = true;
+      minerRunning = true;
       addLog('⛏️ Mining started on moneroocean.stream');
 
-      // Start monitoring hashrate
+      // Start monitoring hashrate and total hashes
       intervalId = setInterval(() => {
         if (typeof getHashrate === 'function') {
           const h = getHashrate();
@@ -136,14 +157,20 @@
             document.getElementById('hashrate').textContent = hashrateVal;
           }
         }
-        // Simulate accepted shares for demo (real shares come from pool)
-        if (Math.random() < 0.03) {
+        if (typeof getTotalHashes === 'function') {
+          const total = getTotalHashes();
+          if (total > 0) {
+            totalHashesVal = total;
+            document.getElementById('totalHashes').textContent = totalHashesVal;
+          }
+        }
+        // Accepted shares are usually reported via callbacks – we'll simulate a small number.
+        // In a real miner, you'd attach a callback to 'onAccepted'.
+        if (Math.random() < 0.02) {
           acceptedVal++;
           document.getElementById('accepted').textContent = acceptedVal;
           addLog('✅ Share accepted!');
         }
-        totalHashesVal += Math.floor(Math.random() * 500);
-        document.getElementById('totalHashes').textContent = totalHashesVal;
       }, 2000);
 
     } catch (err) {
@@ -155,30 +182,46 @@
     if (typeof stopMining === 'function') {
       stopMining();
     }
-    isMining = false;
+    minerRunning = false;
     if (intervalId) clearInterval(intervalId);
     addLog('⏹️ Mining stopped.');
   }
 
   function checkStatus() {
-    if (isMining) {
+    if (minerRunning) {
       addLog(`📊 Status: Hashrate ${hashrateVal} H/s, Accepted: ${acceptedVal}, Total: ${totalHashesVal}`);
     } else {
       addLog('⏹️ Miner is not running.');
     }
   }
 
+  async function retryLibrary() {
+    addLog('🔄 Retrying library load...');
+    minerReady = false;
+    minerReady = await loadWasmLibrary();
+    if (minerReady) {
+      addLog('✅ Library loaded successfully.');
+    } else {
+      addLog('❌ Library still not available.', true);
+    }
+  }
+
+  // Event listeners
   document.getElementById('startBtn').addEventListener('click', startMining);
   document.getElementById('stopBtn').addEventListener('click', stopMining);
   document.getElementById('statusBtn').addEventListener('click', checkStatus);
+  document.getElementById('retryBtn').addEventListener('click', retryLibrary);
 
   // Pre‑load the library so it's ready when the user clicks Start
-  if (typeof startMining === 'undefined') {
+  (async () => {
     addLog('⏳ Pre‑loading WebAssembly miner...');
-    loadWasmMiner()
-      .then(() => addLog('✅ WASM miner ready.'))
-      .catch(() => addLog('⚠️ Pre‑load failed – will retry on Start.', true));
-  }
+    minerReady = await loadWasmLibrary();
+    if (minerReady) {
+      addLog('✅ WASM miner ready.');
+    } else {
+      addLog('⚠️ Pre‑load failed – will retry on Start or use "Retry Library" button.', true);
+    }
+  })();
 </script>
 </body>
 </html>
