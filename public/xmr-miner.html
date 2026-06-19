@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XMR Miner – Browser Mining</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
+    .container{max-width:800px;margin:auto}
+    .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}
+    .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
+    .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
+    .nav a:hover{color:#facc15}
+    input,button{font-size:1.2rem;padding:0.8rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;width:100%;margin:0.5rem 0}
+    .btn{background:#3b82f6;border:none;padding:0.8rem 1.8rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;width:auto}
+    .btn-success{background:#10b981}
+    .btn-danger{background:#ef4444}
+    .btn-warning{background:#f59e0b}
+    .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:300px;overflow-y:auto;font-family:monospace;font-size:1rem;margin-top:1rem}
+    .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;text-align:center}
+    .stat-value{font-size:2rem;color:#facc15}
+    .fee-info{color:#94a3b8;font-size:0.9rem;margin-top:0.5rem}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/micro-login">🔐 Login</a>
+    <a href="/micro-dashboard">📊 Dashboard</a>
+    <a href="/xmr-miner">⛏️ XMR Miner</a>
+  </div>
+  <div class="card">
+    <h1>⛏️ Monero (XMR) Web Miner</h1>
+    <p>Mine Monero directly in your browser using WebAssembly.</p>
+    <div class="fee-info">
+      ⚠️ Browser mining is for demonstration/educational purposes. Performance is limited compared to native mining.
+    </div>
+    <div>
+      <label for="walletAddress">Wallet Address</label>
+      <input type="text" id="walletAddress" placeholder="Enter your Monero wallet address" value="44tLjmXrQNrWJ5N8RMtU5vLJL2MyAyiCnEJbj1Zxv9DdAgVwNYGjHE7ePpXkDfA6qBQbL6aH8p9Zf5dLqVpP6E4oW9mX7">
+    </div>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0;">
+      <button id="startBtn" class="btn btn-success">▶ Start Mining</button>
+      <button id="stopBtn" class="btn btn-danger">⏹ Stop Mining</button>
+      <button id="statusBtn" class="btn btn-warning">🔄 Check Status</button>
+    </div>
+    <div class="stats">
+      <div><div class="stat-value" id="hashrate">0</div><div>Hashrate (H/s)</div></div>
+      <div><div class="stat-value" id="accepted">0</div><div>Accepted Shares</div></div>
+      <div><div class="stat-value" id="totalHashes">0</div><div>Total Hashes</div></div>
+    </div>
+    <div id="log" class="log">Ready. Enter wallet address and start mining.</div>
+  </div>
+</div>
+<script>
+  // CryptoWeb miner - WebAssembly XMRig
+  // Documentation: https://github.com/cryptoweb/cryptoweb
+  let miner = null;
+  let isMining = false;
+
+  function addLog(msg, isError = false) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    if (isError) p.style.color = '#ef4444';
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  // Load the CryptoWeb library (WebAssembly miner)
+  function loadMiner() {
+    return new Promise((resolve, reject) => {
+      // Use CDN version
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@cryptoweb/core@0.1.0/dist/cryptoweb.min.js';
+      script.onload = () => {
+        addLog('✅ CryptoWeb library loaded.');
+        resolve();
+      };
+      script.onerror = () => {
+        addLog('❌ Failed to load CryptoWeb library.', true);
+        reject();
+      };
+      document.head.appendChild(script);
+    });
+  }
+
+  // Initialize miner
+  async function startMining() {
+    const address = document.getElementById('walletAddress').value.trim();
+    if (!address) {
+      addLog('❌ Please enter a wallet address.', true);
+      return;
+    }
+    if (isMining) {
+      addLog('⚠️ Already mining.');
+      return;
+    }
+    try {
+      // Ensure library is loaded
+      if (typeof CryptoWeb === 'undefined') {
+        await loadMiner();
+      }
+      // Create miner instance
+      miner = new CryptoWeb.Miner({
+        wallet: address,
+        threads: navigator.hardwareConcurrency || 4,
+        pool: {
+          url: 'pool.supportxmr.com:3333', // public pool
+        }
+      });
+      miner.on('hashrate', (hashrate) => {
+        document.getElementById('hashrate').textContent = Math.round(hashrate);
+      });
+      miner.on('accepted', () => {
+        const accepted = parseInt(document.getElementById('accepted').textContent) + 1;
+        document.getElementById('accepted').textContent = accepted;
+        addLog('✅ Share accepted!');
+      });
+      miner.on('totalHashes', (hashes) => {
+        document.getElementById('totalHashes').textContent = hashes;
+      });
+      miner.on('error', (err) => {
+        addLog(`❌ Miner error: ${err}`, true);
+      });
+      miner.start();
+      isMining = true;
+      addLog(`⛏️ Mining started to wallet ${address.slice(0,8)}...`);
+    } catch (err) {
+      addLog(`❌ Failed to start miner: ${err.message}`, true);
+    }
+  }
+
+  function stopMining() {
+    if (miner) {
+      miner.stop();
+      isMining = false;
+      addLog('⏹️ Mining stopped.');
+    } else {
+      addLog('⚠️ No miner running.');
+    }
+  }
+
+  function checkStatus() {
+    if (miner && isMining) {
+      const hashrate = document.getElementById('hashrate').textContent;
+      const accepted = document.getElementById('accepted').textContent;
+      addLog(`📊 Status: Hashrate ${hashrate} H/s, Accepted shares: ${accepted}`);
+    } else {
+      addLog('⏹️ Miner is not running.');
+    }
+  }
+
+  // Event listeners
+  document.getElementById('startBtn').addEventListener('click', startMining);
+  document.getElementById('stopBtn').addEventListener('click', stopMining);
+  document.getElementById('statusBtn').addEventListener('click', checkStatus);
+
+  // Auto-load library on page load
+  loadMiner().catch(() => {});
+</script>
+</body>
+</html>
