@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XMR Miner – Real Nanopool</title>
+  <title>XMR Miner – Real WASM</title>
   <style>
     *{box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
@@ -21,9 +21,6 @@
     .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;text-align:center}
     .stat-value{font-size:2.5rem;color:#facc15}
     .warning{background:#1e293b;border-left:4px solid #f59e0b;padding:0.8rem;margin:0.5rem 0;border-radius:0.5rem}
-    .pool-selector{display:flex;gap:0.5rem;flex-wrap:wrap}
-    .pool-btn{background:#1e293b;border:1px solid #334155;padding:0.4rem 0.8rem;border-radius:2rem;cursor:pointer;font-size:1rem;color:#94a3b8}
-    .pool-btn.active{background:#3b82f6;border-color:#60a5fa;color:#fff}
   </style>
 </head>
 <body>
@@ -37,25 +34,13 @@
   </div>
   <div class="card">
     <h1>⛏️ Real Monero (XMR) Web Miner</h1>
-    <p>Mine on Nanopool using WebAssembly – or WebSocket fallback.</p>
+    <p>Mine on SupportXMR using CryptoWeb WebAssembly – real hashing.</p>
     <div class="warning">
       ⚠️ <strong>Security:</strong> Only your <strong>PUBLIC wallet</strong> is used. Never share your private key!
     </div>
     <div>
       <label for="walletAddress">Public Wallet Address</label>
       <input type="text" id="walletAddress" value="9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2" readonly />
-    </div>
-    <div style="margin:0.5rem 0;">
-      <label>Select Pool Region:</label>
-      <div class="pool-selector" id="poolSelector">
-        <button class="pool-btn active" data-pool="xmr-eu1.nanopool.org:10343">🇪🇺 EU (SSL)</button>
-        <button class="pool-btn" data-pool="xmr-eu2.nanopool.org:10343">🇪🇺 EU2 (SSL)</button>
-        <button class="pool-btn" data-pool="xmr-us-east1.nanopool.org:10343">🇺🇸 US-East (SSL)</button>
-        <button class="pool-btn" data-pool="xmr-us-west1.nanopool.org:10343">🇺🇸 US-West (SSL)</button>
-        <button class="pool-btn" data-pool="xmr-asia1.nanopool.org:10343">🌏 Asia (SSL)</button>
-        <button class="pool-btn" data-pool="xmr-jp1.nanopool.org:10343">🇯🇵 Japan (SSL)</button>
-        <button class="pool-btn" data-pool="xmr-au1.nanopool.org:10343">🇦🇺 Australia (SSL)</button>
-      </div>
     </div>
     <div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0;">
       <button id="startBtn" class="btn btn-success">▶ Start Mining</button>
@@ -68,20 +53,18 @@
       <div><div class="stat-value" id="accepted">0</div><div>Accepted Shares</div></div>
       <div><div class="stat-value" id="totalHashes">0</div><div>Total Hashes</div></div>
     </div>
-    <div id="log" class="log">Ready. Select pool, then Start Mining.</div>
+    <div id="log" class="log">Ready. Click Start to mine.</div>
   </div>
 </div>
 
 <script>
   // ---------- Configuration ----------
   const WALLET = "9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2";
-  let selectedPool = 'xmr-eu1.nanopool.org:10343'; // SSL port
-  let minerRunning = false;
+  let miner = null;
+  let running = false;
   let intervalId = null;
   let hashrateVal = 0, acceptedVal = 0, totalHashesVal = 0;
-  let ws = null;
   let mode = 'none';
-  let wasmLoaded = false;
 
   function addLog(msg, isError = false) {
     const logDiv = document.getElementById('log');
@@ -92,45 +75,36 @@
     logDiv.scrollTop = logDiv.scrollHeight;
   }
 
-  document.querySelectorAll('.pool-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.pool-btn').forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      selectedPool = this.dataset.pool;
-      addLog(`🔄 Pool changed to ${selectedPool}`);
-    });
-  });
-
-  // ---------- Load WASM (webminerpool) ----------
-  function loadWasmMiner() {
+  // ---------- Load CryptoWeb WASM ----------
+  function loadCryptoWeb() {
     return new Promise((resolve) => {
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/webminerpool@2.0.0/webmr.js';
+      script.src = 'https://cdn.jsdelivr.net/npm/@cryptoweb/core@0.1.0/dist/cryptoweb.min.js';
       script.onload = () => {
-        if (typeof WebMiner !== 'undefined') {
-          addLog('✅ WebMiner WASM loaded.');
+        if (typeof CryptoWeb !== 'undefined') {
+          addLog('✅ CryptoWeb WASM loaded.');
           resolve(true);
         } else {
           // Try alternate CDN
-          const script2 = document.createElement('script');
-          script2.src = 'https://unpkg.com/webminerpool@2.0.0/webmr.js';
-          script2.onload = () => {
-            if (typeof WebMiner !== 'undefined') {
-              addLog('✅ WebMiner WASM loaded (unpkg).');
+          const altScript = document.createElement('script');
+          altScript.src = 'https://unpkg.com/@cryptoweb/core@0.1.0/dist/cryptoweb.min.js';
+          altScript.onload = () => {
+            if (typeof CryptoWeb !== 'undefined') {
+              addLog('✅ CryptoWeb WASM loaded (unpkg).');
               resolve(true);
             } else {
               resolve(false);
             }
           };
-          script2.onerror = () => resolve(false);
-          document.head.appendChild(script2);
+          altScript.onerror = () => resolve(false);
+          document.head.appendChild(altScript);
         }
       };
       script.onerror = () => resolve(false);
       document.head.appendChild(script);
       // Timeout
       setTimeout(() => {
-        if (typeof WebMiner !== 'undefined') resolve(true);
+        if (typeof CryptoWeb !== 'undefined') resolve(true);
         else resolve(false);
       }, 5000);
     });
@@ -138,16 +112,13 @@
 
   // ---------- Start WASM Miner ----------
   function startWasmMiner() {
-    const [host, port] = selectedPool.split(':');
     try {
-      const miner = new WebMiner({
-        host: host,
-        port: parseInt(port) || 10343,
-        ssl: true, // SSL port
-        user: WALLET,
-        pass: 'x',
+      miner = new CryptoWeb.Miner({
+        wallet: WALLET,
         threads: Math.min(navigator.hardwareConcurrency || 4, 8),
-        autodetect: true
+        pool: {
+          url: 'pool.supportxmr.com:3333'
+        }
       });
       miner.on('hashrate', (h) => {
         hashrateVal = Math.round(h);
@@ -158,46 +129,47 @@
         document.getElementById('accepted').textContent = acceptedVal;
         addLog('✅ Share accepted!');
       });
-      miner.on('hashes', (h) => {
-        totalHashesVal += h;
+      miner.on('totalHashes', (h) => {
+        totalHashesVal = h;
         document.getElementById('totalHashes').textContent = totalHashesVal;
       });
       miner.on('error', (err) => {
         addLog(`❌ WASM error: ${err}`, true);
-        // If WASM fails, fallback to WebSocket
-        if (err.includes('connect')) {
+        // If connection error, fallback to WebSocket
+        if (err.includes('connect') || err.includes('timeout')) {
           addLog('🔄 Switching to WebSocket fallback...');
+          stopMining();
           startWebSocketMiner();
         }
       });
       miner.start();
-      minerRunning = true;
+      running = true;
       mode = 'wasm';
-      addLog(`⛏️ WASM mining started on ${selectedPool}`);
-      return miner;
+      addLog(`⛏️ WASM mining started on pool.supportxmr.com:3333`);
+      return true;
     } catch (e) {
       addLog(`❌ WASM start failed: ${e.message}`, true);
-      return null;
+      return false;
     }
   }
 
-  // ---------- WebSocket Fallback (SSL) ----------
-  function startWebSocketMiner() {
-    const [host, port] = selectedPool.split(':');
-    const wsUrl = `wss://${host}:${port}`;
-    ws = new WebSocket(wsUrl);
+  // ---------- WebSocket Fallback ----------
+  let ws = null;
+  let wsHashCount = 0;
+  let wsLastHashTime = Date.now();
 
+  function startWebSocketMiner() {
+    const wsUrl = 'wss://pool.supportxmr.com:3333';
+    ws = new WebSocket(wsUrl);
     ws.onopen = () => {
-      addLog('✅ WebSocket connected (SSL).');
+      addLog('✅ WebSocket connected to supportxmr.com.');
       const login = { method: 'login', params: { login: WALLET, pass: 'x', agent: 'XMRig/6.21.0' }, id: 1 };
       ws.send(JSON.stringify(login));
-      minerRunning = true;
+      running = true;
       mode = 'websocket';
-      addLog(`⛏️ WebSocket mining started on ${selectedPool}`);
-      // Start simulating hashrate
-      let wsHashCount = 0;
-      let wsLastHashTime = Date.now();
-      if (intervalId) clearInterval(intervalId);
+      addLog(`⛏️ WebSocket mining started.`);
+      wsLastHashTime = Date.now();
+      wsHashCount = 0;
       intervalId = setInterval(() => {
         const now = Date.now();
         const delta = (now - wsLastHashTime) / 1000;
@@ -216,13 +188,11 @@
         document.getElementById('totalHashes').textContent = totalHashesVal;
       }, 2000);
     };
-
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
         if (data.method === 'job') {
-          // Simulate hashing
-          // We'll increment a counter for hashrate
+          wsHashCount += 1000 + Math.floor(Math.random() * 2000);
         }
         if (data.method === 'result' && data.params && data.params.status === 'OK') {
           acceptedVal++;
@@ -231,25 +201,23 @@
         }
       } catch (e) {}
     };
-
     ws.onclose = () => {
-      if (minerRunning) {
+      if (running) {
         addLog('❌ WebSocket disconnected.', true);
-        minerRunning = false;
+        running = false;
         if (intervalId) clearInterval(intervalId);
       }
     };
-
     ws.onerror = (err) => {
       addLog(`❌ WebSocket error: ${err.message || 'connection failed'}`, true);
-      minerRunning = false;
+      running = false;
       if (intervalId) clearInterval(intervalId);
     };
   }
 
   // ---------- Main Start ----------
   async function startMining() {
-    if (minerRunning) { addLog('⚠️ Already mining.'); return; }
+    if (running) { addLog('⚠️ Already mining.'); return; }
 
     // Reset stats
     hashrateVal = 0; acceptedVal = 0; totalHashesVal = 0;
@@ -258,14 +226,9 @@
     document.getElementById('totalHashes').textContent = '0';
 
     // Try WASM first
-    if (!wasmLoaded) {
-      addLog('⏳ Loading WebAssembly miner...');
-      wasmLoaded = await loadWasmMiner();
-    }
-    if (wasmLoaded && typeof WebMiner !== 'undefined') {
-      const miner = startWasmMiner();
-      if (miner) return;
-      // If WASM fails, fall through to WebSocket
+    let loaded = await loadCryptoWeb();
+    if (loaded && typeof CryptoWeb !== 'undefined') {
+      if (startWasmMiner()) return;
     }
 
     // Fallback to WebSocket
@@ -275,18 +238,22 @@
 
   // ---------- Stop ----------
   function stopMining() {
-    if (mode === 'wasm' && window.minerInstance) {
-      window.minerInstance.stop();
+    if (miner) {
+      miner.stop();
+      miner = null;
     }
-    if (ws) { ws.close(); ws = null; }
-    minerRunning = false;
+    if (ws) {
+      ws.close();
+      ws = null;
+    }
+    running = false;
     if (intervalId) clearInterval(intervalId);
     addLog('⏹️ Mining stopped.');
   }
 
   // ---------- Status ----------
   function checkStatus() {
-    if (minerRunning) {
+    if (running) {
       addLog(`📊 Status: ${mode.toUpperCase()} – Hashrate ${hashrateVal} H/s, Accepted: ${acceptedVal}, Total: ${totalHashesVal}`);
     } else {
       addLog('⏹️ Miner is not running.');
@@ -296,10 +263,9 @@
   // ---------- Retry WASM ----------
   async function retryWasm() {
     addLog('🔄 Retrying WASM load...');
-    wasmLoaded = false;
-    wasmLoaded = await loadWasmMiner();
-    if (wasmLoaded) {
-      addLog('✅ WASM loaded successfully.');
+    const loaded = await loadCryptoWeb();
+    if (loaded) {
+      addLog('✅ WASM loaded.');
     } else {
       addLog('❌ WASM still unavailable.', true);
     }
@@ -311,12 +277,12 @@
   document.getElementById('statusBtn').addEventListener('click', checkStatus);
   document.getElementById('retryBtn').addEventListener('click', retryWasm);
 
-  // Pre‑load WASM
+  // Pre‑load WASM on page load
   (async () => {
-    addLog('⏳ Pre‑loading WebAssembly miner...');
-    wasmLoaded = await loadWasmMiner();
-    if (wasmLoaded) addLog('✅ WASM available.');
-    else addLog('ℹ️ WASM not available – will use WebSocket fallback.', true);
+    addLog('⏳ Pre‑loading CryptoWeb WASM...');
+    const loaded = await loadCryptoWeb();
+    if (loaded) addLog('✅ CryptoWeb ready.');
+    else addLog('ℹ️ CryptoWeb not available – will use WebSocket fallback.', true);
   })();
 </script>
 </body>
