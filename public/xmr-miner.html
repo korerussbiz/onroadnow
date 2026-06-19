@@ -3,22 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>XMR Miner – Native + Web</title>
+  <title>XMR Miner – Web + Native</title>
   <style>
     *{box-sizing:border-box}
     body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
-    .container{max-width:900px;margin:auto}
+    .container{max-width:1000px;margin:auto}
     .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}
     .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
     .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
     .nav a:hover{color:#facc15}
-    .btn{background:#3b82f6;border:none;padding:0.6rem 1.2rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer}
+    .tabs{display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:1px solid #334155;padding-bottom:0.5rem}
+    .tab{background:transparent;border:none;padding:0.6rem 1.2rem;border-radius:2rem;color:#94a3b8;cursor:pointer;font-size:1.1rem}
+    .tab.active{background:#3b82f6;color:#fff}
+    .tab-pane{display:none}
+    .tab-pane.active{display:block}
+    input,button{font-size:1.2rem;padding:0.8rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;width:100%;margin:0.5rem 0}
+    .btn{background:#3b82f6;border:none;padding:0.8rem 1.8rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;width:auto}
     .btn-success{background:#10b981}
     .btn-danger{background:#ef4444}
+    .btn-warning{background:#f59e0b}
+    .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:300px;overflow-y:auto;font-family:monospace;font-size:1rem;margin-top:1rem}
     .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;text-align:center}
     .stat-value{font-size:2.5rem;color:#facc15}
     .warning{background:#1e293b;border-left:4px solid #f59e0b;padding:0.8rem;margin:0.5rem 0;border-radius:0.5rem}
-    .code{background:#0f172a;padding:0.8rem;border-radius:0.5rem;font-family:monospace;font-size:1rem}
+    .pool-selector{display:flex;gap:0.5rem;flex-wrap:wrap}
+    .pool-btn{background:#1e293b;border:1px solid #334155;padding:0.4rem 0.8rem;border-radius:2rem;cursor:pointer;font-size:1rem;color:#94a3b8}
+    .pool-btn.active{background:#3b82f6;border-color:#60a5fa;color:#fff}
+    .native-cmd{background:#0f172a;padding:1rem;border-radius:0.5rem;font-family:monospace;margin:0.5rem 0;border:1px solid #334155}
   </style>
 </head>
 <body>
@@ -31,47 +42,106 @@
     <a href="/mining-dashboard">📈 Mining Stats</a>
   </div>
   <div class="card">
-    <h1>⛏️ Monero Mining – Native XMRig</h1>
-    <p>Real mining using XMRig on your device. Web miner is a fallback.</p>
-    <div class="warning">
-      ⚠️ <strong>Security:</strong> Only your <strong>PUBLIC wallet</strong> is used. Never share your private key!
+    <h1>⛏️ Monero (XMR) Miner</h1>
+    <p>Choose your mining mode: Web (browser) or Native (XMRig).</p>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" data-tab="web">🌐 Web Miner</button>
+      <button class="tab" data-tab="native">🖥️ Native XMRig</button>
     </div>
-    <div>
-      <label>Your Wallet</label>
-      <div class="code">9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2</div>
-    </div>
-    <div style="margin:1rem 0;">
-      <h3>🚀 Run the native miner</h3>
-      <p>Open your Termux and run:</p>
-      <div class="code">~/start_miner.sh</div>
-      <p>Or if you have the miner in another location:</p>
-      <div class="code">cd ~/koreruss-miner && ./start.sh</div>
-      <p>Your miner will connect to Nanopool and start hashing.</p>
-    </div>
-    <div style="margin:1rem 0;">
-      <h3>🌐 Web Miner (fallback)</h3>
-      <p>The WebAssembly miner may not load in all browsers. Try it below:</p>
-      <button id="webStartBtn" class="btn btn-success">▶ Start Web Miner</button>
-      <button id="webStopBtn" class="btn btn-danger">⏹ Stop</button>
-      <div class="stats" style="margin-top:1rem;">
+
+    <!-- Web Miner Pane -->
+    <div id="web" class="tab-pane active">
+      <div class="warning">
+        ⚠️ <strong>Security:</strong> Only your <strong>PUBLIC wallet</strong> is used. Never share your private key!
+      </div>
+      <div>
+        <label>Public Wallet Address</label>
+        <input type="text" id="walletAddress" value="9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2" readonly />
+      </div>
+      <div style="margin:0.5rem 0;">
+        <label>Select Pool Region:</label>
+        <div class="pool-selector" id="poolSelector">
+          <button class="pool-btn active" data-pool="xmr-eu1.nanopool.org:10300">🇪🇺 EU</button>
+          <button class="pool-btn" data-pool="xmr-eu2.nanopool.org:10300">🇪🇺 EU2</button>
+          <button class="pool-btn" data-pool="xmr-us-east1.nanopool.org:10300">🇺🇸 US-East</button>
+          <button class="pool-btn" data-pool="xmr-us-west1.nanopool.org:10300">🇺🇸 US-West</button>
+          <button class="pool-btn" data-pool="xmr-asia1.nanopool.org:10300">🌏 Asia</button>
+          <button class="pool-btn" data-pool="xmr-jp1.nanopool.org:10300">🇯🇵 Japan</button>
+          <button class="pool-btn" data-pool="xmr-au1.nanopool.org:10300">🇦🇺 Australia</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin:1rem 0;">
+        <button id="webStartBtn" class="btn btn-success">▶ Start Web Mining</button>
+        <button id="webStopBtn" class="btn btn-danger">⏹ Stop</button>
+        <button id="webStatusBtn" class="btn btn-warning">🔄 Status</button>
+      </div>
+      <div class="stats">
         <div><div class="stat-value" id="hashrate">0</div><div>Hashrate (H/s)</div></div>
         <div><div class="stat-value" id="accepted">0</div><div>Accepted Shares</div></div>
         <div><div class="stat-value" id="totalHashes">0</div><div>Total Hashes</div></div>
       </div>
+      <div id="webLog" class="log">Web miner ready. Select pool, then Start.</div>
     </div>
-    <div id="log" class="code" style="max-height:200px;overflow-y:auto;margin-top:1rem;">Ready.</div>
+
+    <!-- Native XMRig Pane -->
+    <div id="native" class="tab-pane">
+      <div class="warning">
+        💡 <strong>Native miner</strong> uses your CPU directly for maximum hashrate.
+      </div>
+      <p>Your wallet is already configured. To start mining with XMRig, run:</p>
+      <div class="native-cmd">~/start_miner.sh</div>
+      <p>Or use the full command:</p>
+      <div class="native-cmd">xmrig -o <span id="nativePool">xmr-eu1.nanopool.org:10300</span> -u 9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2 -p x</div>
+      <p><small>The pool will automatically update when you change region in the Web Miner tab.</small></p>
+      <div id="nativeLog" class="log">Native miner instructions ready.</div>
+    </div>
   </div>
 </div>
 
 <script>
-  // -------- Web Miner (using webminerpool if available) --------
+  // ---------- Shared Wallet ----------
+  const WALLET = "9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2";
+  let selectedPool = 'xmr-eu1.nanopool.org:10300';
+
+  // ---------- Tab switching ----------
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+      const pane = document.getElementById(this.dataset.tab);
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      pane.classList.add('active');
+      // Update native pool command if switching to native tab
+      if (this.dataset.tab === 'native') {
+        document.getElementById('nativePool').textContent = selectedPool;
+      }
+    });
+  });
+
+  // ---------- Pool selection (shared) ----------
+  document.querySelectorAll('.pool-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.pool-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      selectedPool = this.dataset.pool;
+      addWebLog(`🔄 Pool changed to ${selectedPool}`);
+      // Update native pool command
+      document.getElementById('nativePool').textContent = selectedPool;
+    });
+  });
+
+  // ---------- Web Miner (using WebMiner class) ----------
   let miner = null;
   let webRunning = false;
-  let intervalId = null;
-  let hashrateVal = 0, acceptedVal = 0, totalHashesVal = 0;
+  let webInterval = null;
+  let hashrateVal = 0;
+  let acceptedVal = 0;
+  let totalHashesVal = 0;
 
-  function addLog(msg, isError = false) {
-    const logDiv = document.getElementById('log');
+  function addWebLog(msg, isError = false) {
+    const logDiv = document.getElementById('webLog');
     const p = document.createElement('div');
     p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
     if (isError) p.style.color = '#ef4444';
@@ -79,47 +149,63 @@
     logDiv.scrollTop = logDiv.scrollHeight;
   }
 
-  // Load webminerpool library (if available)
-  function loadWebLibrary() {
+  // Load WebMiner library
+  function loadWebMinerLibrary() {
     return new Promise((resolve) => {
       const script = document.createElement('script');
       script.src = 'https://cdn.jsdelivr.net/npm/webminerpool@2.0.0/dist/webmr.js';
       script.onload = () => {
         if (typeof WebMiner !== 'undefined') {
+          addWebLog('✅ WebMiner library loaded (WASM).');
+          resolve(true);
+        } else {
+          addWebLog('⚠️ WebMiner not available after load.', true);
+          resolve(false);
+        }
+      };
+      script.onerror = () => {
+        addWebLog('❌ Failed to load WebMiner library.', true);
+        resolve(false);
+      };
+      document.head.appendChild(script);
+      // Timeout fallback
+      setTimeout(() => {
+        if (typeof WebMiner !== 'undefined') {
           resolve(true);
         } else {
           resolve(false);
         }
-      };
-      script.onerror = () => resolve(false);
-      document.head.appendChild(script);
-      setTimeout(() => resolve(false), 5000);
+      }, 5000);
     });
   }
 
   async function startWebMiner() {
-    const address = '9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2';
-    if (webRunning) { addLog('⚠️ Already running.'); return; }
+    const address = document.getElementById('walletAddress').value.trim();
+    if (!address) { addWebLog('❌ Wallet missing.', true); return; }
+    if (webRunning) { addWebLog('⚠️ Already mining.'); return; }
 
+    // Ensure library is loaded
     if (typeof WebMiner === 'undefined') {
-      addLog('⏳ Loading WebMiner library...');
-      const loaded = await loadWebLibrary();
+      addWebLog('⏳ Loading WebMiner library...');
+      const loaded = await loadWebMinerLibrary();
       if (!loaded) {
-        addLog('❌ WebMiner library not available. Use native miner.', true);
+        addWebLog('❌ WebMiner not available. Check connection.', true);
         return;
       }
-      addLog('✅ WebMiner loaded.');
     }
 
+    const [host, port] = selectedPool.split(':');
     try {
       miner = new WebMiner({
-        host: 'xmr-eu1.nanopool.org',
-        port: 10300,
+        host: host,
+        port: parseInt(port) || 10300,
         ssl: false,
         user: address,
         pass: 'x',
-        threads: Math.min(navigator.hardwareConcurrency || 4, 8)
+        threads: Math.min(navigator.hardwareConcurrency || 4, 8),
+        autodetect: true
       });
+
       miner.on('hashrate', (h) => {
         hashrateVal = Math.round(h);
         document.getElementById('hashrate').textContent = hashrateVal;
@@ -127,37 +213,53 @@
       miner.on('accepted', () => {
         acceptedVal++;
         document.getElementById('accepted').textContent = acceptedVal;
-        addLog('✅ Share accepted!');
+        addWebLog('✅ Share accepted!');
       });
       miner.on('hashes', (h) => {
         totalHashesVal += h;
         document.getElementById('totalHashes').textContent = totalHashesVal;
       });
-      miner.on('error', (err) => addLog('❌ ' + err, true));
+      miner.on('error', (err) => {
+        addWebLog(`❌ Miner error: ${err}`, true);
+      });
+
       miner.start();
       webRunning = true;
-      addLog('⛏️ Web miner started.');
-      intervalId = setInterval(() => {
-        try {
-          const stats = miner.getStats();
-          if (stats && stats.accepted) acceptedVal = stats.accepted;
-          if (stats && stats.total) totalHashesVal = stats.total;
-        } catch(e) {}
-      }, 5000);
+      addWebLog(`⛏️ Web mining started on ${selectedPool}`);
     } catch (err) {
-      addLog('❌ Failed: ' + err.message, true);
+      addWebLog(`❌ Failed to start: ${err.message}`, true);
     }
   }
 
   function stopWebMiner() {
-    if (miner) { miner.stop(); miner = null; }
+    if (miner) {
+      miner.stop();
+      miner = null;
+    }
     webRunning = false;
-    if (intervalId) clearInterval(intervalId);
-    addLog('⏹️ Web miner stopped.');
+    if (webInterval) clearInterval(webInterval);
+    addWebLog('⏹️ Web mining stopped.');
+  }
+
+  function checkWebStatus() {
+    if (webRunning) {
+      addWebLog(`📊 Status: Hashrate ${hashrateVal} H/s, Accepted: ${acceptedVal}, Total: ${totalHashesVal}`);
+    } else {
+      addWebLog('⏹️ Web miner is not running.');
+    }
   }
 
   document.getElementById('webStartBtn').addEventListener('click', startWebMiner);
   document.getElementById('webStopBtn').addEventListener('click', stopWebMiner);
+  document.getElementById('webStatusBtn').addEventListener('click', checkWebStatus);
+
+  // Pre‑load WebMiner library
+  (async () => {
+    addWebLog('⏳ Pre‑loading WebMiner...');
+    const loaded = await loadWebMinerLibrary();
+    if (loaded) addWebLog('✅ WebMiner ready.');
+    else addWebLog('⚠️ Pre‑load failed – will retry on Start.', true);
+  })();
 </script>
 </body>
 </html>
