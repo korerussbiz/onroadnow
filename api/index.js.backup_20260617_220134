@@ -648,4 +648,453 @@ if (url === '/api/auto-trader/report-profit' && method === 'POST') {
   addTraderLog(userId, `Trade: profit ${profitJMD} JMD, fee ${feePercent}% → user +${userGain}, owner +${fee}`);
   res.status(200).json({ userGain, fee, newUserBalance: state.userProfit, newOwnerFees: state.ownerFees });
   return;
-}
+
+  // ---------- Persistence and Withdrawal Endpoints ----------
+  const fs = require('fs');
+  const path = require('path');
+  const EARNINGS_FILE = path.join(__dirname, '..', 'data', 'earnings.json');
+
+  function loadEarnings() {
+    try {
+      return JSON.parse(fs.readFileSync(EARNINGS_FILE, 'utf8'));
+    } catch { return { totalOwnerFees: 0, withdrawals: [], users: {} }; }
+  }
+
+  function saveEarnings(data) {
+    fs.writeFileSync(EARNINGS_FILE, JSON.stringify(data, null, 2), 'utf8');
+  }
+
+  // Flush in‑memory earnings to file (call this periodically or on shutdown)
+  function flushEarnings() {
+    const data = loadEarnings();
+    // Add ownerFees from all trader states
+    let total = 0;
+    for (const [id, state] of userTraderStates) {
+      total += state.ownerFees || 0;
+    }
+    data.totalOwnerFees = total;
+    // Also store per‑user profits if needed
+    for (const [id, state] of userTraderStates) {
+      if (!data.users[id]) data.users[id] = { profit: 0, fees: 0 };
+      data.users[id].profit = state.userProfit || 0;
+      data.users[id].fees = state.ownerFees || 0;
+    }
+    saveEarnings(data);
+  }
+
+  // Endpoint to get total owner earnings (for admin)
+  if (url === '/api/owner/earnings' && method === 'GET') {
+    // Simple admin check: you can hardcode a userId or use a special token
+    // For now, allow if the request has a specific header or userId matches a hardcoded admin
+    const adminId = 'admin'; // change to your actual user ID
+    if (userId !== adminId) {
+      // You can also check a secret header
+      if (req.headers['x-admin-key'] !== process.env.ADMIN_KEY) {
+        return res.status(403).json({ error: 'Admin only' });
+      }
+    }
+    const data = loadEarnings();
+    res.status(200).json({ totalOwnerFees: data.totalOwnerFees, withdrawals: data.withdrawals });
+    return;
+  }
+
+  // Endpoint for a user to request withdrawal
+  if (url === '/api/withdraw/request' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { amount, address, method } = req.body; // method: 'crypto' or 'paypal'
+    if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
+    const state = getUserTraderState(userId);
+    if (state.userProfit < amount) return res.status(400).json({ error: 'Insufficient balance' });
+
+    // Deduct from user profit
+    state.userProfit -= amount;
+    // Log withdrawal request
+    const data = loadEarnings();
+    data.withdrawals.push({
+      userId,
+      amount,
+      address,
+      method,
+      timestamp: new Date().toISOString(),
+      status: 'pending'
+    });
+    saveEarnings(data);
+    // Flush all changes
+    flushEarnings();
+    res.status(200).json({ message: 'Withdrawal request submitted', remaining: state.userProfit });
+    return;
+  }
+
+  // Admin endpoint to process withdrawal (mark as completed)
+  if (url === '/api/withdraw/process' && method === 'POST') {
+    if (userId !== 'admin' && req.headers['x-admin-key'] !== process.env.ADMIN_KEY) {
+      return res.status(403).json({ error: 'Admin only' });
+    }
+    const { withdrawalId } = req.body;
+    const data = loadEarnings();
+    const idx = data.withdrawals.findIndex(w => w.id === withdrawalId);
+    if (idx === -1) return res.status(404).json({ error: 'Withdrawal not found' });
+    data.withdrawals[idx].status = 'completed';
+    saveEarnings(data);
+    res.status(200).json({ message: 'Withdrawal marked as completed' });
+    return;
+  }
+
+  // Health check to verify all required env vars are set
+  if (url === '/api/health' && method === 'GET') {
+    const checks = {
+      JWT_SECRET: !!process.env.JWT_SECRET,
+      GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
+      INFURA_KEY: !!process.env.INFURA_KEY,
+      SOLANA_RPC: !!process.env.SOLANA_RPC,
+      WALLETCONNECT_PROJECT_ID: !!process.env.WALLETCONNECT_PROJECT_ID,
+      ALPHA_VANTAGE_KEY: !!process.env.ALPHA_VANTAGE_KEY,
+    };
+    const allOk = Object.values(checks).every(v => v === true);
+    res.status(allOk ? 200 : 500).json({ status: allOk ? 'ok' : 'missing keys', checks });
+    return;
+  }
+
+
+  // ---------- Receipt Investment System (Cents on the Dollar + Invoice) ----------
+  // Extend earnings.json with receipt records
+  function loadReceipts(userId) {
+    const data = loadEarnings();
+    if (!data.receipts) data.receipts = {};
+    if (!data.receipts[userId]) data.receipts[userId] = [];
+    saveEarnings(data);
+    return data.receipts[userId];
+  }
+
+  function saveReceipt(userId, receipt) {
+    const data = loadEarnings();
+    if (!data.receipts) data.receipts = {};
+    if (!data.receipts[userId]) data.receipts[userId] = [];
+    data.receipts[userId].push(receipt);
+    saveEarnings(data);
+  }
+
+  // Simulate OCR (if GOOGLE_VISION_API_KEY is set, you can call Vision API)
+  async function extractTotalFromImage(imageBuffer) {
+    // For now, simply return a random total (demo)
+    return 4.30 + Math.random() * 10; // simulate $4.30 ~ $14.30
+  }
+
+  // Generate invoice HTML (can be converted to PDF later)
+  function generateInvoice(receipt) {
+    const invoiceNumber = 'INV-' + Date.now().toString(36).toUpperCase();
+    const date = new Date().toISOString().slice(0,10);
+    const subtotal = receipt.total;
+    const roundup = receipt.roundup;
+    const fee = roundup * 0.02; // 2% platform fee
+    const tax = roundup * 0.05; // 5% VAT/GST (adjust)
+    const totalPaid = roundup + fee + tax;
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head><title>Invoice ${invoiceNumber}</title>
+      <style>body{font-family:monospace;max-width:600px;margin:auto;padding:2rem;}
+      .invoice{background:#1e293b;color:#e2e8f0;padding:2rem;border-radius:1rem;}
+      h1{color:#facc15;} .row{display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid #334155;}
+      .total{font-weight:bold;font-size:1.2rem;border-top:2px solid #facc15;margin-top:1rem;padding-top:1rem;}
+      </style></head>
+      <body>
+      <div class="invoice">
+        <h1>🧾 OnRoadNow Investment Invoice</h1>
+        <p><strong>Invoice #:</strong> ${invoiceNumber}</p>
+        <p><strong>Date:</strong> ${date}</p>
+        <p><strong>User ID:</strong> ${receipt.userId}</p>
+        <hr/>
+        <div class="row"><span>Purchase Total</span><span>$${subtotal.toFixed(2)}</span></div>
+        <div class="row"><span>Round‑up Amount</span><span>$${roundup.toFixed(2)}</span></div>
+        <div class="row"><span>Platform Fee (2%)</span><span>$${fee.toFixed(2)}</span></div>
+        <div class="row"><span>VAT/GST (5%)</span><span>$${tax.toFixed(2)}</span></div>
+        <div class="row total"><span>Total Paid</span><span>$${totalPaid.toFixed(2)}</span></div>
+        <p style="margin-top:2rem;color:#94a3b8;">This invoice records the investment of your spare change into financial assets.</p>
+      </div>
+      </body>
+      </html>
+    `;
+  }
+
+  // Endpoint: upload receipt (file or manual total)
+  if (url === '/api/receipt/upload' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { total, image } = req.body; // manual total or base64 image
+    let finalTotal = total ? parseFloat(total) : null;
+    if (!finalTotal && image) {
+      // Simulate OCR – replace with actual Vision API call
+      const buffer = Buffer.from(image, 'base64');
+      finalTotal = await extractTotalFromImage(buffer);
+    }
+    if (!finalTotal || finalTotal <= 0) return res.status(400).json({ error: 'Could not extract a valid total' });
+
+    // Round up to nearest dollar (or any unit)
+    const rounded = Math.ceil(finalTotal);
+    const roundup = rounded - finalTotal;
+    if (roundup <= 0.001) return res.status(400).json({ error: 'No spare change, already rounded' });
+
+    // Record receipt
+    const receipt = {
+      id: Date.now().toString(36) + userId.slice(0,4),
+      userId,
+      total: finalTotal,
+      rounded,
+      roundup,
+      date: new Date().toISOString(),
+      invested: false
+    };
+    // Save receipt record
+    saveReceipt(userId, receipt);
+
+    // Update round-up balance (using the same system)
+    const userRoundup = loadRoundup(userId);
+    userRoundup.balance += roundup;
+    // Also add to receipt history
+    userRoundup.history.push({ amount: roundup, date: receipt.date, receiptId: receipt.id });
+    if (userRoundup.history.length > 100) userRoundup.history.shift();
+    saveRoundup(userId, userRoundup);
+
+    // Auto-invest if threshold met
+    let invested = 0;
+    let symbol = ROUNDUP_CONFIG.defaultSymbol;
+    if (userRoundup.balance >= ROUNDUP_CONFIG.investThreshold) {
+      try {
+        const tradeResult = await executeTrade(userId, symbol, userRoundup.balance, 'buy');
+        userRoundup.balance = 0;
+        userRoundup.invested += tradeResult.userGain;
+        saveRoundup(userId, userRoundup);
+        invested = tradeResult.userGain;
+        receipt.invested = true;
+        receipt.investedAmount = invested;
+        receipt.investSymbol = symbol;
+        // Update receipt record
+        const allReceipts = loadReceipts(userId);
+        const idx = allReceipts.findIndex(r => r.id === receipt.id);
+        if (idx !== -1) allReceipts[idx] = receipt;
+        saveEarnings(loadEarnings()); // force save
+      } catch (err) {
+        console.error('Auto‑invest failed:', err.message);
+      }
+    }
+
+    // Generate invoice (stored in receipt)
+    const invoiceHtml = generateInvoice(receipt);
+    receipt.invoiceHtml = invoiceHtml; // store for later retrieval
+
+    // Update receipt in storage
+    const allReceipts = loadReceipts(userId);
+    const idx2 = allReceipts.findIndex(r => r.id === receipt.id);
+    if (idx2 !== -1) allReceipts[idx2] = receipt;
+    saveEarnings(loadEarnings());
+
+    res.status(200).json({
+      receiptId: receipt.id,
+      total: finalTotal,
+      roundup,
+      newBalance: userRoundup.balance,
+      invested: invested > 0 ? invested : 'pending',
+      invoiceUrl: `/api/receipt/invoice/${receipt.id}`,
+      message: invested > 0 ? `Auto‑invested $${invested.toFixed(2)}` : 'Spare change added – ready to invest.'
+    });
+    return;
+  }
+
+  // Endpoint: get invoice HTML
+  if (url.startsWith('/api/receipt/invoice/') && method === 'GET') {
+    const receiptId = url.split('/').pop();
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const receipts = loadReceipts(userId);
+    const receipt = receipts.find(r => r.id === receiptId);
+    if (!receipt) return res.status(404).json({ error: 'Receipt not found' });
+    res.setHeader('Content-Type', 'text/html');
+    res.status(200).send(receipt.invoiceHtml || '<p>No invoice generated</p>');
+    return;
+  }
+
+  // Endpoint: get receipt history
+  if (url === '/api/receipt/history' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const receipts = loadReceipts(userId);
+    res.status(200).json(receipts.map(r => ({
+      id: r.id,
+      total: r.total,
+      roundup: r.roundup,
+      date: r.date,
+      invested: r.invested || false,
+      investedAmount: r.investedAmount || 0
+    })));
+    return;
+  }
+
+
+  // ---------- Firebase Integration (Persistence) ----------
+  const admin = require('firebase-admin');
+
+  // Initialize Firebase Admin SDK from environment variables
+  let firestore = null;
+  let isFirebaseReady = false;
+
+  try {
+    // Option 1: Use a single JSON environment variable
+    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+      const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+      firestore = admin.firestore();
+      isFirebaseReady = true;
+      console.log('🔥 Firebase initialized from FIREBASE_SERVICE_ACCOUNT');
+    }
+    // Option 2: Use individual env vars (projectId, clientEmail, privateKey)
+    else if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: privateKey
+        })
+      });
+      firestore = admin.firestore();
+      isFirebaseReady = true;
+      console.log('🔥 Firebase initialized from individual env vars');
+    } else {
+      console.log('ℹ️ Firebase credentials not set – using in-memory/JSON storage.');
+    }
+  } catch (err) {
+    console.error('❌ Firebase initialization failed:', err.message);
+  }
+
+  // Helper: get Firestore collection reference
+  function getCollection(name) {
+    if (isFirebaseReady && firestore) {
+      return firestore.collection(name);
+    }
+    return null;
+  }
+
+  // Override loadEarnings and saveEarnings to use Firestore
+  const originalLoadEarnings = loadEarnings;
+  const originalSaveEarnings = saveEarnings;
+
+  // Re-define loadEarnings with Firestore support
+  loadEarnings = async function() {
+    if (!isFirebaseReady) {
+      // Fallback to JSON file
+      return originalLoadEarnings();
+    }
+    try {
+      const doc = await firestore.collection('system').doc('earnings').get();
+      if (doc.exists) {
+        return doc.data();
+      } else {
+        // Initialize empty document
+        const empty = { totalOwnerFees: 0, withdrawals: [], users: {}, roundups: {}, receipts: {} };
+        await firestore.collection('system').doc('earnings').set(empty);
+        return empty;
+      }
+    } catch (err) {
+      console.error('Firestore load error:', err);
+      return originalLoadEarnings();
+    }
+  };
+
+  saveEarnings = async function(data) {
+    if (!isFirebaseReady) {
+      return originalSaveEarnings(data);
+    }
+    try {
+      await firestore.collection('system').doc('earnings').set(data);
+    } catch (err) {
+      console.error('Firestore save error:', err);
+      originalSaveEarnings(data); // fallback to JSON
+    }
+  };
+
+  // Also persist users, trades, referralTree, etc. to Firestore collections
+  // We'll create async versions of the save functions
+  async function persistUser(user) {
+    if (!isFirebaseReady) return;
+    try {
+      await firestore.collection('users').doc(user.id).set(user);
+    } catch (err) { console.error('Failed to persist user:', err); }
+  }
+
+  async function persistTrade(trade) {
+    if (!isFirebaseReady) return;
+    try {
+      await firestore.collection('trades').add(trade);
+    } catch (err) { console.error('Failed to persist trade:', err); }
+  }
+
+  // Patch the existing functions to also save to Firestore
+  // We'll wrap the original push/update functions
+  const originalUsersPush = users.push;
+  users.push = function(...args) {
+    const result = originalUsersPush.apply(users, args);
+    for (const user of args) {
+      persistUser(user);
+    }
+    return result;
+  };
+
+  const originalTradesPush = trades.push;
+  trades.push = function(...args) {
+    const result = originalTradesPush.apply(trades, args);
+    for (const trade of args) {
+      persistTrade(trade);
+    }
+    return result;
+  };
+
+  // For referralTree, we need to persist changes when set
+  const originalReferralTreeSet = referralTree.set;
+  referralTree.set = function(key, value) {
+    const result = originalReferralTreeSet.call(referralTree, key, value);
+    if (isFirebaseReady) {
+      firestore.collection('referrals').doc(key).set(value).catch(err => console.error('Referral persist error:', err));
+    }
+    return result;
+  };
+
+  // Load initial data from Firestore on startup
+  async function loadInitialData() {
+    if (!isFirebaseReady) return;
+    try {
+      // Load users
+      const userSnapshot = await firestore.collection('users').get();
+      userSnapshot.forEach(doc => {
+        const user = doc.data();
+        if (!users.find(u => u.id === user.id)) users.push(user);
+      });
+      // Load trades
+      const tradeSnapshot = await firestore.collection('trades').get();
+      tradeSnapshot.forEach(doc => {
+        const trade = doc.data();
+        trades.push(trade);
+      });
+      // Load referrals
+      const refSnapshot = await firestore.collection('referrals').get();
+      refSnapshot.forEach(doc => {
+        referralTree.set(doc.id, doc.data());
+      });
+      console.log(`🔥 Loaded ${users.length} users, ${trades.length} trades, ${referralTree.size} referrals from Firestore.`);
+    } catch (err) {
+      console.error('Failed to load initial data from Firestore:', err);
+    }
+  }
+
+  // Call load on startup (will not block)
+  loadInitialData();
+
+  // Also periodically flush in-memory changes to Firestore
+  setInterval(async () => {
+    if (!isFirebaseReady) return;
+    try {
+      const data = await loadEarnings();
+      await saveEarnings(data);
+    } catch (err) { /* ignore */ }
+  }, 60000); // every 60 seconds
+
+};

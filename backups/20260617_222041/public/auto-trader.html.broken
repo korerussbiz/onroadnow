@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>OnRoadNow – Auto‑Trader</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body { font-family: monospace; padding: 2rem; background: #0f172a; color: #eee; }
+    .card { background: #1e293b; border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; }
+    button { background: #3b82f6; border: none; padding: 0.5rem 1rem; border-radius: 2rem; color: white; cursor: pointer; }
+    input { padding: 0.5rem; border-radius: 1rem; border: none; }
+    .log { background: #0f172a; padding: 1rem; border-radius: 1rem; max-height: 300px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+<h1>🤖 Auto‑Trader</h1>
+<div id="loginPanel"></div>
+<div id="traderPanel" style="display:none;">
+  <div class="card">
+    <div>Profit: $<span id="userProfit">0</span></div>
+    <div>Platform fees: $<span id="ownerFees">0</span></div>
+    <input type="number" id="amount" placeholder="USD amount">
+    <button id="buyBtn">Buy</button>
+    <button id="sellBtn">Sell</button>
+  </div>
+  <div class="card log" id="log"></div>
+</div>
+<script>
+  // Force redirect to main login if not authenticated
+  (async () => {
+    const me = await fetch('/api/me', { credentials: 'include' }).then(r => r.json());
+    if (!me.id) {
+      document.getElementById('loginPanel').innerHTML = '<div class="card">🔐 Please <a href="/">log in on the main site</a> first.</div>';
+      return;
+    }
+    document.getElementById('loginPanel').innerHTML = `<div class="card">✅ Logged in as ${me.email}</div>`;
+    document.getElementById('traderPanel').style.display = 'block';
+  })();
+
+  async function apiCall(endpoint, options = {}) {
+    const res = await fetch(`/api/auto-trader/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+    return res.json();
+  }
+
+  function addLog(msg) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logDiv.appendChild(p);
+  }
+
+  async function refreshBalance() {
+    const state = await apiCall('status');
+    document.getElementById('userProfit').innerText = (state.userProfit || 0).toFixed(2);
+    document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2);
+  }
+
+  async function reportProfit(profit, feePercent) {
+    const res = await apiCall('report-profit', {
+      method: 'POST',
+      body: JSON.stringify({ profitJMD: profit, feePercent })
+    });
+    if (res.error) addLog(`❌ ${res.error}`);
+    else addLog(`✅ Trade: profit ${profit} → user +${res.userGain}, owner +${res.fee}`);
+    refreshBalance();
+  }
+
+  document.getElementById('buyBtn')?.addEventListener('click', async () => {
+    const usd = parseFloat(document.getElementById('amount').value);
+    if (isNaN(usd) || usd <= 0) return addLog("Invalid amount");
+    const profit = usd * (Math.random() * 0.1 + 0.02);
+    const fee = 3 + Math.random() * 7;
+    await reportProfit(profit, fee);
+  });
+  document.getElementById('sellBtn')?.addEventListener('click', async () => {
+    const usd = parseFloat(document.getElementById('amount').value);
+    if (isNaN(usd) || usd <= 0) return addLog("Invalid amount");
+    const profit = usd * (Math.random() * 0.1 + 0.02);
+    const fee = 3 + Math.random() * 7;
+    await reportProfit(profit, fee);
+  });
+  refreshBalance();
+</script>
+</body>
+</html>

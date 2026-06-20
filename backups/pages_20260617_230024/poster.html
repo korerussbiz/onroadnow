@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>OnRoadNow – Free Delivery & Marketplace</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+      padding: 16px;
+    }
+    /* The whole banner is a clickable link */
+    .banner-link {
+      display: block;
+      max-width: 500px;
+      width: 100%;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .banner-link:active {
+      transform: scale(0.98);
+    }
+    .banner {
+      background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+      border-radius: 2rem;
+      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.02);
+      overflow: hidden;
+      text-align: center;
+      padding: 1.8rem 1.5rem 2rem;
+    }
+    .hero-icon {
+      font-size: 3.5rem;
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 0.25rem;
+    }
+    .tagline {
+      font-weight: 600;
+      color: #1e40af;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #e0e7ff;
+      display: inline-block;
+      padding-bottom: 0.25rem;
+    }
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1.2rem 0;
+    }
+    .feature {
+      background: #f1f5f9;
+      border-radius: 2rem;
+      padding: 0.5rem 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .feature i {
+      font-size: 1.2rem;
+    }
+    .grocery-badge {
+      background: #e6f7e6;
+      color: #2b6e2b;
+    }
+    .walk-badge {
+      background: #fff3e0;
+      color: #c2410c;
+    }
+    .earn-badge {
+      background: #eef2ff;
+      color: #2563eb;
+    }
+    .fee-note {
+      background: #fef9c3;
+      border-radius: 1rem;
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      margin: 1rem 0;
+      color: #854d0e;
+    }
+    .fee-note strong {
+      color: #b45309;
+    }
+    .cta-button {
+      background: #2563eb;
+      color: white;
+      border-radius: 3rem;
+      padding: 0.8rem 1.8rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    .banner-link:hover .cta-button {
+      background: #1d4ed8;
+    }
+    .monetization {
+      font-size: 0.7rem;
+      color: #4b5563;
+      margin-top: 1rem;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 0.8rem;
+    }
+    .small-print {
+      font-size: 0.65rem;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+    /* Simulate grocery & foot icons using emojis (works everywhere) */
+    .grocery-icon { font-size: 1.2rem; }
+  </style>
+</head>
+<body>
+  <a href="https://onroadnow.vercel.app" class="banner-link" target="_blank" rel="noopener noreferrer">
+    <div class="banner">
+      <div class="hero-icon">🛒🏍️🚶</div>
+      <h1>OnRoadNow</h1>
+      <div class="tagline">Jamaica’s free delivery & marketplace</div>
+
+      <div class="features">
+        <div class="feature grocery-badge">
+          <span class="grocery-icon">🥬🍞</span> Groceries & items
+        </div>
+        <div class="feature walk-badge">
+          <span>🚶‍♂️🚶‍♀️</span> On‑foot delivery
+        </div>
+        <div class="feature earn-badge">
+          <span>💰</span> Earn as deliverer
+        </div>
+      </div>
+
+      <div class="fee-note">
+        <strong>✅ Free to join & use</strong> – only a tiny % fee when you sell or earn.<br>
+        📦 Post requests, sell items, deliver – you keep most of the money.
+      </div>
+
+      <div class="cta-button">
+        👉 Start earning / order now 👈
+      </div>
+
+      <div class="monetization">
+        💵 <strong>How I earn:</strong> small transaction fee + ads + crypto tips (SOL) – honest work, no tricks.
+      </div>
+      <div class="small-print">
+        Tap anywhere – opens OnRoadNow 🇯🇲
+      </div>
+    </div>
+  </a>
+  <button id="depositBtn" class="btn" style="background:#f7931a;font-size:1.2rem;padding:0.8rem 2rem;">💰 Deposit</button>
+  <script>
+  document.getElementById("depositBtn")?.addEventListener("click", async function() {
+    const res = await fetch("/api/deposit", { credentials: "include" });
+    const data = await res.json();
+    if (data.url) window.open(data.url, "_blank");
+    else alert("Deposit URL not set.");
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Trader</title>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card { background: #1e293b; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .flex { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .btn { background: #3b82f6; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; color: white; font-weight: 600; cursor: pointer; }
+    .btn-buy { background: #10b981; }
+    .btn-sell { background: #ef4444; }
+    input { background: #0f172a; border: 1px solid #334155; color: white; padding: 0.5rem 1rem; border-radius: 2rem; flex: 1; }
+    .log { background: #0f172a; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card"><a href="/">← Home</a></div>
+  <div class="card">
+    <h2>📈 Stock Trader</h2>
+    <div class="flex"><input type="text" id="symbol" placeholder="Symbol (e.g., AAPL)" value="AAPL"><button id="getPriceBtn" class="btn">Get Price</button></div>
+    <div id="priceDisplay" style="margin:1rem 0;">Price: —</div>
+    <div class="flex">
+      <input type="number" id="amount" placeholder="Amount (USD)">
+      <button id="buyBtn" class="btn btn-buy">Buy</button>
+      <button id="sellBtn" class="btn btn-sell">Sell</button>
+    </div>
+    <div id="stockLog" class="log">Ready.</div>
+  </div>
+</div>
+<script>
+async function apiCall(endpoint, options = {}) {
+  const res = await fetch(`/api/stock/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+  return res.json();
+}
+function addLog(msg) {
+  const logDiv = document.getElementById('stockLog');
+  const p = document.createElement('div');
+  p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  logDiv.appendChild(p);
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+async function getPrice() {
+  const symbol = document.getElementById('symbol').value;
+  const data = await apiCall(`price?symbol=${symbol}`);
+  if (data.error) addLog(`❌ ${data.error}`);
+  else document.getElementById('priceDisplay').innerText = `Price: $${data.price} (${data.currency})`;
+}
+document.getElementById('getPriceBtn').onclick = getPrice;
+document.getElementById('buyBtn').onclick = async () => {
+  const symbol = document.getElementById('symbol').value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  if (isNaN(amount) || amount <= 0) { addLog("Invalid amount"); return; }
+  const data = await apiCall('trade', { method: 'POST', body: JSON.stringify({ symbol, amount }) });
+  if (data.error) addLog(`❌ ${data.error}`);
+  else addLog(`✅ Bought ${data.shares.toFixed(4)} shares at $${data.price} → profit $${data.netGain.toFixed(4)}`);
+};
+document.getElementById('sellBtn').onclick = async () => {
+  const symbol = document.getElementById('symbol').value;
+  const amount = parseFloat(document.getElementById('amount').value);
+  if (isNaN(amount) || amount <= 0) { addLog("Invalid amount"); return; }
+  const data = await apiCall('trade', { method: 'POST', body: JSON.stringify({ symbol, amount }) });
+  if (data.error) addLog(`❌ ${data.error}`);
+  else addLog(`✅ Sold ${data.shares.toFixed(4)} shares at $${data.price} → profit $${data.netGain.toFixed(4)}`);
+};
+</script>
+</body>
+</html>

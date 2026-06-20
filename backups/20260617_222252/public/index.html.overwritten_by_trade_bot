@@ -81,17 +81,42 @@
   </div>
 </div>
 <div class="container">
+  <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+    <a href="/auto-trader" style="color: #2563eb;">🤖 Auto‑Trader</a>
+    <a href="/stock-trader" style="color: #2563eb;">📈 Stocks</a>
+    <a href="/claimer" style="color: #2563eb;">💰 Claim Bot</a>
+    <a href="/referral" style="color: #2563eb;">👥 Referrals</a>
+    <a href="/history" style="color: #2563eb;">📜 History</a>
+  </div>
   <div class="nav-links" style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem;">
     <a href="/" class="btn btn-outline">🏠 Home</a>
     <a href="/marketplace" class="btn btn-outline">🛒 Marketplace</a>
     <a href="/deliveries" class="btn btn-outline">🚚 Deliveries</a>
     <a href="/auto-trader" class="btn btn-primary">🤖 Auto‑Trader</a>
   </div>
-  <div id="authSection"></div>
-
-  <!-- Business Description & Tutorial -->
+<div id="authSection">
   <div class="card">
-    <div class="card-header"><i class="fas fa-info-circle"></i> How onroadnow Works</div>
+    <div class="card-header">Login / Signup</div>
+    <div id="g_id_onload"
+         data-client_id="134628093591-61nk4mneo6d1o6of5da3e3fijgtd5dd0.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin" data-type="standard" data-size="large"></div>
+    <div class="extra-login">
+      <button id="appleLoginBtn" class="btn btn-apple"><i class="fab fa-apple"></i> Apple (coming soon)</button>
+      <button id="telegramLoginBtn" class="btn btn-telegram"><i class="fab fa-telegram"></i> Telegram (coming soon)</button>
+    </div>
+    <div style="margin:1rem 0; text-align:center;">or</div>
+    <div class="flex-between">
+      <input type="email" id="loginEmail" placeholder="Email" style="flex:1;">
+      <input type="password" id="loginPassword" placeholder="Password" style="flex:1;">
+      <button id="emailLogin" class="btn btn-primary">Login</button>
+      <button id="emailSignup" class="btn btn-outline">Signup</button>
+    </div>
+    <p id="authMsg" style="margin-top:0.5rem;"></p>
+  </div>
+</div>
     <p>onroadnow connects you with trusted local deliverers. Whether you need groceries, medicine, food, or packages – post a request and a deliverer will pick up and deliver. Earn money by delivering items or selling goods in our marketplace. Use the <strong>chat</strong> to negotiate deals directly with other users.</p>
     <div class="tutorial-steps" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
       <div class="step" style="flex:1; background:#f8fafc; border-radius:1rem; padding:1rem; text-align:center;"><i class="fas fa-user-plus fa-2x"></i><h4>1. Sign Up</h4><p>Google, Email, Apple, Telegram</p></div>
@@ -292,6 +317,16 @@
 
   <!-- AdSense -->
   <div class="ad-container"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2772533792093956" data-ad-slot="YOUR_AD_SLOT_ID" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></div>
+  function handleCredentialResponse(response) {
+    fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => { if (data.user) location.reload(); else alert("Google login failed"); })
+    .catch(err => alert("Error: " + err.message));
+  }
 
   <!-- Payment & Donations -->
   <div class="card">
@@ -311,6 +346,16 @@
 <gmpx-api-loader key="AIzaSyB9RTVhBfAtrFET-YyMLK5f2v4tQ-uT2w0" solution-channel="GMP_GE_mapsandplacesautocomplete_v2"></gmpx-api-loader>
 
 <script>
+  function handleCredentialResponse(response) {
+    fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => { if (data.user) location.reload(); else alert("Google login failed"); })
+    .catch(err => alert("Error: " + err.message));
+  }
   // ================================
   // AUTHENTICATION MODULE (self-contained)
   // ================================
@@ -742,6 +787,16 @@
   💡 <strong>Become a partner</strong> – invest in the platform and share in future revenues. Contact us to discuss.
 </div>
 <script>
+  function handleCredentialResponse(response) {
+    fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => { if (data.user) location.reload(); else alert("Google login failed"); })
+    .catch(err => alert("Error: " + err.message));
+  }
 document.addEventListener('DOMContentLoaded', function() {
   const startBtn = document.getElementById('startTraderBtn');
   if (startBtn) {
@@ -773,6 +828,16 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <script>
+  function handleCredentialResponse(response) {
+    fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential: response.credential })
+    })
+    .then(res => res.json())
+    .then(data => { if (data.user) location.reload(); else alert("Google login failed"); })
+    .catch(err => alert("Error: " + err.message));
+  }
 document.getElementById('startTraderBtn')?.addEventListener('click', async () => {
   if (typeof currentUser === 'undefined' || !currentUser) {
     alert('Please login first.');
