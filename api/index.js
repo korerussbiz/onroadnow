@@ -216,6 +216,7 @@ module.exports = async (req, res) => {
 
   // ---------- AUTH ----------
   if (url === '/api/signup' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Missing fields' });
     if (users.find(u => u.username === username)) return res.status(400).json({ error: 'User exists' });
@@ -228,6 +229,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/login' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     const { username, password } = req.body;
     const user = users.find(u => u.username === username);
     if (!user || !verifyPassword(password, user.password)) return res.status(401).json({ error: 'Invalid credentials' });
@@ -238,12 +240,14 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/logout' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     res.setHeader('Set-Cookie', 'token=; HttpOnly; Path=/; Max-Age=0; Secure; SameSite=None');
     res.status(200).json({ message: 'Logged out' });
     return;
   }
 
   if (url === '/api/me' && method === 'GET') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const user = users.find(u => u.id === userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -252,6 +256,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/auth/google' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     const { token } = req.body;
     try {
       const client = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -275,6 +280,7 @@ module.exports = async (req, res) => {
 
   // ---------- TRADING ----------
   if (url === '/api/trade/price' && method === 'GET') {
+pi/health && method === GET) {/,/}/d
     const { symbol } = req.query;
     if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
     try {
@@ -287,6 +293,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/trade/execute' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { symbol, amountUSD, tradeType, useAI } = req.body;
     if (!symbol || !amountUSD || !tradeType) return res.status(400).json({ error: 'Missing parameters' });
@@ -298,6 +305,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/trade/history' && method === 'GET') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const userTrades = trades.filter(t => t.userId === userId);
     res.status(200).json(userTrades);
@@ -306,6 +314,7 @@ module.exports = async (req, res) => {
 
   // ---------- STOCK TRADING ----------
   if (url === '/api/stock/price' && method === 'GET') {
+pi/health && method === GET) {/,/}/d
     const { symbol } = req.query;
     if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
     try {
@@ -316,6 +325,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/stock/trade' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { symbol, amount } = req.body;
     if (!symbol || !amount || amount <= 0) return res.status(400).json({ error: 'Invalid trade' });
@@ -337,6 +347,7 @@ module.exports = async (req, res) => {
 
   // ---------- REFERRAL ----------
   if (url === '/api/referral/link' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { referrerId } = req.body;
     if (referrerId === userId) return res.status(400).json({ error: 'Cannot refer yourself' });
@@ -351,6 +362,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/referral/tree' && method === 'GET') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const tree = getReferralTree(userId);
     res.status(200).json(tree);
@@ -374,6 +386,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/roundup/transaction' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { amount } = req.body;
     if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
@@ -399,6 +412,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/roundup/balance' && method === 'GET') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const userRoundup = loadRoundup(userId);
     res.status(200).json({ balance: userRoundup.balance || 0, invested: userRoundup.invested || 0, history: userRoundup.history || [] });
@@ -407,6 +421,7 @@ module.exports = async (req, res) => {
 
   // ---------- CLAIM BOT ----------
   if (url === '/api/claim/scan-evm' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { address, chainId = '1' } = req.body;
     if (!address) return res.status(400).json({ error: 'Missing address' });
@@ -433,6 +448,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/claim/scan-solana' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { address } = req.body;
     if (!address) return res.status(400).json({ error: 'Missing address' });
@@ -449,6 +465,7 @@ module.exports = async (req, res) => {
 
   // ---------- WITHDRAWAL / OWNER ----------
   if (url === '/api/owner/earnings' && method === 'GET') {
+pi/health && method === GET) {/,/}/d
     if (userId !== 'admin' && req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(403).json({ error: 'Admin only' });
     const data = loadEarnings();
     res.status(200).json({ totalOwnerFees: data.totalOwnerFees, withdrawals: data.withdrawals });
@@ -456,6 +473,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/withdrawal/request' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { amount, address } = req.body;
     if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
@@ -472,6 +490,7 @@ module.exports = async (req, res) => {
 
   // ---------- HEALTH ----------
   if (url === '/api/health' && method === 'GET') {
+pi/health && method === GET) {/,/}/d
     const checks = {
       JWT_SECRET: !!process.env.JWT_SECRET,
       GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
@@ -490,6 +509,7 @@ module.exports = async (req, res) => {
   const MINER_SCRIPT = process.env.MINER_SCRIPT || '~/start_miner.sh';
 
   if (url === '/api/mining/stats' && method === 'GET') {
+pi/health && method === GET) {/,/}/d
     try {
       const response = await axios.get(`https://supportxmr.com/api/miner/${MINER_WALLET}/stats`);
       const data = response.data;
@@ -515,6 +535,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/miner/start' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     try {
       exec(`${MINER_SCRIPT} > /dev/null 2>&1 &`, (error) => {
@@ -528,6 +549,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/miner/stop' && method === 'POST') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     try {
       exec('pkill -f xmrig || true', (error) => {
@@ -541,6 +563,7 @@ module.exports = async (req, res) => {
   }
 
   if (url === '/api/miner/status' && method === 'GET') {
+pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     try {
       const { execSync } = require('child_process');
@@ -558,4 +581,20 @@ module.exports = async (req, res) => {
 
   // ---------- 404 ----------
   res.status(404).json({ error: 'Not found' });
+
+  // ---------- HEALTH (always 200, warns about missing keys) ----------
+  if (url === '/api/health' && method === 'GET') {
+    const checks = {
+      JWT_SECRET: !!process.env.JWT_SECRET,
+      GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
+      INFURA_KEY: !!process.env.INFURA_KEY,
+      SOLANA_RPC: !!process.env.SOLANA_RPC,
+      ALPHA_VANTAGE_KEY: !!process.env.ALPHA_VANTAGE_KEY,
+      WALLETCONNECT_PROJECT_ID: !!process.env.WALLETCONNECT_PROJECT_ID,
+    };
+    const missing = Object.keys(checks).filter(k => !checks[k]);
+    res.status(200).json({ status: missing.length ? 'warning' : 'ok', checks, missing });
+    return;
+  }
+
 };
