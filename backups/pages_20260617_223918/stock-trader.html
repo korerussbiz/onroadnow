@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock Trader</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1.5rem; font-size: 1.2rem; }
+    .container { max-width: 1000px; margin: auto; }
+    .card { background: #1e293b; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; }
+    .nav { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.3rem; }
+    .nav a { color: #60a5fa; text-decoration: none; font-weight: 600; }
+    .nav a:hover { color: #facc15; }
+    .flex { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin: 1rem 0; }
+    input, select { background: #0f172a; border: 1px solid #334155; color: white; padding: 0.8rem 1.2rem; border-radius: 2rem; font-size: 1.2rem; flex: 1; min-width: 150px; }
+    .btn { background: #3b82f6; border: none; padding: 0.8rem 1.8rem; border-radius: 2rem; color: white; font-weight: 600; font-size: 1.2rem; cursor: pointer; }
+    .btn-buy { background: #10b981; }
+    .btn-sell { background: #ef4444; }
+    .btn-lg { font-size: 1.4rem; padding: 1rem 2.5rem; }
+    .log { background: #0f172a; border-radius: 1rem; padding: 1.2rem; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 1rem; margin-top: 1.5rem; }
+    .price-display { font-size: 2.5rem; font-weight: bold; color: #facc15; margin: 1.5rem 0; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/auto-trader">🤖 Auto‑Trader</a>
+    <a href="/stock-trader">📈 Stocks</a>
+    <a href="/claimer">💰 Claim</a>
+    <a href="/referral">👥 Referrals</a>
+    <a href="/roundup">🪙 Round‑Up</a>
+    <a href="/receipt-invest">🧾 Receipt</a>
+    <a href="/history">📜 History</a>
+  </div>
+
+  <div class="card">
+    <h1>📈 Stock Trader</h1>
+    <p>Trade stocks with real‑time prices. Buy low, sell high!</p>
+    <div class="flex">
+      <input type="text" id="symbol" placeholder="Symbol (e.g., AAPL, TSLA)" value="AAPL" style="flex:2;">
+      <button id="getPriceBtn" class="btn">🔍 Get Price</button>
+    </div>
+    <div class="price-display" id="priceDisplay">Price: —</div>
+    <div class="flex">
+      <input type="number" id="amount" placeholder="Amount (USD)" step="0.01" style="flex:1;">
+      <button id="buyBtn" class="btn btn-buy btn-lg">🟢 Buy</button>
+      <button id="sellBtn" class="btn btn-sell btn-lg">🔴 Sell</button>
+    </div>
+    <div id="stockLog" class="log">Ready.</div>
+  </div>
+</div>
+<script>
+  async function apiCall(endpoint, options = {}) {
+    const res = await fetch(`/api/stock/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+    return res.json();
+  }
+  function addLog(msg) {
+    const logDiv = document.getElementById('stockLog');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+  async function getPrice() {
+    const symbol = document.getElementById('symbol').value.trim();
+    if (!symbol) { addLog('❌ Please enter a symbol'); return; }
+    try {
+      const data = await apiCall(`price?symbol=${symbol}`);
+      if (data.error) addLog(`❌ ${data.error}`);
+      else document.getElementById('priceDisplay').innerHTML = `$${data.price.toFixed(2)} (${data.currency || 'USD'})`;
+    } catch(e) { addLog('❌ Error fetching price'); }
+  }
+  async function trade(type) {
+    const symbol = document.getElementById('symbol').value.trim();
+    const amount = parseFloat(document.getElementById('amount').value);
+    if (!symbol) { addLog('❌ Enter a symbol'); return; }
+    if (isNaN(amount) || amount <= 0) { addLog('❌ Enter a valid amount'); return; }
+    try {
+      const data = await apiCall('trade', { method: 'POST', body: JSON.stringify({ symbol, amount }) });
+      if (data.error) addLog(`❌ ${data.error}`);
+      else addLog(`✅ ${type === 'buy' ? 'Bought' : 'Sold'} ${data.shares.toFixed(4)} shares at $${data.price.toFixed(2)} → profit $${data.netGain.toFixed(4)}`);
+    } catch(e) { addLog(`❌ Trade failed`); }
+  }
+  document.getElementById('getPriceBtn').onclick = getPrice;
+  document.getElementById('buyBtn').onclick = () => trade('buy');
+  document.getElementById('sellBtn').onclick = () => trade('sell');
+  // Auto-refresh price every 30s
+  setInterval(getPrice, 30000);
+  getPrice();
+</script>
+</body>
+</html>

@@ -648,4 +648,111 @@ if (url === '/api/auto-trader/report-profit' && method === 'POST') {
   addTraderLog(userId, `Trade: profit ${profitJMD} JMD, fee ${feePercent}% → user +${userGain}, owner +${fee}`);
   res.status(200).json({ userGain, fee, newUserBalance: state.userProfit, newOwnerFees: state.ownerFees });
   return;
-}
+
+  // ---------- Persistence and Withdrawal Endpoints ----------
+  const fs = require('fs');
+  const path = require('path');
+  const EARNINGS_FILE = path.join(__dirname, '..', 'data', 'earnings.json');
+
+  function loadEarnings() {
+    try {
+      return JSON.parse(fs.readFileSync(EARNINGS_FILE, 'utf8'));
+    } catch { return { totalOwnerFees: 0, withdrawals: [], users: {} }; }
+  }
+
+  function saveEarnings(data) {
+    fs.writeFileSync(EARNINGS_FILE, JSON.stringify(data, null, 2), 'utf8');
+  }
+
+  // Flush in‑memory earnings to file (call this periodically or on shutdown)
+  function flushEarnings() {
+    const data = loadEarnings();
+    // Add ownerFees from all trader states
+    let total = 0;
+    for (const [id, state] of userTraderStates) {
+      total += state.ownerFees || 0;
+    }
+    data.totalOwnerFees = total;
+    // Also store per‑user profits if needed
+    for (const [id, state] of userTraderStates) {
+      if (!data.users[id]) data.users[id] = { profit: 0, fees: 0 };
+      data.users[id].profit = state.userProfit || 0;
+      data.users[id].fees = state.ownerFees || 0;
+    }
+    saveEarnings(data);
+  }
+
+  // Endpoint to get total owner earnings (for admin)
+  if (url === '/api/owner/earnings' && method === 'GET') {
+    // Simple admin check: you can hardcode a userId or use a special token
+    // For now, allow if the request has a specific header or userId matches a hardcoded admin
+    const adminId = 'admin'; // change to your actual user ID
+    if (userId !== adminId) {
+      // You can also check a secret header
+      if (req.headers['x-admin-key'] !== process.env.ADMIN_KEY) {
+        return res.status(403).json({ error: 'Admin only' });
+      }
+    }
+    const data = loadEarnings();
+    res.status(200).json({ totalOwnerFees: data.totalOwnerFees, withdrawals: data.withdrawals });
+    return;
+  }
+
+  // Endpoint for a user to request withdrawal
+  if (url === '/api/withdraw/request' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { amount, address, method } = req.body; // method: 'crypto' or 'paypal'
+    if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
+    const state = getUserTraderState(userId);
+    if (state.userProfit < amount) return res.status(400).json({ error: 'Insufficient balance' });
+
+    // Deduct from user profit
+    state.userProfit -= amount;
+    // Log withdrawal request
+    const data = loadEarnings();
+    data.withdrawals.push({
+      userId,
+      amount,
+      address,
+      method,
+      timestamp: new Date().toISOString(),
+      status: 'pending'
+    });
+    saveEarnings(data);
+    // Flush all changes
+    flushEarnings();
+    res.status(200).json({ message: 'Withdrawal request submitted', remaining: state.userProfit });
+    return;
+  }
+
+  // Admin endpoint to process withdrawal (mark as completed)
+  if (url === '/api/withdraw/process' && method === 'POST') {
+    if (userId !== 'admin' && req.headers['x-admin-key'] !== process.env.ADMIN_KEY) {
+      return res.status(403).json({ error: 'Admin only' });
+    }
+    const { withdrawalId } = req.body;
+    const data = loadEarnings();
+    const idx = data.withdrawals.findIndex(w => w.id === withdrawalId);
+    if (idx === -1) return res.status(404).json({ error: 'Withdrawal not found' });
+    data.withdrawals[idx].status = 'completed';
+    saveEarnings(data);
+    res.status(200).json({ message: 'Withdrawal marked as completed' });
+    return;
+  }
+
+  // Health check to verify all required env vars are set
+  if (url === '/api/health' && method === 'GET') {
+    const checks = {
+      JWT_SECRET: !!process.env.JWT_SECRET,
+      GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
+      INFURA_KEY: !!process.env.INFURA_KEY,
+      SOLANA_RPC: !!process.env.SOLANA_RPC,
+      WALLETCONNECT_PROJECT_ID: !!process.env.WALLETCONNECT_PROJECT_ID,
+      ALPHA_VANTAGE_KEY: !!process.env.ALPHA_VANTAGE_KEY,
+    };
+    const allOk = Object.values(checks).every(v => v === true);
+    res.status(allOk ? 200 : 500).json({ status: allOk ? 'ok' : 'missing keys', checks });
+    return;
+  }
+
+};

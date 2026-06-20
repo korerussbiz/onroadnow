@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OnRoadNow – Auto Claim Bot</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .card { background: #1e293b; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .btn { background: #3b82f6; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; color: white; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-danger { background: #ef4444; }
+    .btn-success { background: #10b981; }
+    select, input { background: #0f172a; border: 1px solid #334155; color: white; padding: 0.5rem 1rem; border-radius: 2rem; }
+    .log { background: #0f172a; border-radius: 1rem; padding: 1rem; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.8rem; margin-top: 1rem; }
+    .log p { margin: 0.2rem 0; border-left: 2px solid #3b82f6; padding-left: 0.5rem; }
+    .flex { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+    .nav a { color: #94a3b8; text-decoration: none; margin-right: 1rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav"><a href="/">← Home</a> | <a href="/auto-trader">Auto‑Trader</a> | <a href="/claim-bot">Claim Bot</a></div>
+  <div id="authMessage"></div>
+  <div id="claimContent" style="display: none;">
+    <div class="card">
+      <h2>🤖 Auto Claim Bot</h2>
+      <p>Automatically scans for claimable tokens (faucets, airdrops, unclaimed rewards). Simulated claiming – each claim generates a random amount, deducts a 3‑10% fee, and adds the rest to your profit balance.</p>
+      <div class="flex">
+        <select id="chainSelect">
+          <option value="ethereum">Ethereum</option>
+          <option value="bsc">Binance Smart Chain</option>
+          <option value="polygon">Polygon</option>
+          <option value="solana">Solana</option>
+        </select>
+        <button id="scanBtn" class="btn">🔍 Scan for Claimable Tokens</button>
+        <button id="claimAllBtn" class="btn btn-success">💰 Claim All (Simulated)</button>
+        <button id="stopBtn" class="btn btn-danger">⏹️ Stop</button>
+      </div>
+      <div class="log" id="logArea"></div>
+    </div>
+    <div class="card">
+      <h3>Your Stats</h3>
+      <div>Profit (after fees): <span id="userProfit">0.00</span> JMD</div>
+      <div>Platform fees collected: <span id="ownerFees">0.00</span> JMD</div>
+    </div>
+  </div>
+</div>
+<script>
+  let scanning = false;
+  let scanInterval = null;
+
+  async function apiCall(endpoint, options = {}) {
+    const res = await fetch(`/api/auto-trader/${endpoint}`, {
+      ...options,
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', ...options.headers }
+    });
+    return res.json();
+  }
+
+  function addLog(msg, isError = false) {
+    const logDiv = document.getElementById('logArea');
+    if (!logDiv) return;
+    const p = document.createElement('p');
+    p.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    if (isError) p.style.borderLeftColor = '#ef4444';
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  async function refreshBalance() {
+    const state = await apiCall('status');
+    document.getElementById('userProfit').innerText = (state.userProfit || 0).toFixed(2);
+    document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2);
+  }
+
+  async function claimAmount(amount) {
+    if (!amount || amount <= 0) return;
+    const feePercent = 3 + Math.random() * 7;
+    const res = await apiCall('report-profit', {
+      method: 'POST',
+      body: JSON.stringify({ profitJMD: amount, feePercent })
+    });
+    if (res.error) addLog(`❌ Claim error: ${res.error}`, true);
+    else addLog(`✅ Claimed $${amount.toFixed(2)} → user gain $${res.userGain.toFixed(2)}, owner fee $${res.fee.toFixed(2)}`);
+    refreshBalance();
+  }
+
+  async function scanAndClaim() {
+    if (!scanning) return;
+    const chain = document.getElementById('chainSelect').value;
+    addLog(`🔍 Scanning ${chain} for claimable tokens...`);
+    // Simulate scanning – replace with real API calls later
+    await new Promise(r => setTimeout(r, 2000));
+    const found = Math.random() > 0.7;
+    if (found) {
+      const amount = 1 + Math.random() * 20; // JMD equivalent
+      addLog(`🎁 Found claimable amount: $${amount.toFixed(2)} on ${chain}`);
+      await claimAmount(amount);
+    } else {
+      addLog(`No claimable tokens found on ${chain} this round.`);
+    }
+  }
+
+  document.getElementById('scanBtn').addEventListener('click', () => {
+    if (scanning) {
+      addLog("Scan already running.");
+      return;
+    }
+    scanning = true;
+    addLog("Started continuous scanning (every 30 seconds). Click 'Stop' to end.");
+    scanInterval = setInterval(scanAndClaim, 30000);
+    scanAndClaim(); // immediate first scan
+  });
+
+  document.getElementById('claimAllBtn').addEventListener('click', async () => {
+    addLog("Manual claim all triggered – simulating claim of random amount.");
+    const amount = 5 + Math.random() * 50;
+    await claimAmount(amount);
+  });
+
+  document.getElementById('stopBtn').addEventListener('click', () => {
+    if (scanInterval) {
+      clearInterval(scanInterval);
+      scanInterval = null;
+    }
+    scanning = false;
+    addLog("Stopped scanning.");
+  });
+
+  (async () => {
+    const me = await fetch('/api/me', { credentials: 'include' }).then(r => r.json());
+    if (!me.id) {
+      document.getElementById('authMessage').innerHTML = `<div class="card">🔐 You must <a href="/">log in</a> to use the Claim Bot.</div>`;
+      return;
+    }
+    document.getElementById('authMessage').innerHTML = `<div class="card">✅ Logged in as <strong>${me.email}</strong></div>`;
+    document.getElementById('claimContent').style.display = 'block';
+    refreshBalance();
+    addLog("Claim Bot ready. Press 'Scan for Claimable Tokens' to start automatic scanning (simulated).");
+  })();
+</script>
+  <button id="depositBtn" class="btn" style="background:#f7931a;font-size:1.2rem;padding:0.8rem 2rem;">💰 Deposit</button>
+  <script>
+  document.getElementById("depositBtn")?.addEventListener("click", async function() {
+    const res = await fetch("/api/deposit", { credentials: "include" });
+    const data = await res.json();
+    if (data.url) window.open(data.url, "_blank");
+    else alert("Deposit URL not set.");
+  });
+  </script>
+</body>
+</html>

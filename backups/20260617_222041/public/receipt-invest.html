@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Receipt Investment – Cents on the Dollar</title>
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+    .card { background: #1e293b; border-radius: 1.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .btn { background: #3b82f6; border: none; padding: 0.5rem 1.2rem; border-radius: 2rem; color: white; font-weight: 600; cursor: pointer; }
+    .btn-success { background: #10b981; }
+    input, textarea { background: #0f172a; border: 1px solid #334155; color: white; padding: 0.5rem 1rem; border-radius: 2rem; width: 100%; }
+    .flex { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .log { background: #0f172a; border-radius: 1rem; padding: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card"><a href="/">← Home</a> | <a href="/roundup">🪙 Round‑Up</a></div>
+  <div class="card">
+    <h2>🧾 Receipt Investment</h2>
+    <p>Upload a receipt image or enter the total, and we'll invest your spare change!</p>
+    <div class="flex">
+      <input type="number" id="manualTotal" placeholder="Total amount (USD)" step="0.01">
+      <button id="manualBtn" class="btn">➕ Use Manual Total</button>
+    </div>
+    <p>Or upload a receipt image (JPEG/PNG):</p>
+    <input type="file" id="receiptImage" accept="image/*">
+    <button id="uploadBtn" class="btn btn-success">📤 Upload & Invest</button>
+    <div id="result" style="margin:1rem 0;"></div>
+    <div id="history"></div>
+    <div id="log" class="log">Ready.</div>
+  </div>
+</div>
+<script>
+  async function apiCall(endpoint, options = {}) {
+    const res = await fetch(`/api/receipt/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+    return res.json();
+  }
+  function addLog(msg) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+  async function uploadReceipt(imageBase64, total) {
+    const data = await apiCall('upload', {
+      method: 'POST',
+      body: JSON.stringify({ total, image: imageBase64 })
+    });
+    if (data.error) { addLog('❌ ' + data.error); return; }
+    addLog(`✅ Total $${data.total.toFixed(2)} → round‑up $${data.roundup.toFixed(2)}. Balance: $${data.newBalance.toFixed(2)}`);
+    if (data.invested > 0) addLog(`💰 Auto‑invested $${data.invested.toFixed(2)}`);
+    if (data.invoiceUrl) addLog(`🧾 Invoice: ${data.invoiceUrl}`);
+    document.getElementById('result').innerHTML = `
+      <div style="background:#0f172a;padding:1rem;border-radius:1rem;">
+        <p>Total: $${data.total.toFixed(2)}</p>
+        <p>Round‑up: $${data.roundup.toFixed(2)}</p>
+        <p>New Balance: $${data.newBalance.toFixed(2)}</p>
+        <p>${data.invested > 0 ? '✅ Invested $' + data.invested.toFixed(2) : '⏳ Waiting for threshold'}</p>
+        <a href="${data.invoiceUrl}" target="_blank" class="btn">📄 View Invoice</a>
+      </div>
+    `;
+    refreshHistory();
+  }
+  async function refreshHistory() {
+    try {
+      const data = await apiCall('history', { method: 'GET' });
+      const historyDiv = document.getElementById('history');
+      if (data.length === 0) { historyDiv.innerHTML = '<p>No receipts yet.</p>'; return; }
+      historyDiv.innerHTML = '<h4>Recent Receipts</h4>';
+      data.slice(-5).reverse().forEach(r => {
+        historyDiv.innerHTML += `
+          <div style="background:#0f172a;padding:0.5rem;border-radius:0.5rem;margin:0.5rem 0;">
+            <strong>$${r.total.toFixed(2)}</strong> → round‑up $${r.roundup.toFixed(2)}
+            <span style="color:${r.invested ? '#10b981' : '#eab308'}">
+              ${r.invested ? '✅ Invested $' + r.investedAmount.toFixed(2) : '⏳ Pending'}
+            </span>
+            <br/><small>${new Date(r.date).toLocaleString()}</small>
+          </div>
+        `;
+      });
+    } catch(e) { /* ignore */ }
+  }
+  document.getElementById('manualBtn').onclick = async () => {
+    const total = parseFloat(document.getElementById('manualTotal').value);
+    if (isNaN(total) || total <= 0) { addLog('Please enter a valid total'); return; }
+    await uploadReceipt(null, total);
+  };
+  document.getElementById('uploadBtn').onclick = async () => {
+    const fileInput = document.getElementById('receiptImage');
+    if (!fileInput.files || !fileInput.files[0]) { addLog('Please select an image'); return; }
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target.result.split(',')[1];
+      await uploadReceipt(base64, null);
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+  };
+  refreshHistory();
+</script>
+</body>
+</html>

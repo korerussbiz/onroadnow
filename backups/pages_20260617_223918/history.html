@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trade History</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1.5rem; font-size: 1.2rem; }
+    .container { max-width: 1000px; margin: auto; }
+    .card { background: #1e293b; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; }
+    .nav { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.3rem; }
+    .nav a { color: #60a5fa; text-decoration: none; font-weight: 600; }
+    .nav a:hover { color: #facc15; }
+    table { width: 100%; border-collapse: collapse; font-size: 1.1rem; }
+    th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #334155; }
+    th { color: #94a3b8; font-weight: normal; }
+    .log { background: #0f172a; border-radius: 1rem; padding: 1.2rem; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 1rem; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/auto-trader">🤖 Auto‑Trader</a>
+    <a href="/stock-trader">📈 Stocks</a>
+    <a href="/claimer">💰 Claim</a>
+    <a href="/referral">👥 Referrals</a>
+    <a href="/roundup">🪙 Round‑Up</a>
+    <a href="/receipt-invest">🧾 Receipt</a>
+    <a href="/history">📜 History</a>
+  </div>
+
+  <div class="card">
+    <h1>📜 Trade History</h1>
+    <p>All your trades (crypto, stocks, round‑up, receipts) in one place.</p>
+    <div id="historyTable"><p>Loading...</p></div>
+    <div id="log" class="log">Ready.</div>
+  </div>
+</div>
+<script>
+  async function apiCall(endpoint, options = {}) {
+    const res = await fetch(`/api/trade/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+    return res.json();
+  }
+  function addLog(msg) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+  async function loadHistory() {
+    try {
+      const data = await apiCall('history', { method: 'GET' });
+      const container = document.getElementById('historyTable');
+      if (!data || data.length === 0) {
+        container.innerHTML = '<p>No trades yet.</p>';
+        return;
+      }
+      let html = '<table><tr><th>Symbol</th><th>Type</th><th>Amount</th><th>Price</th><th>Profit</th><th>Date</th></tr>';
+      data.slice(-20).reverse().forEach(t => {
+        html += `<tr><td>${t.symbol}</td><td>${t.tradeType}</td><td>$${t.amountUSD.toFixed(2)}</td><td>$${t.price.toFixed(2)}</td><td>$${t.profit.toFixed(4)}</td><td>${new Date(t.timestamp).toLocaleString()}</td></tr>`;
+      });
+      html += '</table>';
+      container.innerHTML = html;
+    } catch(e) { addLog('❌ Failed to load history'); }
+  }
+  loadHistory();
+  setInterval(loadHistory, 30000);
+</script>
+</body>
+</html>

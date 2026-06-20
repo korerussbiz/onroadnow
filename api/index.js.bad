@@ -195,7 +195,6 @@ module.exports = async (req, res) => {
 
 
 // ---------- Per‑user Auto‑Trader endpoints ----------
-if (url === '/api/auto-trader/start' && method === 'POST') {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   const state = getUserTraderState(userId);
   state.running = true;
@@ -203,7 +202,6 @@ if (url === '/api/auto-trader/start' && method === 'POST') {
   res.status(200).json({ message: 'started' });
   return;
 }
-if (url === '/api/auto-trader/stop' && method === 'POST') {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   const state = getUserTraderState(userId);
   state.running = false;
@@ -211,13 +209,11 @@ if (url === '/api/auto-trader/stop' && method === 'POST') {
   res.status(200).json({ message: 'stopped' });
   return;
 }
-if (url === '/api/auto-trader/status' && method === 'GET') {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   const state = getUserTraderState(userId);
   res.status(200).json({ running: state.running, userProfit: state.userProfit, ownerFees: state.ownerFees, log: state.log });
   return;
 }
-if (url === '/api/auto-trader/report-profit' && method === 'POST') {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   const { profitJMD, feePercent } = req.body;
   if (!profitJMD || profitJMD <= 0) return res.status(400).json({ error: 'Invalid profit' });
@@ -307,7 +303,6 @@ if (url === '/api/bot/grant' && method === 'POST') {
 
 // ---------- Auto-Trader endpoint with fee (3-10%) and earnings to Korey D. Russell ----------
 // This is a simulation; real trading would require external bot and payment processing.
-if (url === '/api/auto-trader/start' && method === 'POST') {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   const { amount } = req.body;
   if (!amount || amount < 100) return res.status(400).json({ error: 'Minimum amount 100 JMD' });
@@ -343,7 +338,6 @@ if (url === '/api/auto-trader/start' && method === 'POST') {
 }
 
 // ---------- Auto‑Trader start (real fee, no simulation) ----------
-if (url === '/api/auto-trader/start' && method === 'POST') {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   const { amount, currency } = req.body;
   if (!amount || amount < 10) return res.status(400).json({ error: 'Minimum 10 JMD' });
@@ -371,7 +365,6 @@ function addLog(msg) {
 }
 
 // ---------- Start Auto‑Trader (real trading) ----------
-if (url === '/api/auto-trader/start' && method === 'POST') {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   if (traderState.running) return res.status(400).json({ error: 'Already running' });
   traderState.running = true;
@@ -388,7 +381,6 @@ if (url === '/api/auto-trader/start' && method === 'POST') {
 }
 
 // ---------- Stop Auto‑Trader ----------
-if (url === '/api/auto-trader/stop' && method === 'POST') {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   traderState.running = false;
   addLog(`Trader stopped by user ${userId}`);
@@ -397,7 +389,6 @@ if (url === '/api/auto-trader/stop' && method === 'POST') {
 }
 
 // ---------- Get status and balance ----------
-if (url === '/api/auto-trader/status' && method === 'GET') {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   // In a real system, you'd fetch user-specific profit from DB.
   // For simplicity, we return the global state (single user demo).
@@ -412,7 +403,6 @@ if (url === '/api/auto-trader/status' && method === 'GET') {
 
 // ---------- Report profit from a trade (called by the trading bot) ----------
 // This endpoint deducts fee (3-10%) and credits user, sends fee to owner.
-if (url === '/api/auto-trader/report-profit' && method === 'POST') {
   // Authorization: use a secret API key (not user session) to prevent abuse.
   const apiKey = req.headers['x-api-key'];
   if (apiKey !== process.env.TRADER_API_KEY) return res.status(403).json({ error: 'Unauthorized' });
@@ -605,6 +595,48 @@ if (typeof userTraderStates === 'undefined') {
 // Since the file may not have that marker, we'll simply append at the end before the 404.
 
 // ---------- Auto‑Trader endpoints (start/stop/status/report) ----------
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  state.running = true;
+  addTraderLog(userId, 'Trader started');
+  res.status(200).json({ message: 'started' });
+  return;
+}
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  state.running = false;
+  addTraderLog(userId, 'Trader stopped');
+  res.status(200).json({ message: 'stopped' });
+  return;
+}
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  res.status(200).json({
+    running: state.running,
+    userProfit: state.userProfit,
+    ownerFees: state.ownerFees,
+    balance: state.balance,
+    log: state.log,
+    history: state.history
+  });
+  return;
+}
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { profitJMD, feePercent } = req.body;
+  if (!profitJMD || profitJMD <= 0) return res.status(400).json({ error: 'Invalid profit' });
+  const fee = profitJMD * (Math.min(10, Math.max(3, feePercent)) / 100);
+  const userGain = profitJMD - fee;
+  const state = getUserTraderState(userId);
+  state.userProfit += userGain;
+  state.ownerFees += fee;
+  state.history.push({ profit: profitJMD, gain: userGain, fee, timestamp: Date.now() });
+  if (state.history.length > 100) state.history.shift();
+  addTraderLog(userId, `Trade: profit ${profitJMD} JMD, fee ${feePercent}% → user +${userGain}, owner +${fee}`);
+  res.status(200).json({ userGain, fee, newUserBalance: state.userProfit, newOwnerFees: state.ownerFees });
+  return;
+}
+
+// ---------- Auto-Trader endpoints ----------
 if (url === '/api/auto-trader/start' && method === 'POST') {
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
   const state = getUserTraderState(userId);
@@ -628,7 +660,74 @@ if (url === '/api/auto-trader/status' && method === 'GET') {
     running: state.running,
     userProfit: state.userProfit,
     ownerFees: state.ownerFees,
-    balance: state.balance,
+    balance: state.balance || 0,
+    log: state.log
+  });
+  return;
+}
+if (url === '/api/auto-trader/report-profit' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { profitJMD, feePercent } = req.body;
+  if (!profitJMD || profitJMD <= 0) return res.status(400).json({ error: 'Invalid profit' });
+  const fee = profitJMD * (Math.min(10, Math.max(3, feePercent)) / 100);
+  const userGain = profitJMD - fee;
+  const state = getUserTraderState(userId);
+  state.userProfit += userGain;
+  state.ownerFees += fee;
+  addTraderLog(userId, `Trade: profit ${profitJMD} JMD, fee ${feePercent}% → user +${userGain}, owner +${fee}`);
+  res.status(200).json({ userGain, fee, newUserBalance: state.userProfit, newOwnerFees: state.ownerFees });
+  return;
+}
+if (url === '/api/auto-trader/add-funds' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const { amount } = req.body;
+  if (!amount || amount <= 0) return res.status(400).json({ error: 'Invalid amount' });
+  const state = getUserTraderState(userId);
+  state.balance = (state.balance || 0) + amount;
+  addTraderLog(userId, `💰 Deposited ${amount} JMD via crypto`);
+  res.status(200).json({ newBalance: state.balance });
+  return;
+}
+
+// ---------- Auto‑Trader endpoints (per‑user) ----------
+let userTraderStates = new Map();
+
+function getUserTraderState(userId) {
+  if (!userTraderStates.has(userId)) {
+    userTraderStates.set(userId, { running: false, userProfit: 0, ownerFees: 0, log: [], history: [] });
+  }
+  return userTraderStates.get(userId);
+}
+
+function addTraderLog(userId, msg) {
+  const state = getUserTraderState(userId);
+  state.log.unshift(`[${new Date().toISOString()}] ${msg}`);
+  if (state.log.length > 100) state.log.pop();
+}
+
+if (url === '/api/auto-trader/start' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  state.running = true;
+  addTraderLog(userId, 'Trader started');
+  res.status(200).json({ message: 'started' });
+  return;
+}
+if (url === '/api/auto-trader/stop' && method === 'POST') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  state.running = false;
+  addTraderLog(userId, 'Trader stopped');
+  res.status(200).json({ message: 'stopped' });
+  return;
+}
+if (url === '/api/auto-trader/status' && method === 'GET') {
+  if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+  const state = getUserTraderState(userId);
+  res.status(200).json({
+    running: state.running,
+    userProfit: state.userProfit,
+    ownerFees: state.ownerFees,
     log: state.log,
     history: state.history
   });
@@ -643,8 +742,6 @@ if (url === '/api/auto-trader/report-profit' && method === 'POST') {
   const state = getUserTraderState(userId);
   state.userProfit += userGain;
   state.ownerFees += fee;
-  state.history.push({ profit: profitJMD, gain: userGain, fee, timestamp: Date.now() });
-  if (state.history.length > 100) state.history.shift();
   addTraderLog(userId, `Trade: profit ${profitJMD} JMD, fee ${feePercent}% → user +${userGain}, owner +${fee}`);
   res.status(200).json({ userGain, fee, newUserBalance: state.userProfit, newOwnerFees: state.ownerFees });
   return;

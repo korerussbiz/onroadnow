@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Round-Up Investment</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1.5rem; font-size: 1.2rem; }
+    .container { max-width: 800px; margin: auto; }
+    .card { background: #1e293b; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; }
+    .nav { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.3rem; }
+    .nav a { color: #60a5fa; text-decoration: none; font-weight: 600; }
+    .nav a:hover { color: #facc15; }
+    .flex { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin: 1rem 0; }
+    .btn { background: #3b82f6; border: none; padding: 0.8rem 1.8rem; border-radius: 2rem; color: white; font-weight: 600; font-size: 1.2rem; cursor: pointer; }
+    .btn-success { background: #10b981; }
+    .btn-lg { font-size: 1.4rem; padding: 1rem 2.5rem; }
+    input { background: #0f172a; border: 1px solid #334155; color: white; padding: 0.8rem 1.2rem; border-radius: 2rem; font-size: 1.2rem; flex: 1; min-width: 150px; }
+    .stat { font-size: 2rem; font-weight: bold; color: #facc15; margin: 0.5rem 0; }
+    .log { background: #0f172a; border-radius: 1rem; padding: 1.2rem; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 1rem; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/auto-trader">🤖 Auto‑Trader</a>
+    <a href="/stock-trader">📈 Stocks</a>
+    <a href="/claimer">💰 Claim</a>
+    <a href="/referral">👥 Referrals</a>
+    <a href="/roundup">🪙 Round‑Up</a>
+    <a href="/receipt-invest">🧾 Receipt</a>
+    <a href="/history">📜 History</a>
+  </div>
+
+  <div class="card">
+    <h1>🪙 Round‑Up Investment</h1>
+    <p>Every purchase rounds up to the nearest dollar – we invest your spare change automatically!</p>
+    <div class="flex">
+      <input type="number" id="amount" placeholder="Purchase amount (USD)" step="0.01">
+      <button id="addPurchase" class="btn btn-lg">➕ Add</button>
+      <button id="investNow" class="btn btn-success btn-lg">💰 Invest Now</button>
+    </div>
+    <div class="stat" id="balanceDisplay">Balance: $0.00</div>
+    <div style="font-size:1.4rem;" id="investedDisplay">Invested so far: $0.00</div>
+    <div id="historyDisplay" style="font-size:1.2rem; margin-top:1rem;">History: <span id="historyList">None</span></div>
+    <div id="log" class="log">Ready.</div>
+  </div>
+</div>
+<script>
+  async function apiCall(endpoint, options = {}) {
+    const res = await fetch(`/api/roundup/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+    return res.json();
+  }
+  function addLog(msg) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+  async function refreshBalance() {
+    try {
+      const data = await apiCall('balance', { method: 'GET' });
+      document.getElementById('balanceDisplay').textContent = `Balance: $${(data.balance || 0).toFixed(2)}`;
+      document.getElementById('investedDisplay').textContent = `Invested so far: $${(data.invested || 0).toFixed(2)}`;
+      const history = data.history || [];
+      document.getElementById('historyList').textContent = history.map(h => `$${h.amount.toFixed(2)}`).join(' | ') || 'None';
+    } catch(e) { addLog('❌ Failed to refresh'); }
+  }
+  document.getElementById('addPurchase').onclick = async () => {
+    const amount = parseFloat(document.getElementById('amount').value);
+    if (isNaN(amount) || amount <= 0) { addLog('❌ Enter a valid amount'); return; }
+    const data = await apiCall('transaction', { method: 'POST', body: JSON.stringify({ amount }) });
+    if (data.error) addLog(`❌ ${data.error}`);
+    else {
+      addLog(`✅ Purchase $${amount.toFixed(2)} → round‑up $${data.roundup.toFixed(2)} added. New balance: $${data.newBalance.toFixed(2)}`);
+      if (data.invested > 0) addLog(`💰 Auto‑invested $${data.invested.toFixed(2)}`);
+      refreshBalance();
+    }
+  };
+  document.getElementById('investNow').onclick = async () => {
+    const data = await apiCall('invest', { method: 'POST' });
+    if (data.error) addLog(`❌ ${data.error}`);
+    else {
+      addLog(`💰 Invested $${data.invested.toFixed(2)} into ${data.symbol} at $${data.price.toFixed(2)}`);
+      refreshBalance();
+    }
+  };
+  refreshBalance();
+  setInterval(refreshBalance, 30000);
+</script>
+</body>
+</html>
