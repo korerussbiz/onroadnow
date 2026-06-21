@@ -171,3 +171,29 @@ module.exports = async (req, res) => {
   // ---------- 404 ----------
   res.status(404).json({ error: 'Not found' });
 };
+
+  // ---------- Auto-Discovery ----------
+  const discovery = require('../services/discovery');
+
+  // Run discovery on startup (async)
+  discovery.discoverAll().then(() => {
+    console.log('✅ Discovery complete');
+  }).catch(err => {
+    console.error('Discovery error:', err);
+  });
+
+  // Endpoint to check discovered services
+  if (url === '/api/discovery/status' && method === 'GET') {
+    const rpcs = discovery.getRPCs ? discovery.getRPCs() : discovery.workingRPCs;
+    const price = discovery.getPriceAPI ? discovery.getPriceAPI() : discovery.workingPriceAPI;
+    res.status(200).json({ rpcs, price });
+    return;
+  }
+
+  // Endpoint to manually trigger discovery
+  if (url === '/api/discovery/refresh' && method === 'POST') {
+    const result = await discovery.discoverAll();
+    res.status(200).json(result);
+    return;
+  }
+
