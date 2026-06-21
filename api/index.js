@@ -51,9 +51,7 @@ let deliveries = [];
 let userTraderStates = new Map();
 let referralTree = new Map();
 let trades = [];
-let botStatus = { running: false, lastRun: null, earnings: 0 };
 
-// Helper functions
 function hashPassword(pwd) { return crypto.createHash('sha256').update(pwd).digest('hex'); }
 function verifyPassword(pwd, hash) { return hashPassword(pwd) === hash; }
 
@@ -83,7 +81,7 @@ function getReferralTree(userId) {
   return referralTree.get(userId);
 }
 
-// ---------- Data persistence (JSON fallback) ----------
+// ---------- Data persistence ----------
 const EARNINGS_FILE = path.join(__dirname, '..', 'data', 'earnings.json');
 function loadEarnings() {
   try { return JSON.parse(fs.readFileSync(EARNINGS_FILE, 'utf8')); } catch { return { totalOwnerFees: 0, withdrawals: [], users: {}, roundups: {}, receipts: {} }; }
@@ -92,7 +90,7 @@ function saveEarnings(data) {
   fs.writeFileSync(EARNINGS_FILE, JSON.stringify(data, null, 2), 'utf8');
 }
 
-// ---------- Stock & Crypto Price ----------
+// ---------- Price Fetching ----------
 async function getStockPrice(symbol) {
   try {
     const quote = await yahooFinance.quote(symbol);
@@ -117,7 +115,7 @@ async function getCryptoPrice(symbol) {
   }
 }
 
-// ---------- AI Trading Signal ----------
+// ---------- AI Signal (mock) ----------
 async function getAISignal(symbol, type = 'stock') {
   try {
     let prices = [];
@@ -207,7 +205,6 @@ module.exports = async (req, res) => {
     } catch(e) {}
   }
 
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', 'https://onroadnow.vercel.app');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
@@ -273,38 +270,7 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // ---------- TRADING ----------
-  if (url === '/api/trade/price' && method === 'GET') {
-    const { symbol } = req.query;
-    if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
-    try {
-      let price;
-      if (symbol.length <= 5 && /^[A-Z]+$/.test(symbol)) price = await getStockPrice(symbol);
-      else price = await getCryptoPrice(symbol);
-      res.status(200).json({ symbol, price });
-    } catch(e) { res.status(500).json({ error: e.message }); }
-    return;
-  }
-
-  if (url === '/api/trade/execute' && method === 'POST') {
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-    const { symbol, amountUSD, tradeType, useAI } = req.body;
-    if (!symbol || !amountUSD || !tradeType) return res.status(400).json({ error: 'Missing parameters' });
-    try {
-      const result = await executeTrade(userId, symbol, amountUSD, tradeType, useAI);
-      res.status(200).json(result);
-    } catch(e) { res.status(500).json({ error: e.message }); }
-    return;
-  }
-
-  if (url === '/api/trade/history' && method === 'GET') {
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-    const userTrades = trades.filter(t => t.userId === userId);
-    res.status(200).json(userTrades);
-    return;
-  }
-
-  // ---------- STOCK TRADING ----------
+  // ---------- STOCK PRICE ----------
   if (url === '/api/stock/price' && method === 'GET') {
     const { symbol } = req.query;
     if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
@@ -405,6 +371,32 @@ module.exports = async (req, res) => {
     return;
   }
 
+  // ---------- RECEIPT INVESTMENT ----------
+  function loadReceipts(userId) {
+    const data = loadEarnings();
+    if (!data.receipts) data.receipts = {};
+    if (!data.receipts[userId]) data.receipts[userId] = [];
+    saveEarnings(data);
+    return data.receipts[userId];
+  }
+
+  if (url === '/api/receipt/upload' && method === 'POST') {
+    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
+    const { total } = req.body;
+    if (!total || total <= 0) return res.status(400).json({ error: 'Invalid total' });
+    const rounded = Math.ceil(total);
+    const roundup = rounded - total;
+    if (roundup <= 0.001) return res.status(400).json({ error: 'No spare change' });
+    const receipt = { id: Date.now().toString(36) + userId.slice(0,4), userId, total, rounded, roundup, date: new Date().toISOString(), invested: false };
+    loadReceipts(userId).push(receipt);
+    const userRoundup = loadRoundup(userId);
+    userRoundup.balance += roundup;
+    userRoundup.history.push({ amount: roundup, date: receipt.date, receiptId: receipt.id });
+    saveRoundup(userId, userRoundup);
+    res.status(200).json({ message: 'Receipt uploaded', roundup, newBalance: userRoundup.balance });
+    return;
+  }
+
   // ---------- CLAIM BOT ----------
   if (url === '/api/claim/scan-evm' && method === 'POST') {
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
@@ -440,14 +432,13 @@ module.exports = async (req, res) => {
       const { Connection, PublicKey } = require('@solana/web3.js');
       const connection = new Connection(SOLANA_RPC);
       const pubkey = new PublicKey(address);
-      const claims = [];
-      claims.push({ program: 'Jito', amount: '0.5 JTO', eligible: true });
+      const claims = [{ program: 'Jito', amount: '0.5 JTO', eligible: true }];
       res.status(200).json({ claims });
     } catch(e) { res.status(500).json({ error: e.message }); }
     return;
   }
 
-  // ---------- WITHDRAWAL / OWNER ----------
+  // ---------- WITHDRAWAL ----------
   if (url === '/api/owner/earnings' && method === 'GET') {
     if (userId !== 'admin' && req.headers['x-admin-key'] !== ADMIN_KEY) return res.status(403).json({ error: 'Admin only' });
     const data = loadEarnings();
@@ -470,24 +461,8 @@ module.exports = async (req, res) => {
     return;
   }
 
-  // ---------- HEALTH ----------
-  if (url === '/api/health' && method === 'GET') {
-    const checks = {
-      JWT_SECRET: !!process.env.JWT_SECRET,
-      GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
-      INFURA_KEY: !!process.env.INFURA_KEY,
-      SOLANA_RPC: !!process.env.SOLANA_RPC,
-      ALPHA_VANTAGE_KEY: !!process.env.ALPHA_VANTAGE_KEY,
-      WALLETCONNECT_PROJECT_ID: !!process.env.WALLETCONNECT_PROJECT_ID,
-    };
-    const allOk = Object.values(checks).every(v => v === true);
-    res.status(allOk ? 200 : 500).json({ status: allOk ? 'ok' : 'missing keys', checks });
-    return;
-  }
-
-  // ---------- MINING API ----------
+  // ---------- MINING STATS ----------
   const MINER_WALLET = '9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2';
-  const MINER_SCRIPT = process.env.MINER_SCRIPT || '~/start_miner.sh';
 
   if (url === '/api/mining/stats' && method === 'GET') {
     try {
@@ -499,14 +474,13 @@ module.exports = async (req, res) => {
       res.status(200).json({
         wallet: MINER_WALLET,
         hashrate: data.hashrate || 0,
-        balance: balance,
+        balance,
         totalHashes: data.totalHashes || 0,
         validShares: data.validShares || 0,
         lastShare: data.lastHash || 0,
-        xmrPrice: xmrPrice,
+        xmrPrice,
         valueUSD: balance * xmrPrice,
-        paid: (data.amtPaid || 0) / 1e12,
-        status: 'ok'
+        paid: (data.amtPaid || 0) / 1e12
       });
     } catch (err) {
       res.status(500).json({ error: 'Failed to fetch mining stats' });
@@ -514,45 +488,18 @@ module.exports = async (req, res) => {
     return;
   }
 
-  if (url === '/api/miner/start' && method === 'POST') {
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-    try {
-      exec(`${MINER_SCRIPT} > /dev/null 2>&1 &`, (error) => {
-        if (error) console.error('Miner start error:', error);
-      });
-      res.status(200).json({ message: 'Miner started', status: 'starting' });
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-    return;
-  }
-
-  if (url === '/api/miner/stop' && method === 'POST') {
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-    try {
-      exec('pkill -f xmrig || true', (error) => {
-        if (error) console.error('Miner stop error:', error);
-      });
-      res.status(200).json({ message: 'Miner stopped', status: 'stopped' });
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-    return;
-  }
-
-  if (url === '/api/miner/status' && method === 'GET') {
-    if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-    try {
-      const { execSync } = require('child_process');
-      let running = false;
-      try {
-        const output = execSync('pgrep -f xmrig', { encoding: 'utf8' });
-        running = output.trim().length > 0;
-      } catch (e) { running = false; }
-      res.status(200).json({ running });
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
+  // ---------- HEALTH ----------
+  if (url === '/api/health' && method === 'GET') {
+    const checks = {
+      JWT_SECRET: !!process.env.JWT_SECRET,
+      GOOGLE_CLIENT_ID: !!process.env.GOOGLE_CLIENT_ID,
+      INFURA_KEY: !!process.env.INFURA_KEY,
+      SOLANA_RPC: !!process.env.SOLANA_RPC,
+      ALPHA_VANTAGE_KEY: !!process.env.ALPHA_VANTAGE_KEY,
+      WALLETCONNECT_PROJECT_ID: !!process.env.WALLETCONNECT_PROJECT_ID,
+    };
+    const missing = Object.keys(checks).filter(k => !checks[k]);
+    res.status(200).json({ status: missing.length ? 'warning' : 'ok', checks, missing });
     return;
   }
 

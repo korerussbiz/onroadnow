@@ -14,7 +14,6 @@
     { "src": "/receipt-invest", "dest": "/public/receipt-invest.html" },
     { "src": "/history", "dest": "/public/history.html" },
     { "src": "/xmr-miner", "dest": "/public/xmr-miner.html" },
-    { "src": "/mining-dashboard", "dest": "/public/mining-dashboard.html" },
     { "src": "/", "dest": "/public/index.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ],
