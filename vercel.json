@@ -6,14 +6,6 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.js" },
-    { "src": "/auto-trader", "dest": "/public/auto-trader.html" },
-    { "src": "/stock-trader", "dest": "/public/stock-trader.html" },
-    { "src": "/claimer", "dest": "/public/claimer.html" },
-    { "src": "/referral", "dest": "/public/referral.html" },
-    { "src": "/roundup", "dest": "/public/roundup.html" },
-    { "src": "/receipt-invest", "dest": "/public/receipt-invest.html" },
-    { "src": "/history", "dest": "/public/history.html" },
-    { "src": "/xmr-miner", "dest": "/public/xmr-miner.html" },
     { "src": "/", "dest": "/public/index.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ],
