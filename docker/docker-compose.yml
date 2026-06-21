@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  gateway:
+    build: ../services/gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - AUTH_SERVICE_URL=http://auth:8001
+      - TRADING_SERVICE_URL=http://trading:8002
+      - MINING_SERVICE_URL=http://mining:8003
+      - USER_SERVICE_URL=http://user:8004
+    depends_on:
+      - auth
+      - trading
+      - mining
+      - user
+
+  auth:
+    build: ../services/auth
+    ports:
+      - "8001:8001"
+
+  trading:
+    build: ../services/trading
+    ports:
+      - "8002:8002"
+
+  mining:
+    build: ../services/mining
+    ports:
+      - "8003:8003"
+    volumes:
+      - ~/start_miner.sh:/start_miner.sh:ro
+
+  user:
+    build: ../services/user
+    ports:
+      - "8004:8004"
