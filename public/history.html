@@ -8,7 +8,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Inter', sans-serif;
+        font-family: "Inter", sans-serif;
         background: #0f172a;
         color: #e2e8f0;
         padding: 1.5rem;
@@ -64,19 +64,23 @@
     </div>
     <script>
       async function loadHistory() {
-        const res = await fetch('/api/trade/history', { credentials: 'include' });
+        const res = await fetch("/api/trade/history", {
+          credentials: "include",
+        });
         const data = await res.json();
         if (data.length === 0)
-          return (document.getElementById('historyTable').innerHTML = '<p>No trades yet.</p>');
-        let html = '<table><tr><th>Symbol</th><th>Amount</th><th>Type</th><th>Profit</th></tr>';
+          return (document.getElementById("historyTable").innerHTML =
+            "<p>No trades yet.</p>");
+        let html =
+          "<table><tr><th>Symbol</th><th>Amount</th><th>Type</th><th>Profit</th></tr>";
         data
           .slice(-20)
           .reverse()
           .forEach((t) => {
             html += `<tr><td>${t.symbol}</td><td>$${t.amountUSD}</td><td>${t.tradeType}</td><td>${(t.profit || 0).toFixed(4)}</td></tr>`;
           });
-        html += '</table>';
-        document.getElementById('historyTable').innerHTML = html;
+        html += "</table>";
+        document.getElementById("historyTable").innerHTML = html;
       }
       loadHistory();
     </script>

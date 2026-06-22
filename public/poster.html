@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
     <title>OnRoadNow – Free Delivery & Marketplace</title>
     <style>
       * {
@@ -17,7 +20,7 @@
         align-items: center;
         min-height: 100vh;
         font-family:
-          'Segoe UI',
+          "Segoe UI",
           Roboto,
           system-ui,
           -apple-system,
@@ -148,24 +151,42 @@
   </head>
   <body>
     <div
-      style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem"
+      style="
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      "
     >
-      <a href="/micro-login" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-login"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🔐 Login</a
       >
-      <a href="/micro-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📊 Dashboard</a
       >
-      <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/xmr-miner"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >⛏️ XMR Miner</a
       >
-      <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/mining-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Mining Stats</a
       >
-      <a href="/micro-teller" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-teller"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🧾 Teller</a
       >
-      <a href="/micro-trade" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-trade"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Trade</a
       >
     </div>
@@ -184,20 +205,25 @@
           <div class="feature grocery-badge">
             <span class="grocery-icon">🥬🍞</span> Groceries & items
           </div>
-          <div class="feature walk-badge"><span>🚶‍♂️🚶‍♀️</span> On‑foot delivery</div>
-          <div class="feature earn-badge"><span>💰</span> Earn as deliverer</div>
+          <div class="feature walk-badge">
+            <span>🚶‍♂️🚶‍♀️</span> On‑foot delivery
+          </div>
+          <div class="feature earn-badge">
+            <span>💰</span> Earn as deliverer
+          </div>
         </div>
 
         <div class="fee-note">
-          <strong>✅ Free to join & use</strong> – only a tiny % fee when you sell or earn.<br />
+          <strong>✅ Free to join & use</strong> – only a tiny % fee when you
+          sell or earn.<br />
           📦 Post requests, sell items, deliver – you keep most of the money.
         </div>
 
         <div class="cta-button">👉 Start earning / order now 👈</div>
 
         <div class="monetization">
-          💵 <strong>How I earn:</strong> small transaction fee + ads + crypto tips (SOL) – honest
-          work, no tricks.
+          💵 <strong>How I earn:</strong> small transaction fee + ads + crypto
+          tips (SOL) – honest work, no tricks.
         </div>
         <div class="small-print">Tap anywhere – opens OnRoadNow 🇯🇲</div>
       </div>
@@ -210,12 +236,14 @@
       💰 Deposit
     </button>
     <script>
-      document.getElementById('depositBtn')?.addEventListener('click', async function () {
-        const res = await fetch('/api/deposit', { credentials: 'include' });
-        const data = await res.json();
-        if (data.url) window.open(data.url, '_blank');
-        else alert('Deposit URL not set.');
-      });
+      document
+        .getElementById("depositBtn")
+        ?.addEventListener("click", async function () {
+          const res = await fetch("/api/deposit", { credentials: "include" });
+          const data = await res.json();
+          if (data.url) window.open(data.url, "_blank");
+          else alert("Deposit URL not set.");
+        });
     </script>
   </body>
 </html>

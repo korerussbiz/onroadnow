@@ -9,7 +9,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-family: "Inter", "Segoe UI", sans-serif;
         background: #0f172a;
         color: #e2e8f0;
         padding: 1.5rem;
@@ -108,24 +108,42 @@
   </head>
   <body>
     <div
-      style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem"
+      style="
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      "
     >
-      <a href="/micro-login" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-login"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🔐 Login</a
       >
-      <a href="/micro-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📊 Dashboard</a
       >
-      <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/xmr-miner"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >⛏️ XMR Miner</a
       >
-      <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/mining-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Mining Stats</a
       >
-      <a href="/micro-teller" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-teller"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🧾 Teller</a
       >
-      <a href="/micro-trade" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-trade"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Trade</a
       >
     </div>
@@ -139,13 +157,19 @@
         <a href="/roundup">🪙 Round‑Up</a>
         <a href="/receipt-invest">🧾 Receipt</a>
         <a href="/history">📜 History</a>
-        <a href="/features" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        <a
+          href="/features"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
           >✨ All Features</a
         >
-        <a href="/store-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        <a
+          href="/store-dashboard"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
           >📊 Store</a
         >
-        <a href="/customer-portal" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        <a
+          href="/customer-portal"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
           >👤 Portal</a
         >
       </div>
@@ -165,7 +189,13 @@
         </div>
         <div class="price-display" id="priceDisplay">Price: —</div>
         <div class="flex">
-          <input type="number" id="amount" placeholder="Amount (USD)" step="0.01" style="flex: 1" />
+          <input
+            type="number"
+            id="amount"
+            placeholder="Amount (USD)"
+            step="0.01"
+            style="flex: 1"
+          />
           <button id="buyBtn" class="btn btn-buy btn-lg">🟢 Buy</button>
           <button id="sellBtn" class="btn btn-sell btn-lg">🔴 Sell</button>
         </div>
@@ -183,65 +213,65 @@
       async function apiCall(endpoint, options = {}) {
         const res = await fetch(`/api/stock/${endpoint}`, {
           ...options,
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
         });
         return res.json();
       }
       function addLog(msg) {
-        const logDiv = document.getElementById('stockLog');
-        const p = document.createElement('div');
+        const logDiv = document.getElementById("stockLog");
+        const p = document.createElement("div");
         p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
         logDiv.appendChild(p);
         logDiv.scrollTop = logDiv.scrollHeight;
       }
       async function getPrice() {
-        const symbol = document.getElementById('symbol').value.trim();
+        const symbol = document.getElementById("symbol").value.trim();
         if (!symbol) {
-          addLog('❌ Please enter a symbol');
+          addLog("❌ Please enter a symbol");
           return;
         }
         if (!/^[A-Z]{1,5}$/.test(symbol)) {
-          addLog('❌ Invalid stock symbol');
+          addLog("❌ Invalid stock symbol");
           return;
         }
         try {
-          const data = await apiCall('price?symbol=' + symbol, {
-            method: 'GET',
+          const data = await apiCall("price?symbol=" + symbol, {
+            method: "GET",
           });
           if (data.error) {
             addLog(`❌ ${data.error}`);
             return;
           }
           if (data.price === undefined || data.price === null) {
-            addLog('❌ Price data not found');
+            addLog("❌ Price data not found");
             return;
           }
-          document.getElementById('priceDisplay').innerHTML =
-            `$${(data.price || 0).toFixed(2)} (${data.currency || 'USD'})`;
+          document.getElementById("priceDisplay").innerHTML =
+            `$${(data.price || 0).toFixed(2)} (${data.currency || "USD"})`;
         } catch (e) {
           console.error(e);
-          addLog('❌ Error fetching price');
+          addLog("❌ Error fetching price");
         }
       }
       async function trade(type) {
-        const symbol = document.getElementById('symbol').value.trim();
-        const amount = parseFloat(document.getElementById('amount').value);
+        const symbol = document.getElementById("symbol").value.trim();
+        const amount = parseFloat(document.getElementById("amount").value);
         if (!symbol) {
-          addLog('❌ Enter a symbol');
+          addLog("❌ Enter a symbol");
           return;
         }
         if (!/^[A-Z]{1,5}$/.test(symbol)) {
-          addLog('❌ Invalid stock symbol');
+          addLog("❌ Invalid stock symbol");
           return;
         }
         if (isNaN(amount) || amount <= 0) {
-          addLog('❌ Enter a valid amount');
+          addLog("❌ Enter a valid amount");
           return;
         }
         try {
-          const data = await apiCall('trade', {
-            method: 'POST',
+          const data = await apiCall("trade", {
+            method: "POST",
             body: JSON.stringify({ symbol, amount }),
           });
           if (data.error) {
@@ -249,16 +279,16 @@
             return;
           }
           addLog(
-            `✅ ${type === 'buy' ? 'Bought' : 'Sold'} ${data.shares.toFixed(4)} shares at $${data.price.toFixed(2)} → profit $${data.netGain.toFixed(4)}`
+            `✅ ${type === "buy" ? "Bought" : "Sold"} ${data.shares.toFixed(4)} shares at $${data.price.toFixed(2)} → profit $${data.netGain.toFixed(4)}`,
           );
         } catch (e) {
           console.error(e);
           addLog(`❌ Trade failed`);
         }
       }
-      document.getElementById('getPriceBtn').onclick = getPrice;
-      document.getElementById('buyBtn').onclick = () => trade('buy');
-      document.getElementById('sellBtn').onclick = () => trade('sell');
+      document.getElementById("getPriceBtn").onclick = getPrice;
+      document.getElementById("buyBtn").onclick = () => trade("buy");
+      document.getElementById("sellBtn").onclick = () => trade("sell");
       // Auto-refresh price every 30s
       setInterval(getPrice, 30000);
       getPrice();

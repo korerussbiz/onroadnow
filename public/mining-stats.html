@@ -9,7 +9,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-family: "Inter", "Segoe UI", sans-serif;
         background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
         color: #e2e8f0;
         padding: 1.5rem;
@@ -119,7 +119,9 @@
         <a href="/">🏠 Home</a>
         <a href="/micro-login">🔐 Login</a>
         <a href="/micro-dashboard">📊 Dashboard</a>
-        <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        <a
+          href="/xmr-miner"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
           >⛏️ XMR Mining</a
         >
         <a href="/mining">⛏️ Mining</a>
@@ -131,7 +133,9 @@
         <p>Live data from the pool – updated every 30 seconds.</p>
         <div class="wallet-display">
           <span style="color: #94a3b8">Wallet:</span>
-          <span style="color: #facc15">9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2</span>
+          <span style="color: #facc15"
+            >9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2</span
+          >
         </div>
 
         <div id="statsContainer" class="stats-grid">
@@ -155,7 +159,9 @@
 
         <div style="margin-top: 1rem; display: flex; gap: 1rem">
           <button id="refreshBtn" class="btn">🔄 Refresh Now</button>
-          <span id="lastUpdate" style="color: #94a3b8; font-size: 0.9rem; align-self: center"
+          <span
+            id="lastUpdate"
+            style="color: #94a3b8; font-size: 0.9rem; align-self: center"
             >Last update: –</span
           >
         </div>
@@ -166,27 +172,36 @@
 
     <script>
       async function fetchStats() {
-        const logDiv = document.getElementById('log');
-        const lastUpdateSpan = document.getElementById('lastUpdate');
+        const logDiv = document.getElementById("log");
+        const lastUpdateSpan = document.getElementById("lastUpdate");
         try {
-          const res = await fetch('/api/mining/stats', { credentials: 'include' });
+          const res = await fetch("/api/mining/stats", {
+            credentials: "include",
+          });
           const data = await res.json();
           if (data.error) throw new Error(data.error);
 
-          document.getElementById('hashrate').textContent = data.hashrate.toLocaleString();
-          document.getElementById('unpaid').textContent = data.unpaidBalance.toFixed(6) + ' XMR';
-          document.getElementById('value').textContent = '$' + data.valueUSD.toFixed(2);
-          document.getElementById('shares').textContent = data.totalHashes.toLocaleString();
+          document.getElementById("hashrate").textContent =
+            data.hashrate.toLocaleString();
+          document.getElementById("unpaid").textContent =
+            data.unpaidBalance.toFixed(6) + " XMR";
+          document.getElementById("value").textContent =
+            "$" + data.valueUSD.toFixed(2);
+          document.getElementById("shares").textContent =
+            data.totalHashes.toLocaleString();
 
           const now = new Date();
-          lastUpdateSpan.textContent = 'Last update: ' + now.toLocaleTimeString();
-          logDiv.innerHTML = '✅ Stats updated at ' + now.toLocaleTimeString();
+          lastUpdateSpan.textContent =
+            "Last update: " + now.toLocaleTimeString();
+          logDiv.innerHTML = "✅ Stats updated at " + now.toLocaleTimeString();
         } catch (err) {
-          logDiv.innerHTML = '❌ ' + err.message;
+          logDiv.innerHTML = "❌ " + err.message;
         }
       }
 
-      document.getElementById('refreshBtn').addEventListener('click', fetchStats);
+      document
+        .getElementById("refreshBtn")
+        .addEventListener("click", fetchStats);
       fetchStats();
       setInterval(fetchStats, 30000);
     </script>

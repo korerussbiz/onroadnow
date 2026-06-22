@@ -9,7 +9,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Inter', sans-serif;
+        font-family: "Inter", sans-serif;
         background: #0f172a;
         color: #e2e8f0;
         padding: 1.5rem;
@@ -75,10 +75,14 @@
         <a href="/">🏠 Home</a>
         <a href="/micro-login">🔐 Login</a>
         <a href="/micro-dashboard">📊 Dashboard</a>
-        <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        <a
+          href="/xmr-miner"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
           >⛏️ XMR Miner</a
         >
-        <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        <a
+          href="/mining-dashboard"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
           >📈 Mining Stats</a
         >
         <a href="/micro-trade">📈 Trade</a>
@@ -109,7 +113,9 @@
           <div id="depositList"></div>
         </div>
         <div style="margin-top: 2rem">
-          <button id="withdrawBtn" class="btn btn-danger">Withdraw Funds</button>
+          <button id="withdrawBtn" class="btn btn-danger">
+            Withdraw Funds
+          </button>
           <button id="refreshBtn" class="btn btn-success">Refresh</button>
         </div>
         <div
@@ -132,64 +138,69 @@
       async function apiCall(endpoint, options = {}) {
         const res = await fetch(`/api/${endpoint}`, {
           ...options,
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
         });
         return res.json();
       }
       function addLog(msg) {
-        const logDiv = document.getElementById('log');
-        const p = document.createElement('div');
+        const logDiv = document.getElementById("log");
+        const p = document.createElement("div");
         p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
         logDiv.appendChild(p);
         logDiv.scrollTop = logDiv.scrollHeight;
       }
       async function loadDashboard() {
-        const data = await apiCall('micro/dashboard', { method: 'GET' });
+        const data = await apiCall("micro/dashboard", { method: "GET" });
         if (data.error) {
           addLog(`❌ ${data.error}`);
           return;
         }
-        document.getElementById('balance').textContent = `$${(data.balance || 0).toFixed(2)}`;
-        document.getElementById('invested').textContent = `$${(data.invested || 0).toFixed(2)}`;
-        document.getElementById('profit').textContent = `$${(data.profit || 0).toFixed(2)}`;
-        document.getElementById('depositsCount').textContent = (data.deposits || []).length;
-        const list = document.getElementById('depositList');
-        list.innerHTML = '';
+        document.getElementById("balance").textContent =
+          `$${(data.balance || 0).toFixed(2)}`;
+        document.getElementById("invested").textContent =
+          `$${(data.invested || 0).toFixed(2)}`;
+        document.getElementById("profit").textContent =
+          `$${(data.profit || 0).toFixed(2)}`;
+        document.getElementById("depositsCount").textContent = (
+          data.deposits || []
+        ).length;
+        const list = document.getElementById("depositList");
+        list.innerHTML = "";
         (data.deposits || [])
           .slice()
           .reverse()
           .slice(0, 10)
           .forEach((d) => {
-            const div = document.createElement('div');
-            div.className = 'deposit-item';
+            const div = document.createElement("div");
+            div.className = "deposit-item";
             div.innerHTML = `
         <strong>#${d.id}</strong> – $${d.amount.toFixed(2)}
-        <span style="float:right;color:${d.status === 'invested' ? '#10b981' : '#f59e0b'}">
-          ${d.status === 'invested' ? '✅ Invested' : '⏳ Pending'}
+        <span style="float:right;color:${d.status === "invested" ? "#10b981" : "#f59e0b"}">
+          ${d.status === "invested" ? "✅ Invested" : "⏳ Pending"}
         </span>
         <br><small>${new Date(d.timestamp).toLocaleString()}</small>
       `;
             list.appendChild(div);
           });
       }
-      document.getElementById('withdrawBtn').onclick = async () => {
-        const amount = prompt('Enter amount to withdraw:');
+      document.getElementById("withdrawBtn").onclick = async () => {
+        const amount = prompt("Enter amount to withdraw:");
         if (!amount) return;
-        const address = prompt('Enter wallet address or PayPal email:');
+        const address = prompt("Enter wallet address or PayPal email:");
         if (!address) return;
-        const data = await apiCall('micro/withdraw', {
-          method: 'POST',
+        const data = await apiCall("micro/withdraw", {
+          method: "POST",
           body: JSON.stringify({ amount: parseFloat(amount), address }),
         });
         if (data.error) {
           alert(data.error);
         } else {
-          alert('Withdrawal request submitted.');
+          alert("Withdrawal request submitted.");
         }
         loadDashboard();
       };
-      document.getElementById('refreshBtn').onclick = loadDashboard;
+      document.getElementById("refreshBtn").onclick = loadDashboard;
       loadDashboard();
     </script>
   </body>

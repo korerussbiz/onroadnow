@@ -14,62 +14,85 @@
   </head>
   <body>
     <div
-      style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem"
+      style="
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      "
     >
-      <a href="/micro-login" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-login"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🔐 Login</a
       >
-      <a href="/micro-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📊 Dashboard</a
       >
-      <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/xmr-miner"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >⛏️ XMR Miner</a
       >
-      <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/mining-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Mining Stats</a
       >
-      <a href="/micro-teller" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-teller"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🧾 Teller</a
       >
-      <a href="/micro-trade" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-trade"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Trade</a
       >
     </div>
     <h1>OnRoadNow Terms of Service</h1>
     <p><strong>Last Updated:</strong> June 2025</p>
     <p>
-      <strong>1. Platform Role</strong><br />OnRoadNow is a technology platform connecting
-      independent users. We do not provide delivery, shopping, or sales services. All users are
-      independent contractors or individuals.
+      <strong>1. Platform Role</strong><br />OnRoadNow is a technology platform
+      connecting independent users. We do not provide delivery, shopping, or
+      sales services. All users are independent contractors or individuals.
     </p>
     <p>
-      <strong>2. No Responsibility for User Conduct</strong><br />OnRoadNow is not responsible for
-      theft, fraud, illegal items, disputes, or any loss arising from use of the platform. Users act
-      at their own risk.
+      <strong>2. No Responsibility for User Conduct</strong><br />OnRoadNow is
+      not responsible for theft, fraud, illegal items, disputes, or any loss
+      arising from use of the platform. Users act at their own risk.
     </p>
     <p>
-      <strong>3. User Obligations</strong><br />You agree not to post illegal/stolen items, harass
-      others, or violate any laws. You must honor your transaction commitments.
+      <strong>3. User Obligations</strong><br />You agree not to post
+      illegal/stolen items, harass others, or violate any laws. You must honor
+      your transaction commitments.
     </p>
     <p>
-      <strong>4. Limitation of Liability</strong><br />To the fullest extent permitted by law,
-      OnRoadNow shall not be liable for any indirect or consequential damages.
+      <strong>4. Limitation of Liability</strong><br />To the fullest extent
+      permitted by law, OnRoadNow shall not be liable for any indirect or
+      consequential damages.
     </p>
     <p>
-      <strong>5. Indemnification</strong><br />You agree to indemnify OnRoadNow against any claims
-      arising from your misuse of the platform.
+      <strong>5. Indemnification</strong><br />You agree to indemnify OnRoadNow
+      against any claims arising from your misuse of the platform.
     </p>
     <p>
-      <strong>6. Right to Remove or Suspend</strong><br />We may suspend or terminate any user for
-      violation of these terms.
+      <strong>6. Right to Remove or Suspend</strong><br />We may suspend or
+      terminate any user for violation of these terms.
     </p>
     <p><strong>7. Governing Law</strong><br />Jamaica.</p>
     <p>
-      <strong>8. No Legal Responsibility for User‑to‑User Transactions</strong><br />All
-      transactions are solely between users. OnRoadNow is not a party and does not warrant any
-      items.
+      <strong>8. No Legal Responsibility for User‑to‑User Transactions</strong
+      ><br />All transactions are solely between users. OnRoadNow is not a party
+      and does not warrant any items.
     </p>
-    <p>By using OnRoadNow, you acknowledge that you have read and agreed to these terms.</p>
+    <p>
+      By using OnRoadNow, you acknowledge that you have read and agreed to these
+      terms.
+    </p>
     <button
       id="depositBtn"
       class="btn"
@@ -78,12 +101,14 @@
       💰 Deposit
     </button>
     <script>
-      document.getElementById('depositBtn')?.addEventListener('click', async function () {
-        const res = await fetch('/api/deposit', { credentials: 'include' });
-        const data = await res.json();
-        if (data.url) window.open(data.url, '_blank');
-        else alert('Deposit URL not set.');
-      });
+      document
+        .getElementById("depositBtn")
+        ?.addEventListener("click", async function () {
+          const res = await fetch("/api/deposit", { credentials: "include" });
+          const data = await res.json();
+          if (data.url) window.open(data.url, "_blank");
+          else alert("Deposit URL not set.");
+        });
     </script>
   </body>
 </html>

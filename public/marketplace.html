@@ -15,7 +15,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Inter', sans-serif;
+        font-family: "Inter", sans-serif;
         background: #f8fafc;
         padding: 2rem;
       }
@@ -114,24 +114,42 @@
   </head>
   <body>
     <div
-      style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem"
+      style="
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      "
     >
-      <a href="/micro-login" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-login"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🔐 Login</a
       >
-      <a href="/micro-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📊 Dashboard</a
       >
-      <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/xmr-miner"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >⛏️ XMR Miner</a
       >
-      <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/mining-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Mining Stats</a
       >
-      <a href="/micro-teller" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-teller"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🧾 Teller</a
       >
-      <a href="/micro-trade" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-trade"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Trade</a
       >
     </div>
@@ -142,7 +160,9 @@
       </div>
       <div class="flex">
         <h1>🛒 Marketplace</h1>
-        <a href="/" class="btn btn-outline">➕ Post a new item (in Member Dashboard)</a>
+        <a href="/" class="btn btn-outline"
+          >➕ Post a new item (in Member Dashboard)</a
+        >
       </div>
       <div id="listingsContainer" class="card">
         <div style="text-align: center; padding: 2rem">Loading listings...</div>
@@ -152,16 +172,16 @@
       async function apiCall(url, options = {}) {
         const res = await fetch(url, {
           ...options,
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json', ...options.headers },
+          credentials: "include",
+          headers: { "Content-Type": "application/json", ...options.headers },
         });
         return res.json();
       }
 
       async function loadListings() {
-        const container = document.getElementById('listingsContainer');
+        const container = document.getElementById("listingsContainer");
         try {
-          const listings = await apiCall('/api/listings');
+          const listings = await apiCall("/api/listings");
           if (!listings || listings.length === 0) {
             container.innerHTML = `
           <div class="empty-state">
@@ -193,22 +213,24 @@
           container.innerHTML = html;
 
           // Attach buy event listeners
-          document.querySelectorAll('.buy-btn').forEach((btn) => {
-            btn.addEventListener('click', async (e) => {
+          document.querySelectorAll(".buy-btn").forEach((btn) => {
+            btn.addEventListener("click", async (e) => {
               const listingId = btn.dataset.id;
-              const user = await apiCall('/api/me');
+              const user = await apiCall("/api/me");
               if (!user.id) {
-                alert('Please login to buy');
-                window.location.href = '/';
+                alert("Please login to buy");
+                window.location.href = "/";
                 return;
               }
-              const res = await apiCall('/api/purchase', {
-                method: 'POST',
+              const res = await apiCall("/api/purchase", {
+                method: "POST",
                 body: JSON.stringify({ listingId }),
               });
-              if (res.error) alert('Error: ' + res.error);
+              if (res.error) alert("Error: " + res.error);
               else {
-                alert('Purchase recorded! You will be contacted by the seller.');
+                alert(
+                  "Purchase recorded! You will be contacted by the seller.",
+                );
                 loadListings(); // refresh to remove sold item
               }
             });
@@ -219,8 +241,11 @@
       }
 
       function escapeHtml(str) {
-        if (!str) return '';
-        return str.replace(/[&<>]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[m]);
+        if (!str) return "";
+        return str.replace(
+          /[&<>]/g,
+          (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[m],
+        );
       }
 
       loadListings();
@@ -233,12 +258,14 @@
       💰 Deposit
     </button>
     <script>
-      document.getElementById('depositBtn')?.addEventListener('click', async function () {
-        const res = await fetch('/api/deposit', { credentials: 'include' });
-        const data = await res.json();
-        if (data.url) window.open(data.url, '_blank');
-        else alert('Deposit URL not set.');
-      });
+      document
+        .getElementById("depositBtn")
+        ?.addEventListener("click", async function () {
+          const res = await fetch("/api/deposit", { credentials: "include" });
+          const data = await res.json();
+          if (data.url) window.open(data.url, "_blank");
+          else alert("Deposit URL not set.");
+        });
     </script>
   </body>
 </html>
