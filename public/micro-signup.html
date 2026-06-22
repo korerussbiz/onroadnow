@@ -1,71 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up</title>
-  <style>
-    *{box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
-    .container{max-width:500px;margin:auto}
-    .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}
-    input{width:100%;padding:0.8rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;margin:0.5rem 0;font-size:1.2rem}
-    .btn{background:#10b981;border:none;padding:0.8rem 1.8rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;width:100%;font-size:1.2rem}
-    .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
-    .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
-    .error{color:#ef4444;margin:0.5rem 0}
-  </style>
-</head>
-<body>
-<div class="container">
-  <div class="nav">
-    <a href="/">🏠 Home</a>
-    <a href="/micro-login">🔐 Login</a>
-    <a href="/micro-dashboard">📊 Dashboard</a>
-    <a href="/xmr-miner" style="color:#60a5fa;text-decoration:none;font-weight:600;">⛏️ XMR Miner</a>
-    <a href="/mining-dashboard" style="color:#60a5fa;text-decoration:none;font-weight:600;">📈 Mining Stats</a>
-  </div>
-  <div class="card">
-    <h1>✏️ Create Account</h1>
-    <div id="errorMsg" class="error"></div>
-    <input type="text" id="signupUsername" placeholder="Username">
-    <input type="email" id="signupEmail" placeholder="Email">
-    <input type="password" id="signupPassword" placeholder="Password">
-    <button id="signupBtn" class="btn">Sign Up</button>
-    <div id="log" style="background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:150px;overflow-y:auto;font-family:monospace;margin-top:1rem;">Ready.</div>
-  </div>
-</div>
-<script>
-  async function apiCall(endpoint, options = {}) {
-    const res = await fetch(`/api/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
-    return res.json();
-  }
-  function addLog(msg, isError = false) {
-    const logDiv = document.getElementById('log');
-    const p = document.createElement('div');
-    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-    if (isError) p.style.color = '#ef4444';
-    logDiv.appendChild(p);
-    logDiv.scrollTop = logDiv.scrollHeight;
-  }
-  document.getElementById('signupBtn').onclick = async () => {
-    const username = document.getElementById('signupUsername').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value.trim();
-    document.getElementById('errorMsg').textContent = '';
-    if (!username || !email || !password) { 
-      document.getElementById('errorMsg').textContent = '❌ All fields are required.';
-      return;
-    }
-    const data = await apiCall('micro/signup', { method: 'POST', body: JSON.stringify({ username, email, password }) });
-    if (data.error) {
-      document.getElementById('errorMsg').textContent = '❌ ' + data.error;
-      addLog('❌ ' + data.error, true);
-      return;
-    }
-    addLog(`✅ Account created for ${username}. Redirecting to dashboard...`);
-    // Redirect to dashboard after a moment
-    setTimeout(() => { window.location.href = '/micro-dashboard'; }, 1500);
-  };
-</script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+      }
+      .container {
+        max-width: 500px;
+        margin: auto;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+      input {
+        width: 100%;
+        padding: 0.8rem;
+        border-radius: 0.5rem;
+        border: 1px solid #334155;
+        background: #0f172a;
+        color: #fff;
+        margin: 0.5rem 0;
+        font-size: 1.2rem;
+      }
+      .btn {
+        background: #10b981;
+        border: none;
+        padding: 0.8rem 1.8rem;
+        border-radius: 2rem;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1.2rem;
+      }
+      .nav {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      }
+      .nav a {
+        color: #60a5fa;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .error {
+        color: #ef4444;
+        margin: 0.5rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <a href="/">🏠 Home</a>
+        <a href="/micro-login">🔐 Login</a>
+        <a href="/micro-dashboard">📊 Dashboard</a>
+        <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+          >⛏️ XMR Miner</a
+        >
+        <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+          >📈 Mining Stats</a
+        >
+      </div>
+      <div class="card">
+        <h1>✏️ Create Account</h1>
+        <div id="errorMsg" class="error"></div>
+        <input type="text" id="signupUsername" placeholder="Username" />
+        <input type="email" id="signupEmail" placeholder="Email" />
+        <input type="password" id="signupPassword" placeholder="Password" />
+        <button id="signupBtn" class="btn">Sign Up</button>
+        <div
+          id="log"
+          style="
+            background: #0f172a;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            margin-top: 1rem;
+          "
+        >
+          Ready.
+        </div>
+      </div>
+    </div>
+    <script>
+      async function apiCall(endpoint, options = {}) {
+        const res = await fetch(`/api/${endpoint}`, {
+          ...options,
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        return res.json();
+      }
+      function addLog(msg, isError = false) {
+        const logDiv = document.getElementById('log');
+        const p = document.createElement('div');
+        p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        if (isError) p.style.color = '#ef4444';
+        logDiv.appendChild(p);
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+      document.getElementById('signupBtn').onclick = async () => {
+        const username = document.getElementById('signupUsername').value.trim();
+        const email = document.getElementById('signupEmail').value.trim();
+        const password = document.getElementById('signupPassword').value.trim();
+        document.getElementById('errorMsg').textContent = '';
+        if (!username || !email || !password) {
+          document.getElementById('errorMsg').textContent = '❌ All fields are required.';
+          return;
+        }
+        const data = await apiCall('micro/signup', {
+          method: 'POST',
+          body: JSON.stringify({ username, email, password }),
+        });
+        if (data.error) {
+          document.getElementById('errorMsg').textContent = '❌ ' + data.error;
+          addLog('❌ ' + data.error, true);
+          return;
+        }
+        addLog(`✅ Account created for ${username}. Redirecting to dashboard...`);
+        // Redirect to dashboard after a moment
+        setTimeout(() => {
+          window.location.href = '/micro-dashboard';
+        }, 1500);
+      };
+    </script>
+  </body>
 </html>

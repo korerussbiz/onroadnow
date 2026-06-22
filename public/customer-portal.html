@@ -1,69 +1,129 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Customer Portal</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1.5rem; font-size: 1.2rem; }
-    .container { max-width: 900px; margin: auto; }
-    .nav { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem; }
-    .nav a { color: #60a5fa; text-decoration: none; font-weight: 600; }
-    .card { background: #1e293b; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; }
-    .stat { font-size: 2rem; color: #facc15; }
-    .deposit-item { background: #0f172a; padding: 1rem; border-radius: 0.5rem; margin: 0.5rem 0; }
-  </style>
-</head>
-<body>
-  <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem;">
-    <a href="/micro-login" style="color:#60a5fa;text-decoration:none;font-weight:600;">🔐 Login</a>
-    <a href="/micro-dashboard" style="color:#60a5fa;text-decoration:none;font-weight:600;">📊 Dashboard</a>
-    <a href="/xmr-miner" style="color:#60a5fa;text-decoration:none;font-weight:600;">⛏️ XMR Miner</a>
-    <a href="/mining-dashboard" style="color:#60a5fa;text-decoration:none;font-weight:600;">📈 Mining Stats</a>
-    <a href="/micro-teller" style="color:#60a5fa;text-decoration:none;font-weight:600;">🧾 Teller</a>
-    <a href="/micro-trade" style="color:#60a5fa;text-decoration:none;font-weight:600;">📈 Trade</a>
-  </div>
-<div class="container">
-  <div class="nav">
-    <a href="/">🏠 Home</a>
-    <a href="/cash-register">🧾 Cash Register</a>
-    <a href="/store-dashboard">📊 Store Dashboard</a>
-    <a href="/customer-portal">👤 Customer Portal</a>
-    <a href="/features">✨ All Features</a>
-  </div>
-  <div class="card">
-    <h1>👤 Customer Portal</h1>
-    <p>Your deposits and investments</p>
-    <div class="stat" id="balance">Balance: $0.00</div>
-    <div class="stat" id="invested">Invested: $0.00</div>
-    <div class="stat" id="profit">Profit: $0.00</div>
-    <div id="depositHistory"><h3>Your Deposits</h3><div id="depositList"></div></div>
-  </div>
-</div>
-<script>
-  async function fetchCustomerData() {
-    const res = await fetch('/api/customer/dashboard', { credentials: 'include' });
-    const data = await res.json();
-    if (data.error) { alert(data.error); return; }
-    document.getElementById('balance').textContent = `Balance: $${(data.customer.balance || 0).toFixed(2)}`;
-    document.getElementById('invested').textContent = `Invested: $${(data.totalInvested || 0).toFixed(2)}`;
-    document.getElementById('profit').textContent = `Profit: $${(data.tradingProfit || 0).toFixed(2)}`;
-    const list = document.getElementById('depositList');
-    list.innerHTML = '';
-    (data.deposits || []).slice().reverse().forEach(d => {
-      const div = document.createElement('div');
-      div.className = 'deposit-item';
-      div.innerHTML = `
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Portal</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+      }
+      .container {
+        max-width: 900px;
+        margin: auto;
+      }
+      .nav {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      }
+      .nav a {
+        color: #60a5fa;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+      .stat {
+        font-size: 2rem;
+        color: #facc15;
+      }
+      .deposit-item {
+        background: #0f172a;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin: 0.5rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem"
+    >
+      <a href="/micro-login" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >🔐 Login</a
+      >
+      <a href="/micro-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📊 Dashboard</a
+      >
+      <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >⛏️ XMR Miner</a
+      >
+      <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📈 Mining Stats</a
+      >
+      <a href="/micro-teller" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >🧾 Teller</a
+      >
+      <a href="/micro-trade" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📈 Trade</a
+      >
+    </div>
+    <div class="container">
+      <div class="nav">
+        <a href="/">🏠 Home</a>
+        <a href="/cash-register">🧾 Cash Register</a>
+        <a href="/store-dashboard">📊 Store Dashboard</a>
+        <a href="/customer-portal">👤 Customer Portal</a>
+        <a href="/features">✨ All Features</a>
+      </div>
+      <div class="card">
+        <h1>👤 Customer Portal</h1>
+        <p>Your deposits and investments</p>
+        <div class="stat" id="balance">Balance: $0.00</div>
+        <div class="stat" id="invested">Invested: $0.00</div>
+        <div class="stat" id="profit">Profit: $0.00</div>
+        <div id="depositHistory">
+          <h3>Your Deposits</h3>
+          <div id="depositList"></div>
+        </div>
+      </div>
+    </div>
+    <script>
+      async function fetchCustomerData() {
+        const res = await fetch('/api/customer/dashboard', { credentials: 'include' });
+        const data = await res.json();
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+        document.getElementById('balance').textContent =
+          `Balance: $${(data.customer.balance || 0).toFixed(2)}`;
+        document.getElementById('invested').textContent =
+          `Invested: $${(data.totalInvested || 0).toFixed(2)}`;
+        document.getElementById('profit').textContent =
+          `Profit: $${(data.tradingProfit || 0).toFixed(2)}`;
+        const list = document.getElementById('depositList');
+        list.innerHTML = '';
+        (data.deposits || [])
+          .slice()
+          .reverse()
+          .forEach((d) => {
+            const div = document.createElement('div');
+            div.className = 'deposit-item';
+            div.innerHTML = `
         <strong>Deposit #${d.id}</strong>
         <span style="float:right;">$${d.amount.toFixed(2)} → round-up $${d.roundup.toFixed(2)}</span>
         <br><span style="color:${d.invested ? '#10b981' : '#f59e0b'}">${d.invested ? '✅ Invested $' + d.investedAmount.toFixed(2) : '⏳ Pending'}</span>
         <span style="float:right;">${new Date(d.timestamp).toLocaleString()}</span>
       `;
-      list.appendChild(div);
-    });
-  }
-  fetchCustomerData();
-</script>
-</body>
+            list.appendChild(div);
+          });
+      }
+      fetchCustomerData();
+    </script>
+  </body>
 </html>

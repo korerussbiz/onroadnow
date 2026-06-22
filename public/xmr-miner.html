@@ -1,84 +1,132 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <title>XMR Mining – Local Bridge</title>
-  <style>
-    body{background:#0f172a;color:#e2e8f0;font-family:monospace;padding:2rem}
-    .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
-    .stat{background:#1e293b;padding:1rem;border-radius:0.5rem;text-align:center}
-    .value{font-size:2.5rem;color:#facc15}
-    button{background:#10b981;border:none;padding:0.8rem 2rem;border-radius:2rem;color:#fff;font-size:1.2rem;cursor:pointer;margin:0.3rem}
-    .danger{background:#ef4444}
-    .log{background:#1e293b;padding:1rem;border-radius:0.5rem;margin-top:1rem;max-height:200px;overflow-y:auto}
-  </style>
-</head>
-<body>
-  <h1>⛏️ XMR Mining (Local Bridge)</h1>
-  <p>Wallet: 9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2</p>
-  <p><small>Status: <span id="bridgeStatus">Checking...</span></small></p>
-  <div>
-    <button id="startBtn">▶ Start Miner</button>
-    <button id="stopBtn" class="danger">⏹ Stop</button>
-    <button id="statusBtn">🔄 Check Status</button>
-  </div>
-  <div class="stats">
-    <div class="stat"><div class="value" id="hashrate">0</div><div>Hashrate (H/s)</div></div>
-    <div class="stat"><div class="value" id="balance">0.000000</div><div>Unpaid Balance</div></div>
-    <div class="stat"><div class="value" id="value">$0.00</div><div>Value (USD)</div></div>
-  </div>
-  <div id="log" class="log">Ready.</div>
-
-  <script>
-    const BASE = 'http://localhost:3001'; // local bridge
-
-    function log(msg) {
-      const el = document.getElementById('log');
-      el.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
-      el.scrollTop = el.scrollHeight;
-    }
-
-    async function api(method, endpoint, body) {
-      try {
-        const res = await fetch(`${BASE}${endpoint}`, {
-          method,
-          headers: { 'Content-Type': 'application/json' },
-          body: body ? JSON.stringify(body) : undefined
-        });
-        return await res.json();
-      } catch (e) {
-        document.getElementById('bridgeStatus').textContent = '❌ Offline';
-        log('❌ Cannot reach bridge. Is it running?');
-        throw e;
+  <head>
+    <title>XMR Mining – Local Bridge</title>
+    <style>
+      body {
+        background: #0f172a;
+        color: #e2e8f0;
+        font-family: monospace;
+        padding: 2rem;
       }
-    }
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+      }
+      .stat {
+        background: #1e293b;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+      }
+      .value {
+        font-size: 2.5rem;
+        color: #facc15;
+      }
+      button {
+        background: #10b981;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 2rem;
+        color: #fff;
+        font-size: 1.2rem;
+        cursor: pointer;
+        margin: 0.3rem;
+      }
+      .danger {
+        background: #ef4444;
+      }
+      .log {
+        background: #1e293b;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-top: 1rem;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>⛏️ XMR Mining (Local Bridge)</h1>
+    <p>Wallet: 9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2</p>
+    <p>
+      <small>Status: <span id="bridgeStatus">Checking...</span></small>
+    </p>
+    <div>
+      <button id="startBtn">▶ Start Miner</button>
+      <button id="stopBtn" class="danger">⏹ Stop</button>
+      <button id="statusBtn">🔄 Check Status</button>
+    </div>
+    <div class="stats">
+      <div class="stat">
+        <div class="value" id="hashrate">0</div>
+        <div>Hashrate (H/s)</div>
+      </div>
+      <div class="stat">
+        <div class="value" id="balance">0.000000</div>
+        <div>Unpaid Balance</div>
+      </div>
+      <div class="stat">
+        <div class="value" id="value">$0.00</div>
+        <div>Value (USD)</div>
+      </div>
+    </div>
+    <div id="log" class="log">Ready.</div>
 
-    async function fetchStats() {
-      try {
-        const data = await api('GET', '/api/mining/stats');
-        document.getElementById('hashrate').textContent = data.hashrate.toLocaleString();
-        document.getElementById('balance').textContent = data.balance.toFixed(6);
-        document.getElementById('value').textContent = '$' + data.valueUSD.toFixed(2);
-        document.getElementById('bridgeStatus').textContent = '✅ Online';
-      } catch (e) { /* ignore */ }
-    }
+    <script>
+      const BASE = 'http://localhost:3001'; // local bridge
 
-    document.getElementById('startBtn').onclick = async () => {
-      const data = await api('POST', '/api/miner/start');
-      log('✅ ' + (data.status || 'Started'));
-    };
+      function log(msg) {
+        const el = document.getElementById('log');
+        el.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+        el.scrollTop = el.scrollHeight;
+      }
 
-    document.getElementById('stopBtn').onclick = async () => {
-      const data = await api('POST', '/api/miner/stop');
-      log('⏹️ ' + (data.status || 'Stopped'));
-    };
+      async function api(method, endpoint, body) {
+        try {
+          const res = await fetch(`${BASE}${endpoint}`, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: body ? JSON.stringify(body) : undefined,
+          });
+          return await res.json();
+        } catch (e) {
+          document.getElementById('bridgeStatus').textContent = '❌ Offline';
+          log('❌ Cannot reach bridge. Is it running?');
+          throw e;
+        }
+      }
 
-    document.getElementById('statusBtn').onclick = async () => {
-      const data = await api('GET', '/api/miner/status');
-      log('🔄 ' + (data.running ? 'Miner is running' : 'Miner is stopped'));
-    };
+      async function fetchStats() {
+        try {
+          const data = await api('GET', '/api/mining/stats');
+          document.getElementById('hashrate').textContent = data.hashrate.toLocaleString();
+          document.getElementById('balance').textContent = data.balance.toFixed(6);
+          document.getElementById('value').textContent = '$' + data.valueUSD.toFixed(2);
+          document.getElementById('bridgeStatus').textContent = '✅ Online';
+        } catch (e) {
+          /* ignore */
+        }
+      }
 
-    fetchStats();
-    setInterval(fetchStats, 10000);
-  </script>
-</body>
+      document.getElementById('startBtn').onclick = async () => {
+        const data = await api('POST', '/api/miner/start');
+        log('✅ ' + (data.status || 'Started'));
+      };
+
+      document.getElementById('stopBtn').onclick = async () => {
+        const data = await api('POST', '/api/miner/stop');
+        log('⏹️ ' + (data.status || 'Stopped'));
+      };
+
+      document.getElementById('statusBtn').onclick = async () => {
+        const data = await api('GET', '/api/miner/status');
+        log('🔄 ' + (data.running ? 'Miner is running' : 'Miner is stopped'));
+      };
+
+      fetchStats();
+      setInterval(fetchStats, 10000);
+    </script>
+  </body>
 </html>

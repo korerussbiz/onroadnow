@@ -36,9 +36,25 @@ async function getStockPrice(symbol) {
 
 async function getCryptoPrice(symbol) {
   const sources = [
-    { name: 'CoinGecko', url: () => `https://api.coingecko.com/api/v3/simple/price?ids=${symbol.toLowerCase()}&vs_currencies=usd`, parse: (data) => data[symbol.toLowerCase()]?.usd },
-    { name: 'Binance', url: () => `https://api.binance.com/api/v3/ticker/price?symbol=${symbol.toUpperCase()}USDT`, parse: (data) => parseFloat(data.price) },
-    { name: 'Kraken', url: () => `https://api.kraken.com/0/public/Ticker?pair=${symbol.toUpperCase()}USD`, parse: (data) => { const pair = Object.keys(data.result)[0]; return parseFloat(data.result[pair].c[0]); } }
+    {
+      name: 'CoinGecko',
+      url: () =>
+        `https://api.coingecko.com/api/v3/simple/price?ids=${symbol.toLowerCase()}&vs_currencies=usd`,
+      parse: (data) => data[symbol.toLowerCase()]?.usd,
+    },
+    {
+      name: 'Binance',
+      url: () => `https://api.binance.com/api/v3/ticker/price?symbol=${symbol.toUpperCase()}USDT`,
+      parse: (data) => parseFloat(data.price),
+    },
+    {
+      name: 'Kraken',
+      url: () => `https://api.kraken.com/0/public/Ticker?pair=${symbol.toUpperCase()}USD`,
+      parse: (data) => {
+        const pair = Object.keys(data.result)[0];
+        return parseFloat(data.result[pair].c[0]);
+      },
+    },
   ];
   for (const source of sources) {
     try {
@@ -60,7 +76,7 @@ module.exports = async (req, res) => {
     try {
       const decoded = jwt.verify(cookies.token, JWT_SECRET);
       userId = decoded.userId;
-    } catch(e) {}
+    } catch (e) {}
   }
 
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -73,20 +89,27 @@ module.exports = async (req, res) => {
   if (url === '/api/signup' && method === 'POST') {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Missing fields' });
-    if (users.find(u => u.username === username)) return res.status(400).json({ error: 'User exists' });
+    if (users.find((u) => u.username === username))
+      return res.status(400).json({ error: 'User exists' });
     const userId = crypto.randomUUID();
     users.push({ id: userId, username, password });
     const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
-    res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; Max-Age=604800; Secure; SameSite=None`);
+    res.setHeader(
+      'Set-Cookie',
+      `token=${token}; HttpOnly; Path=/; Max-Age=604800; Secure; SameSite=None`
+    );
     return res.status(201).json({ message: 'Signed up', userId });
   }
 
   if (url === '/api/login' && method === 'POST') {
     const { username, password } = req.body;
-    const user = users.find(u => u.username === username && u.password === password);
+    const user = users.find((u) => u.username === username && u.password === password);
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '7d' });
-    res.setHeader('Set-Cookie', `token=${token}; HttpOnly; Path=/; Max-Age=604800; Secure; SameSite=None`);
+    res.setHeader(
+      'Set-Cookie',
+      `token=${token}; HttpOnly; Path=/; Max-Age=604800; Secure; SameSite=None`
+    );
     return res.status(200).json({ message: 'Logged in', userId: user.id });
   }
 
@@ -97,7 +120,7 @@ module.exports = async (req, res) => {
 
   if (url === '/api/me' && method === 'GET') {
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-    const user = users.find(u => u.id === userId);
+    const user = users.find((u) => u.id === userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
     return res.status(200).json({ id: user.id, username: user.username });
   }
@@ -114,7 +137,7 @@ module.exports = async (req, res) => {
         price = await getCryptoPrice(symbol);
       }
       return res.status(200).json({ symbol, price });
-    } catch(e) {
+    } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
@@ -144,9 +167,19 @@ module.exports = async (req, res) => {
       const state = getUserState(userId);
       state.profit += userGain;
       state.fees += fee;
-      trades.push({ userId, symbol, price, amount, units, tradeType, profit, fee, timestamp: Date.now() });
+      trades.push({
+        userId,
+        symbol,
+        price,
+        amount,
+        units,
+        tradeType,
+        profit,
+        fee,
+        timestamp: Date.now(),
+      });
       return res.status(200).json({ price, units, profit, fee, userGain });
-    } catch(e) {
+    } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
@@ -154,7 +187,7 @@ module.exports = async (req, res) => {
   // ---------- HISTORY ----------
   if (url === '/api/trade/history' && method === 'GET') {
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
-    const userTrades = trades.filter(t => t.userId === userId);
+    const userTrades = trades.filter((t) => t.userId === userId);
     return res.status(200).json(userTrades);
   }
 

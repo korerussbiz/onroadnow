@@ -1,70 +1,144 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Store Dashboard</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; padding: 1.5rem; font-size: 1.2rem; }
-    .container { max-width: 1000px; margin: auto; }
-    .nav { display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem; }
-    .nav a { color: #60a5fa; text-decoration: none; font-weight: 600; }
-    .card { background: #1e293b; border-radius: 1.5rem; padding: 2rem; margin-bottom: 2rem; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
-    .stat { font-size: 2rem; color: #facc15; }
-  </style>
-</head>
-<body>
-  <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem;">
-    <a href="/micro-login" style="color:#60a5fa;text-decoration:none;font-weight:600;">🔐 Login</a>
-    <a href="/micro-dashboard" style="color:#60a5fa;text-decoration:none;font-weight:600;">📊 Dashboard</a>
-    <a href="/xmr-miner" style="color:#60a5fa;text-decoration:none;font-weight:600;">⛏️ XMR Miner</a>
-    <a href="/mining-dashboard" style="color:#60a5fa;text-decoration:none;font-weight:600;">📈 Mining Stats</a>
-    <a href="/micro-teller" style="color:#60a5fa;text-decoration:none;font-weight:600;">🧾 Teller</a>
-    <a href="/micro-trade" style="color:#60a5fa;text-decoration:none;font-weight:600;">📈 Trade</a>
-  </div>
-<div class="container">
-  <div class="nav">
-    <a href="/">🏠 Home</a>
-    <a href="/cash-register">🧾 Cash Register</a>
-    <a href="/store-dashboard">📊 Store Dashboard</a>
-    <a href="/customer-portal">👤 Customer Portal</a>
-    <a href="/features">✨ All Features</a>
-  </div>
-  <div class="card">
-    <h1>📊 Store Dashboard</h1>
-    <div class="grid">
-      <div><h3>Today</h3>
-        <div class="stat" id="todayCount">0</div>
-        <div>Deposits</div>
-        <div class="stat" id="todayAmount">$0.00</div>
-        <div>Total Amount</div>
-        <div class="stat" id="todayRoundup">$0.00</div>
-        <div>Total Round-up</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Store Dashboard</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Inter', sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+      }
+      .container {
+        max-width: 1000px;
+        margin: auto;
+      }
+      .nav {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      }
+      .nav a {
+        color: #60a5fa;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+      .stat {
+        font-size: 2rem;
+        color: #facc15;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem"
+    >
+      <a href="/micro-login" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >🔐 Login</a
+      >
+      <a href="/micro-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📊 Dashboard</a
+      >
+      <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >⛏️ XMR Miner</a
+      >
+      <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📈 Mining Stats</a
+      >
+      <a href="/micro-teller" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >🧾 Teller</a
+      >
+      <a href="/micro-trade" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📈 Trade</a
+      >
+    </div>
+    <div class="container">
+      <div class="nav">
+        <a href="/">🏠 Home</a>
+        <a href="/cash-register">🧾 Cash Register</a>
+        <a href="/store-dashboard">📊 Store Dashboard</a>
+        <a href="/customer-portal">👤 Customer Portal</a>
+        <a href="/features">✨ All Features</a>
       </div>
-      <div><h3>All Time</h3>
-        <div class="stat" id="allTimeDeposits">$0.00</div>
-        <div>Total Deposits</div>
-        <div class="stat" id="allTimeRoundups">$0.00</div>
-        <div>Total Round-ups</div>
+      <div class="card">
+        <h1>📊 Store Dashboard</h1>
+        <div class="grid">
+          <div>
+            <h3>Today</h3>
+            <div class="stat" id="todayCount">0</div>
+            <div>Deposits</div>
+            <div class="stat" id="todayAmount">$0.00</div>
+            <div>Total Amount</div>
+            <div class="stat" id="todayRoundup">$0.00</div>
+            <div>Total Round-up</div>
+          </div>
+          <div>
+            <h3>All Time</h3>
+            <div class="stat" id="allTimeDeposits">$0.00</div>
+            <div>Total Deposits</div>
+            <div class="stat" id="allTimeRoundups">$0.00</div>
+            <div>Total Round-ups</div>
+          </div>
+        </div>
+        <div id="recentDeposits" style="margin-top: 2rem">
+          <h3>Recent Deposits</h3>
+          <div id="depositList"></div>
+        </div>
       </div>
     </div>
-    <div id="recentDeposits" style="margin-top:2rem;"><h3>Recent Deposits</h3><div id="depositList"></div></div>
-  </div>
-</div>
-<script>
-  async function fetchDashboard() {
-    const res = await fetch('/api/store/dashboard', { credentials: 'include' });
-    const data = await res.json();
-    if (data.error) { alert(data.error); return; }
-    document.getElementById('todayCount').textContent = data.today.count || 0;
-    document.getElementById('todayAmount').textContent = `$${(data.today.totalAmount || 0).toFixed(2)}`;
-    document.getElementById('todayRoundup').textContent = `$${(data.today.totalRoundup || 0).toFixed(2)}`;
-    document.getElementById('allTimeDeposits').textContent = `$${(data.allTime.totalDeposits || 0).toFixed(2)}`;
-    document.getElementById('allTimeRoundups').textContent = `$${(data.allTime.totalRoundups || 0).toFixed(2)}`;
-  }
-  fetchDashboard();
-</script>
-</body>
+    <script>
+      async function fetchDashboard() {
+        try {
+          const res = await fetch('/api/store/dashboard', { credentials: 'include' });
+          const data = await res.json();
+          if (data.error) {
+            console.error(data.error);
+            alert(data.error);
+            return;
+          }
+          if (data.today && data.today.count) {
+            document.getElementById('todayCount').textContent = data.today.count;
+          }
+          if (data.today && data.today.totalAmount) {
+            document.getElementById('todayAmount').textContent =
+              `$${data.today.totalAmount.toFixed(2)}`;
+          }
+          if (data.today && data.today.totalRoundup) {
+            document.getElementById('todayRoundup').textContent =
+              `$${data.today.totalRoundup.toFixed(2)}`;
+          }
+          if (data.allTime && data.allTime.totalDeposits) {
+            document.getElementById('allTimeDeposits').textContent =
+              `$${data.allTime.totalDeposits.toFixed(2)}`;
+          }
+          if (data.allTime && data.allTime.totalRoundups) {
+            document.getElementById('allTimeRoundups').textContent =
+              `$${data.allTime.totalRoundups.toFixed(2)}`;
+          }
+        } catch (error) {
+          console.error('Failed to fetch dashboard data:', error);
+        }
+      }
+      fetchDashboard();
+    </script>
+  </body>
 </html>
