@@ -9,7 +9,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Inter', sans-serif;
+        font-family: "Inter", sans-serif;
         background: #0f172a;
         color: #e2e8f0;
         padding: 1.5rem;
@@ -79,10 +79,14 @@
         <a href="/">🏠 Home</a>
         <a href="/micro-login">🔐 Login</a>
         <a href="/micro-dashboard">📊 Dashboard</a>
-        <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        <a
+          href="/xmr-miner"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
           >⛏️ XMR Miner</a
         >
-        <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        <a
+          href="/mining-dashboard"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
           >📈 Mining Stats</a
         >
         <a href="/micro-teller">🧾 Teller</a>
@@ -96,7 +100,9 @@
           <input type="password" id="password" placeholder="Password" />
           <button id="loginBtn" class="btn">Login</button>
           <p style="text-align: center; margin: 0.5rem 0">— OR —</p>
-          <button id="googleBtn" class="btn btn-google">Sign in with Google</button>
+          <button id="googleBtn" class="btn btn-google">
+            Sign in with Google
+          </button>
           <p style="text-align: center; margin-top: 1rem">
             <a href="/micro-signup" style="color: #60a5fa">Create Account</a>
           </p>
@@ -125,63 +131,64 @@
       async function apiCall(endpoint, options = {}) {
         const res = await fetch(`/api/${endpoint}`, {
           ...options,
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
         });
         return res.json();
       }
       function addLog(msg, isError = false) {
-        const logDiv = document.getElementById('log');
-        const p = document.createElement('div');
+        const logDiv = document.getElementById("log");
+        const p = document.createElement("div");
         p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-        if (isError) p.style.color = '#ef4444';
+        if (isError) p.style.color = "#ef4444";
         logDiv.appendChild(p);
         logDiv.scrollTop = logDiv.scrollHeight;
       }
       async function checkSession() {
         try {
-          const data = await apiCall('me', { method: 'GET' });
+          const data = await apiCall("me", { method: "GET" });
           if (!data.error) {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('loggedIn').style.display = 'block';
+            document.getElementById("loginForm").style.display = "none";
+            document.getElementById("loggedIn").style.display = "block";
             addLog(`✅ Welcome ${data.username}`);
           } else {
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('loggedIn').style.display = 'none';
+            document.getElementById("loginForm").style.display = "block";
+            document.getElementById("loggedIn").style.display = "none";
           }
         } catch (e) {
-          document.getElementById('loginForm').style.display = 'block';
-          document.getElementById('loggedIn').style.display = 'none';
+          document.getElementById("loginForm").style.display = "block";
+          document.getElementById("loggedIn").style.display = "none";
         }
       }
-      document.getElementById('loginBtn').onclick = async () => {
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value.trim();
-        document.getElementById('errorMsg').textContent = '';
+      document.getElementById("loginBtn").onclick = async () => {
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
+        document.getElementById("errorMsg").textContent = "";
         if (!username || !password) {
-          document.getElementById('errorMsg').textContent = '❌ Enter username and password.';
+          document.getElementById("errorMsg").textContent =
+            "❌ Enter username and password.";
           return;
         }
-        const data = await apiCall('login', {
-          method: 'POST',
+        const data = await apiCall("login", {
+          method: "POST",
           body: JSON.stringify({ username, password }),
         });
         if (data.error) {
-          document.getElementById('errorMsg').textContent = '❌ ' + data.error;
-          addLog('❌ ' + data.error, true);
+          document.getElementById("errorMsg").textContent = "❌ " + data.error;
+          addLog("❌ " + data.error, true);
           return;
         }
         addLog(`✅ Logged in as ${username}`);
-        document.getElementById('errorMsg').textContent = '';
+        document.getElementById("errorMsg").textContent = "";
         checkSession();
       };
-      document.getElementById('logoutBtn').onclick = async () => {
-        await apiCall('logout', { method: 'POST' });
-        addLog('🔓 Logged out');
+      document.getElementById("logoutBtn").onclick = async () => {
+        await apiCall("logout", { method: "POST" });
+        addLog("🔓 Logged out");
         checkSession();
       };
-      document.getElementById('googleBtn').onclick = () => {
-        alert('Google OAuth will be implemented with the backend.');
+      document.getElementById("googleBtn").onclick = () => {
+        alert("Google OAuth will be implemented with the backend.");
       };
       checkSession();
     </script>

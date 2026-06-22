@@ -9,7 +9,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Inter', 'Segoe UI', sans-serif;
+        font-family: "Inter", "Segoe UI", sans-serif;
         background: #0f172a;
         color: #e2e8f0;
         padding: 1.5rem;
@@ -91,24 +91,42 @@
   </head>
   <body>
     <div
-      style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem"
+      style="
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      "
     >
-      <a href="/micro-login" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-login"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🔐 Login</a
       >
-      <a href="/micro-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📊 Dashboard</a
       >
-      <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/xmr-miner"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >⛏️ XMR Miner</a
       >
-      <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/mining-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Mining Stats</a
       >
-      <a href="/micro-teller" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-teller"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🧾 Teller</a
       >
-      <a href="/micro-trade" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-trade"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Trade</a
       >
     </div>
@@ -122,13 +140,19 @@
         <a href="/roundup">🪙 Round‑Up</a>
         <a href="/receipt-invest">🧾 Receipt</a>
         <a href="/history">📜 History</a>
-        <a href="/features" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        <a
+          href="/features"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
           >✨ All Features</a
         >
-        <a href="/store-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        <a
+          href="/store-dashboard"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
           >📊 Store</a
         >
-        <a href="/customer-portal" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        <a
+          href="/customer-portal"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
           >👤 Portal</a
         >
       </div>
@@ -136,8 +160,8 @@
       <div class="card">
         <h1>🧾 Receipt Investment</h1>
         <p>
-          Upload a receipt image or enter the total, and we'll invest your spare change with
-          invoice!
+          Upload a receipt image or enter the total, and we'll invest your spare
+          change with invoice!
         </p>
         <div class="flex">
           <input
@@ -148,7 +172,9 @@
             style="flex: 2"
           />
           <button id="manualBtn" class="btn">➕ Manual</button>
-          <button id="uploadBtn" class="btn btn-success">📤 Upload Image</button>
+          <button id="uploadBtn" class="btn btn-success">
+            📤 Upload Image
+          </button>
         </div>
         <input type="file" id="receiptImage" accept="image/*" />
         <div id="result" style="margin: 1rem 0; font-size: 1.3rem"></div>
@@ -160,8 +186,8 @@
       async function apiCall(endpoint, options = {}) {
         const res = await fetch(`/api/receipt/${endpoint}`, {
           ...options,
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
         });
         return res.json();
       }
@@ -178,12 +204,14 @@
       💰 Deposit
     </button>
     <script>
-      document.getElementById('depositBtn')?.addEventListener('click', async function () {
-        const res = await fetch('/api/deposit', { credentials: 'include' });
-        const data = await res.json();
-        if (data.url) window.open(data.url, '_blank');
-        else alert('Deposit URL not set.');
-      });
+      document
+        .getElementById("depositBtn")
+        ?.addEventListener("click", async function () {
+          const res = await fetch("/api/deposit", { credentials: "include" });
+          const data = await res.json();
+          if (data.url) window.open(data.url, "_blank");
+          else alert("Deposit URL not set.");
+        });
     </script>
   </body>
 </html>

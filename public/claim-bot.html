@@ -11,7 +11,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Inter', sans-serif;
+        font-family: "Inter", sans-serif;
         background: #0f172a;
         color: #e2e8f0;
         padding: 1rem;
@@ -80,24 +80,42 @@
   </head>
   <body>
     <div
-      style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem"
+      style="
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      "
     >
-      <a href="/micro-login" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-login"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🔐 Login</a
       >
-      <a href="/micro-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📊 Dashboard</a
       >
-      <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/xmr-miner"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >⛏️ XMR Miner</a
       >
-      <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/mining-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Mining Stats</a
       >
-      <a href="/micro-teller" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-teller"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🧾 Teller</a
       >
-      <a href="/micro-trade" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-trade"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Trade</a
       >
     </div>
@@ -111,9 +129,10 @@
         <div class="card">
           <h2>🤖 Auto Claim Bot</h2>
           <p>
-            Automatically scans for claimable tokens (faucets, airdrops, unclaimed rewards).
-            Simulated claiming – each claim generates a random amount, deducts a 3‑10% fee, and adds
-            the rest to your profit balance.
+            Automatically scans for claimable tokens (faucets, airdrops,
+            unclaimed rewards). Simulated claiming – each claim generates a
+            random amount, deducts a 3‑10% fee, and adds the rest to your profit
+            balance.
           </p>
           <div class="flex">
             <select id="chainSelect">
@@ -122,8 +141,12 @@
               <option value="polygon">Polygon</option>
               <option value="solana">Solana</option>
             </select>
-            <button id="scanBtn" class="btn">🔍 Scan for Claimable Tokens</button>
-            <button id="claimAllBtn" class="btn btn-success">💰 Claim All (Simulated)</button>
+            <button id="scanBtn" class="btn">
+              🔍 Scan for Claimable Tokens
+            </button>
+            <button id="claimAllBtn" class="btn btn-success">
+              💰 Claim All (Simulated)
+            </button>
             <button id="stopBtn" class="btn btn-danger">⏹️ Stop</button>
           </div>
           <div class="log" id="logArea"></div>
@@ -131,7 +154,9 @@
         <div class="card">
           <h3>Your Stats</h3>
           <div>Profit (after fees): <span id="userProfit">0.00</span> JMD</div>
-          <div>Platform fees collected: <span id="ownerFees">0.00</span> JMD</div>
+          <div>
+            Platform fees collected: <span id="ownerFees">0.00</span> JMD
+          </div>
         </div>
       </div>
     </div>
@@ -142,98 +167,112 @@
       async function apiCall(endpoint, options = {}) {
         const res = await fetch(`/api/auto-trader/${endpoint}`, {
           ...options,
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json', ...options.headers },
+          credentials: "include",
+          headers: { "Content-Type": "application/json", ...options.headers },
         });
         return res.json();
       }
 
       function addLog(msg, isError = false) {
-        const logDiv = document.getElementById('logArea');
+        const logDiv = document.getElementById("logArea");
         if (!logDiv) return;
-        const p = document.createElement('p');
+        const p = document.createElement("p");
         p.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
-        if (isError) p.style.borderLeftColor = '#ef4444';
+        if (isError) p.style.borderLeftColor = "#ef4444";
         logDiv.appendChild(p);
         logDiv.scrollTop = logDiv.scrollHeight;
       }
 
       async function refreshBalance() {
-        const state = await apiCall('status');
-        document.getElementById('userProfit').innerText = (state.userProfit || 0).toFixed(2);
-        document.getElementById('ownerFees').innerText = (state.ownerFees || 0).toFixed(2);
+        const state = await apiCall("status");
+        document.getElementById("userProfit").innerText = (
+          state.userProfit || 0
+        ).toFixed(2);
+        document.getElementById("ownerFees").innerText = (
+          state.ownerFees || 0
+        ).toFixed(2);
       }
 
       async function claimAmount(amount) {
         if (!amount || amount <= 0) return;
         const feePercent = 3 + Math.random() * 7;
-        const res = await apiCall('report-profit', {
-          method: 'POST',
+        const res = await apiCall("report-profit", {
+          method: "POST",
           body: JSON.stringify({ profitJMD: amount, feePercent }),
         });
         if (res.error) addLog(`❌ Claim error: ${res.error}`, true);
         else
           addLog(
-            `✅ Claimed $${amount.toFixed(2)} → user gain $${res.userGain.toFixed(2)}, owner fee $${res.fee.toFixed(2)}`
+            `✅ Claimed $${amount.toFixed(2)} → user gain $${res.userGain.toFixed(2)}, owner fee $${res.fee.toFixed(2)}`,
           );
         refreshBalance();
       }
 
       async function scanAndClaim() {
         if (!scanning) return;
-        const chain = document.getElementById('chainSelect').value;
+        const chain = document.getElementById("chainSelect").value;
         addLog(`🔍 Scanning ${chain} for claimable tokens...`);
         // Simulate scanning – replace with real API calls later
         await new Promise((r) => setTimeout(r, 2000));
         const found = Math.random() > 0.7;
         if (found) {
           const amount = 1 + Math.random() * 20; // JMD equivalent
-          addLog(`🎁 Found claimable amount: $${amount.toFixed(2)} on ${chain}`);
+          addLog(
+            `🎁 Found claimable amount: $${amount.toFixed(2)} on ${chain}`,
+          );
           await claimAmount(amount);
         } else {
           addLog(`No claimable tokens found on ${chain} this round.`);
         }
       }
 
-      document.getElementById('scanBtn').addEventListener('click', () => {
+      document.getElementById("scanBtn").addEventListener("click", () => {
         if (scanning) {
-          addLog('Scan already running.');
+          addLog("Scan already running.");
           return;
         }
         scanning = true;
-        addLog("Started continuous scanning (every 30 seconds). Click 'Stop' to end.");
+        addLog(
+          "Started continuous scanning (every 30 seconds). Click 'Stop' to end.",
+        );
         scanInterval = setInterval(scanAndClaim, 30000);
         scanAndClaim(); // immediate first scan
       });
 
-      document.getElementById('claimAllBtn').addEventListener('click', async () => {
-        addLog('Manual claim all triggered – simulating claim of random amount.');
-        const amount = 5 + Math.random() * 50;
-        await claimAmount(amount);
-      });
+      document
+        .getElementById("claimAllBtn")
+        .addEventListener("click", async () => {
+          addLog(
+            "Manual claim all triggered – simulating claim of random amount.",
+          );
+          const amount = 5 + Math.random() * 50;
+          await claimAmount(amount);
+        });
 
-      document.getElementById('stopBtn').addEventListener('click', () => {
+      document.getElementById("stopBtn").addEventListener("click", () => {
         if (scanInterval) {
           clearInterval(scanInterval);
           scanInterval = null;
         }
         scanning = false;
-        addLog('Stopped scanning.');
+        addLog("Stopped scanning.");
       });
 
       (async () => {
-        const me = await fetch('/api/me', { credentials: 'include' }).then((r) => r.json());
+        const me = await fetch("/api/me", { credentials: "include" }).then(
+          (r) => r.json(),
+        );
         if (!me.id) {
-          document.getElementById('authMessage').innerHTML =
+          document.getElementById("authMessage").innerHTML =
             `<div class="card">🔐 You must <a href="/">log in</a> to use the Claim Bot.</div>`;
           return;
         }
-        document.getElementById('authMessage').innerHTML =
+        document.getElementById("authMessage").innerHTML =
           `<div class="card">✅ Logged in as <strong>${me.email}</strong></div>`;
-        document.getElementById('claimContent').style.display = 'block';
+        document.getElementById("claimContent").style.display = "block";
         refreshBalance();
         addLog(
-          "Claim Bot ready. Press 'Scan for Claimable Tokens' to start automatic scanning (simulated)."
+          "Claim Bot ready. Press 'Scan for Claimable Tokens' to start automatic scanning (simulated).",
         );
       })();
     </script>
@@ -245,12 +284,14 @@
       💰 Deposit
     </button>
     <script>
-      document.getElementById('depositBtn')?.addEventListener('click', async function () {
-        const res = await fetch('/api/deposit', { credentials: 'include' });
-        const data = await res.json();
-        if (data.url) window.open(data.url, '_blank');
-        else alert('Deposit URL not set.');
-      });
+      document
+        .getElementById("depositBtn")
+        ?.addEventListener("click", async function () {
+          const res = await fetch("/api/deposit", { credentials: "include" });
+          const data = await res.json();
+          if (data.url) window.open(data.url, "_blank");
+          else alert("Deposit URL not set.");
+        });
     </script>
   </body>
 </html>

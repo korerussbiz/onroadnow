@@ -8,7 +8,7 @@
         box-sizing: border-box;
       }
       body {
-        font-family: 'Inter', sans-serif;
+        font-family: "Inter", sans-serif;
         background: #0f172a;
         color: #e2e8f0;
         padding: 1.5rem;
@@ -90,16 +90,23 @@
     <script>
       async function fetchStats() {
         try {
-          const res = await fetch('/api/mining/stats', { credentials: 'include' });
+          const res = await fetch("/api/mining/stats", {
+            credentials: "include",
+          });
           const data = await res.json();
-          document.getElementById('hashrate').textContent = data.hashrate.toLocaleString() + ' H/s';
-          document.getElementById('balance').textContent = data.balance.toFixed(6) + ' XMR';
-          document.getElementById('value').textContent = '$' + data.valueUSD.toFixed(2);
+          document.getElementById("hashrate").textContent =
+            data.hashrate.toLocaleString() + " H/s";
+          document.getElementById("balance").textContent =
+            data.balance.toFixed(6) + " XMR";
+          document.getElementById("value").textContent =
+            "$" + data.valueUSD.toFixed(2);
         } catch (e) {
-          document.getElementById('log').textContent = '❌ ' + e.message;
+          document.getElementById("log").textContent = "❌ " + e.message;
         }
       }
-      document.getElementById('refreshBtn').addEventListener('click', fetchStats);
+      document
+        .getElementById("refreshBtn")
+        .addEventListener("click", fetchStats);
       fetchStats();
       setInterval(fetchStats, 10000);
     </script>

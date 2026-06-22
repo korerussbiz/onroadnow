@@ -75,10 +75,10 @@
     <div id="log" class="log">Ready.</div>
 
     <script>
-      const BASE = 'http://localhost:3001'; // local bridge
+      const BASE = "http://localhost:3001"; // local bridge
 
       function log(msg) {
-        const el = document.getElementById('log');
+        const el = document.getElementById("log");
         el.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
         el.scrollTop = el.scrollHeight;
       }
@@ -87,42 +87,45 @@
         try {
           const res = await fetch(`${BASE}${endpoint}`, {
             method,
-            headers: { 'Content-Type': 'application/json' },
+            headers: { "Content-Type": "application/json" },
             body: body ? JSON.stringify(body) : undefined,
           });
           return await res.json();
         } catch (e) {
-          document.getElementById('bridgeStatus').textContent = '❌ Offline';
-          log('❌ Cannot reach bridge. Is it running?');
+          document.getElementById("bridgeStatus").textContent = "❌ Offline";
+          log("❌ Cannot reach bridge. Is it running?");
           throw e;
         }
       }
 
       async function fetchStats() {
         try {
-          const data = await api('GET', '/api/mining/stats');
-          document.getElementById('hashrate').textContent = data.hashrate.toLocaleString();
-          document.getElementById('balance').textContent = data.balance.toFixed(6);
-          document.getElementById('value').textContent = '$' + data.valueUSD.toFixed(2);
-          document.getElementById('bridgeStatus').textContent = '✅ Online';
+          const data = await api("GET", "/api/mining/stats");
+          document.getElementById("hashrate").textContent =
+            data.hashrate.toLocaleString();
+          document.getElementById("balance").textContent =
+            data.balance.toFixed(6);
+          document.getElementById("value").textContent =
+            "$" + data.valueUSD.toFixed(2);
+          document.getElementById("bridgeStatus").textContent = "✅ Online";
         } catch (e) {
           /* ignore */
         }
       }
 
-      document.getElementById('startBtn').onclick = async () => {
-        const data = await api('POST', '/api/miner/start');
-        log('✅ ' + (data.status || 'Started'));
+      document.getElementById("startBtn").onclick = async () => {
+        const data = await api("POST", "/api/miner/start");
+        log("✅ " + (data.status || "Started"));
       };
 
-      document.getElementById('stopBtn').onclick = async () => {
-        const data = await api('POST', '/api/miner/stop');
-        log('⏹️ ' + (data.status || 'Stopped'));
+      document.getElementById("stopBtn").onclick = async () => {
+        const data = await api("POST", "/api/miner/stop");
+        log("⏹️ " + (data.status || "Stopped"));
       };
 
-      document.getElementById('statusBtn').onclick = async () => {
-        const data = await api('GET', '/api/miner/status');
-        log('🔄 ' + (data.running ? 'Miner is running' : 'Miner is stopped'));
+      document.getElementById("statusBtn").onclick = async () => {
+        const data = await api("GET", "/api/miner/status");
+        log("🔄 " + (data.running ? "Miner is running" : "Miner is stopped"));
       };
 
       fetchStats();

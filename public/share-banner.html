@@ -3,12 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta property="og:title" content="OnRoadNow – Free delivery & marketplace" />
+    <meta
+      property="og:title"
+      content="OnRoadNow – Free delivery & marketplace"
+    />
     <meta
       property="og:description"
       content="Post requests, sell items, earn as a deliverer. Free to use. Only pay a tiny % when you earn. Ad‑supported."
     />
-    <meta property="og:image" content="https://onroadnow.vercel.app/favicon.png" />
+    <meta
+      property="og:image"
+      content="https://onroadnow.vercel.app/favicon.png"
+    />
     <meta property="og:url" content="https://onroadnow.vercel.app" />
     <meta property="og:type" content="website" />
     <title>OnRoadNow – Free to use, earn money</title>
@@ -20,7 +26,7 @@
       }
       body {
         font-family:
-          'Inter',
+          "Inter",
           system-ui,
           -apple-system,
           sans-serif;
@@ -111,24 +117,42 @@
   </head>
   <body>
     <div
-      style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem"
+      style="
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      "
     >
-      <a href="/micro-login" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-login"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🔐 Login</a
       >
-      <a href="/micro-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📊 Dashboard</a
       >
-      <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/xmr-miner"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >⛏️ XMR Miner</a
       >
-      <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/mining-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Mining Stats</a
       >
-      <a href="/micro-teller" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-teller"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >🧾 Teller</a
       >
-      <a href="/micro-trade" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+      <a
+        href="/micro-trade"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
         >📈 Trade</a
       >
     </div>
@@ -137,21 +161,27 @@
       <div class="tagline">Jamaica’s delivery & marketplace</div>
       <div class="free">✅ Free to join – no monthly fees</div>
       <div class="row">
-        <span class="icon">🛒</span> <span>Groceries</span> <span class="icon">🍔</span>
-        <span>Food</span> <span class="icon">💊</span> <span>Medicine</span>
+        <span class="icon">🛒</span> <span>Groceries</span>
+        <span class="icon">🍔</span> <span>Food</span>
+        <span class="icon">💊</span> <span>Medicine</span>
         <span class="icon">🚶</span> <span>On‑foot delivery</span>
       </div>
       <p>
-        <strong>Post requests, sell items, or earn as a deliverer – completely free to use.</strong>
+        <strong
+          >Post requests, sell items, or earn as a deliverer – completely free
+          to use.</strong
+        >
       </p>
       <div class="fee-note">
         📌 <strong>Only pay when you earn or sell:</strong> a tiny
         <strong>1–3.8%</strong> transaction fee.<br />
-        💡 Example: Sell for JMD 1000 → fee JMD 20‑38. Deliverer fronts cost → +22.4% fee on
-        reimbursement.<br />
+        💡 Example: Sell for JMD 1000 → fee JMD 20‑38. Deliverer fronts cost →
+        +22.4% fee on reimbursement.<br />
         🎯 No hidden costs. No subscription.
       </div>
-      <a href="https://onroadnow.vercel.app" class="btn">👉 Start using OnRoadNow 👈</a>
+      <a href="https://onroadnow.vercel.app" class="btn"
+        >👉 Start using OnRoadNow 👈</a
+      >
       <div class="monetization">
         💰 <strong>Support this independent project</strong><br />
         • AdSense ads help cover hosting<br />
@@ -170,12 +200,14 @@
       💰 Deposit
     </button>
     <script>
-      document.getElementById('depositBtn')?.addEventListener('click', async function () {
-        const res = await fetch('/api/deposit', { credentials: 'include' });
-        const data = await res.json();
-        if (data.url) window.open(data.url, '_blank');
-        else alert('Deposit URL not set.');
-      });
+      document
+        .getElementById("depositBtn")
+        ?.addEventListener("click", async function () {
+          const res = await fetch("/api/deposit", { credentials: "include" });
+          const data = await res.json();
+          if (data.url) window.open(data.url, "_blank");
+          else alert("Deposit URL not set.");
+        });
     </script>
   </body>
 </html>
