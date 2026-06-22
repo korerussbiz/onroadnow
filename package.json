@@ -9,6 +9,7 @@
     "vercel-build": "echo done"
   },
   "dependencies": {
+    "@octokit/rest": "^22.0.1",
     "@solana/web3.js": "^1.98.4",
     "@walletconnect/modal": "^2.7.0",
     "axios": "^1.18.0",

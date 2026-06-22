@@ -5,6 +5,7 @@
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
+    { "src": "/api/integrate", "dest": "/api/integrate/index.js" },
     { "src": "/trading", "dest": "/public/trading.html" },
     { "src": "/portfolio", "dest": "/public/portfolio.html" },
     { "src": "/mining", "dest": "/public/mining.html" },
