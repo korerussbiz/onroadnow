@@ -1,147 +1,231 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>OnRoadNow Micro Trader</title>
     <style>
-        body { font-family: Arial; margin: 2rem; background: #0f172a; color: #eee; }
-        .card { background: #1e293b; padding: 1.5rem; border-radius: 1rem; margin-bottom: 1rem; }
-        button { background: #3b82f6; border: none; padding: 0.5rem 1rem; border-radius: 2rem; color: white; cursor: pointer; margin: 0.2rem; }
-        .buy { background: #10b981; }
-        .sell { background: #ef4444; }
-        input { padding: 0.5rem; border-radius: 1rem; border: none; margin: 0.5rem 0; }
-        .log { background: #0f172a; padding: 1rem; border-radius: 1rem; max-height: 300px; overflow-y: auto; font-family: monospace; }
+      body {
+        font-family: Arial;
+        margin: 2rem;
+        background: #0f172a;
+        color: #eee;
+      }
+      .card {
+        background: #1e293b;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+      }
+      button {
+        background: #3b82f6;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        color: white;
+        cursor: pointer;
+        margin: 0.2rem;
+      }
+      .buy {
+        background: #10b981;
+      }
+      .sell {
+        background: #ef4444;
+      }
+      input {
+        padding: 0.5rem;
+        border-radius: 1rem;
+        border: none;
+        margin: 0.5rem 0;
+      }
+      .log {
+        background: #0f172a;
+        padding: 1rem;
+        border-radius: 1rem;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: monospace;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-</head>
-<body>
-  <div style="display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem;">
-    <a href="/micro-login" style="color:#60a5fa;text-decoration:none;font-weight:600;">🔐 Login</a>
-    <a href="/micro-dashboard" style="color:#60a5fa;text-decoration:none;font-weight:600;">📊 Dashboard</a>
-    <a href="/xmr-miner" style="color:#60a5fa;text-decoration:none;font-weight:600;">⛏️ XMR Miner</a>
-    <a href="/mining-dashboard" style="color:#60a5fa;text-decoration:none;font-weight:600;">📈 Mining Stats</a>
-    <a href="/micro-teller" style="color:#60a5fa;text-decoration:none;font-weight:600;">🧾 Teller</a>
-    <a href="/micro-trade" style="color:#60a5fa;text-decoration:none;font-weight:600;">📈 Trade</a>
-  </div>
-<h1>📈 OnRoadNow Micro Trading Bot</h1>
-<div class="card">
-    <h3>Market Data</h3>
-    <select id="pairSelect">
+  </head>
+  <body>
+    <div
+      style="display: flex; gap: 1.2rem; flex-wrap: wrap; margin-bottom: 2rem; font-size: 1.2rem"
+    >
+      <a href="/micro-login" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >🔐 Login</a
+      >
+      <a href="/micro-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📊 Dashboard</a
+      >
+      <a href="/xmr-miner" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >⛏️ XMR Miner</a
+      >
+      <a href="/mining-dashboard" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📈 Mining Stats</a
+      >
+      <a href="/micro-teller" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >🧾 Teller</a
+      >
+      <a href="/micro-trade" style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📈 Trade</a
+      >
+    </div>
+    <h1>📈 OnRoadNow Micro Trading Bot</h1>
+    <div class="card">
+      <h3>Market Data</h3>
+      <select id="pairSelect">
         <option value="BTC">BTC/USD</option>
         <option value="ETH">ETH/USD</option>
         <option value="SOL">SOL/USD</option>
-    </select>
-    <div id="price" style="font-size: 2rem; margin: 1rem 0;">— USD</div>
-    <canvas id="priceChart" width="400" height="200"></canvas>
-</div>
-<div class="card">
-    <h3>Virtual Wallet</h3>
-    <div>USD: <span id="usdBalance">10000.00</span></div>
-    <div id="cryptoBalance">BTC: 0.0000</div>
-    <input type="number" id="amount" placeholder="Amount (USD)" step="any">
-    <button id="buyBtn" class="buy">Buy</button>
-    <button id="sellBtn" class="sell">Sell</button>
-</div>
-<div class="card">
-    <h3>Transaction Log</h3>
-    <div id="log" class="log">Ready.</div>
-</div>
-<script>
-    let wallet = { USD: 10000, BTC: 0, ETH: 0, SOL: 0 };
-    let currentPair = "BTC";
-    let currentPrice = 0;
-    let priceHistory = [];
-    let chart = null;
+      </select>
+      <div id="price" style="font-size: 2rem; margin: 1rem 0">— USD</div>
+      <canvas id="priceChart" width="400" height="200"></canvas>
+    </div>
+    <div class="card">
+      <h3>Virtual Wallet</h3>
+      <div>USD: <span id="usdBalance">10000.00</span></div>
+      <div id="cryptoBalance">BTC: 0.0000</div>
+      <input type="number" id="amount" placeholder="Amount (USD)" step="any" />
+      <button id="buyBtn" class="buy">Buy</button>
+      <button id="sellBtn" class="sell">Sell</button>
+    </div>
+    <div class="card">
+      <h3>Transaction Log</h3>
+      <div id="log" class="log">Ready.</div>
+    </div>
+    <script>
+      let wallet = { USD: 10000, BTC: 0, ETH: 0, SOL: 0 };
+      let currentPair = 'BTC';
+      let currentPrice = 0;
+      let priceHistory = [];
+      let chart = null;
 
-    const logDiv = document.getElementById('log');
-    function addLog(msg) {
+      const logDiv = document.getElementById('log');
+      function addLog(msg) {
         const p = document.createElement('div');
         p.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
         logDiv.appendChild(p);
         logDiv.scrollTop = logDiv.scrollHeight;
-    }
+      }
 
-    async function fetchPrice() {
+      async function fetchPrice() {
+        const symbol = encodeURIComponent(currentPair);
         const id = { BTC: 'bitcoin', ETH: 'ethereum', SOL: 'solana' }[currentPair];
         try {
-            const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
-            const data = await res.json();
-            currentPrice = data[id]?.usd;
-            if (currentPrice) {
-                document.getElementById('price').innerText = `${currentPrice} USD`;
-                priceHistory.push(currentPrice);
-                if (priceHistory.length > 30) priceHistory.shift();
-                if (chart) {
-                    chart.data.datasets[0].data = priceHistory;
-                    chart.update();
-                } else {
-                    const ctx = document.getElementById('priceChart').getContext('2d');
-                    chart = new Chart(ctx, {
-                        type: 'line',
-                        data: { labels: priceHistory.map((_, i) => i), datasets: [{ label: `${currentPair}/USD`, data: priceHistory, borderColor: '#facc15' }] }
-                    });
-                }
+          const res = await fetch(
+            `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`
+          );
+          const data = await res.json();
+          currentPrice = data[id]?.usd;
+          if (currentPrice) {
+            document.getElementById('price').innerText = `${currentPrice} USD`;
+            priceHistory.push(currentPrice);
+            if (priceHistory.length > 30) priceHistory.shift();
+            if (chart) {
+              chart.data.datasets[0].data = priceHistory;
+              chart.update();
+            } else {
+              const ctx = document.getElementById('priceChart').getContext('2d');
+              chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                  labels: priceHistory.map((_, i) => i),
+                  datasets: [
+                    { label: `${currentPair}/USD`, data: priceHistory, borderColor: '#facc15' },
+                  ],
+                },
+              });
             }
-        } catch(e) { addLog(`Price fetch error: ${e.message}`); }
-    }
+          }
+        } catch (e) {
+          addLog(`Price fetch error: ${e.message}`);
+        }
+      }
 
-    function updateUI() {
+      function updateUI() {
         document.getElementById('usdBalance').innerText = wallet.USD.toFixed(2);
-        if (currentPair === 'BTC') document.getElementById('cryptoBalance').innerHTML = `BTC: ${wallet.BTC.toFixed(8)}`;
-        else if (currentPair === 'ETH') document.getElementById('cryptoBalance').innerHTML = `ETH: ${wallet.ETH.toFixed(6)}`;
+        if (currentPair === 'BTC')
+          document.getElementById('cryptoBalance').innerHTML = `BTC: ${wallet.BTC.toFixed(8)}`;
+        else if (currentPair === 'ETH')
+          document.getElementById('cryptoBalance').innerHTML = `ETH: ${wallet.ETH.toFixed(6)}`;
         else document.getElementById('cryptoBalance').innerHTML = `SOL: ${wallet.SOL.toFixed(4)}`;
-    }
+      }
 
-    async function trade(type) {
-        if (!currentPrice) { addLog("Price not loaded"); return; }
+      async function trade(type) {
+        if (!currentPrice) {
+          addLog('Price not loaded');
+          return;
+        }
         let amountUSD = parseFloat(document.getElementById('amount').value);
-        if (isNaN(amountUSD) || amountUSD <= 0) { addLog("Invalid amount"); return; }
+        if (isNaN(amountUSD) || amountUSD <= 0) {
+          addLog('Invalid amount');
+          return;
+        }
         let cryptoAmount = amountUSD / currentPrice;
         let minCrypto = { BTC: 0.0001, ETH: 0.001, SOL: 0.01 }[currentPair];
-        if (cryptoAmount < minCrypto) { addLog(`Min trade: ${minCrypto} ${currentPair}`); return; }
+        if (cryptoAmount < minCrypto) {
+          addLog(`Min trade: ${minCrypto} ${currentPair}`);
+          return;
+        }
         if (type === 'buy') {
-            if (wallet.USD < amountUSD) { addLog("Insufficient USD"); return; }
-            wallet.USD -= amountUSD;
-            if (currentPair === 'BTC') wallet.BTC += cryptoAmount;
-            else if (currentPair === 'ETH') wallet.ETH += cryptoAmount;
-            else wallet.SOL += cryptoAmount;
-            addLog(`Bought ${cryptoAmount.toFixed(8)} ${currentPair} for $${amountUSD.toFixed(2)}`);
+          if (wallet.USD < amountUSD) {
+            addLog('Insufficient USD');
+            return;
+          }
+          wallet.USD -= amountUSD;
+          if (currentPair === 'BTC') wallet.BTC += cryptoAmount;
+          else if (currentPair === 'ETH') wallet.ETH += cryptoAmount;
+          else wallet.SOL += cryptoAmount;
+          addLog(`Bought ${cryptoAmount.toFixed(8)} ${currentPair} for $${amountUSD.toFixed(2)}`);
         } else {
-            let balance = { BTC: wallet.BTC, ETH: wallet.ETH, SOL: wallet.SOL }[currentPair];
-            if (balance < cryptoAmount) { addLog(`Insufficient ${currentPair}`); return; }
-            if (currentPair === 'BTC') wallet.BTC -= cryptoAmount;
-            else if (currentPair === 'ETH') wallet.ETH -= cryptoAmount;
-            else wallet.SOL -= cryptoAmount;
-            wallet.USD += amountUSD;
-            addLog(`Sold ${cryptoAmount.toFixed(8)} ${currentPair} for $${amountUSD.toFixed(2)}`);
+          let balance = { BTC: wallet.BTC, ETH: wallet.ETH, SOL: wallet.SOL }[currentPair];
+          if (balance < cryptoAmount) {
+            addLog(`Insufficient ${currentPair}`);
+            return;
+          }
+          if (currentPair === 'BTC') wallet.BTC -= cryptoAmount;
+          else if (currentPair === 'ETH') wallet.ETH -= cryptoAmount;
+          else wallet.SOL -= cryptoAmount;
+          wallet.USD += amountUSD;
+          addLog(`Sold ${cryptoAmount.toFixed(8)} ${currentPair} for $${amountUSD.toFixed(2)}`);
         }
         updateUI();
         document.getElementById('amount').value = '';
-    }
+      }
 
-    document.getElementById('pairSelect').addEventListener('change', (e) => {
+      document.getElementById('pairSelect').addEventListener('change', (e) => {
         currentPair = e.target.value;
         priceHistory = [];
-        if (chart) { chart.destroy(); chart = null; }
+        if (chart) {
+          chart.destroy();
+          chart = null;
+        }
         fetchPrice();
         updateUI();
         addLog(`Switched to ${currentPair}/USD`);
-    });
-    document.getElementById('buyBtn').onclick = () => trade('buy');
-    document.getElementById('sellBtn').onclick = () => trade('sell');
+      });
+      document.getElementById('buyBtn').onclick = () => trade('buy');
+      document.getElementById('sellBtn').onclick = () => trade('sell');
 
-    fetchPrice();
-    setInterval(fetchPrice, 5000);
-    updateUI();
-    addLog("Bot started. Use Buy/Sell to simulate trades.");
-</script>
-  <button id="depositBtn" class="btn" style="background:#f7931a;font-size:1.2rem;padding:0.8rem 2rem;">💰 Deposit</button>
-  <script>
-  document.getElementById("depositBtn")?.addEventListener("click", async function() {
-    const res = await fetch("/api/deposit", { credentials: "include" });
-    const data = await res.json();
-    if (data.url) window.open(data.url, "_blank");
-    else alert("Deposit URL not set.");
-  });
-  </script>
-</body>
+      fetchPrice();
+      setInterval(fetchPrice, 5000);
+      updateUI();
+      addLog('Bot started. Use Buy/Sell to simulate trades.');
+    </script>
+    <button
+      id="depositBtn"
+      class="btn"
+      style="background: #f7931a; font-size: 1.2rem; padding: 0.8rem 2rem"
+    >
+      💰 Deposit
+    </button>
+    <script>
+      document.getElementById('depositBtn')?.addEventListener('click', async function () {
+        const res = await fetch('/api/deposit', { credentials: 'include' });
+        const data = await res.json();
+        if (data.url) window.open(data.url, '_blank');
+        else alert('Deposit URL not set.');
+      });
+    </script>
+  </body>
 </html>

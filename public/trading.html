@@ -10,8 +10,6 @@
     body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
     .container{max-width:1000px;margin:auto}
     .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}
-    .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
-    .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
     .flex{display:flex;gap:1rem;flex-wrap:wrap;align-items:center}
     input,select,button{font-size:1.2rem;padding:0.8rem;border-radius:0.5rem;border:1px solid #334155;background:#0f172a;color:#fff;margin:0.5rem 0}
     .btn{background:#3b82f6;border:none;padding:0.6rem 1.2rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer}
@@ -25,17 +23,12 @@
 </head>
 <body>
 <div class="container">
-  <div class="nav">
-    <a href="/">🏠 Home</a>
-    <a href="/trading">📊 Trading</a>
-    <a href="/portfolio">💼 Portfolio</a>
-    <a href="/mining">⛏️ Mining</a>
-    <a href="/history">📜 History</a>
-  </div>
+  $NAV_HTML
   <div class="card">
     <h1>📊 Trading Dashboard</h1>
+    <p>Trade stocks and crypto with real‑time prices. Paper trading (simulated) with fees.</p>
     <div class="flex">
-      <input type="text" id="symbol" value="BTC" placeholder="Symbol">
+      <input type="text" id="symbol" value="BTC" placeholder="Symbol (e.g., BTC, AAPL)">
       <button id="priceBtn" class="btn">Get Price</button>
     </div>
     <div style="height:300px;margin:1rem 0;"><canvas id="priceChart"></canvas></div>
@@ -46,13 +39,18 @@
     </div>
     <div class="stats-grid" id="priceDisplay">
       <div class="stat"><div class="stat-value" id="currentPrice">—</div><div>Price (USD)</div></div>
+      <div class="stat"><div class="stat-value" id="balance">$0.00</div><div>Balance</div></div>
+      <div class="stat"><div class="stat-value" id="profit">$0.00</div><div>Profit</div></div>
     </div>
-    <div id="log" class="log">Ready.</div>
+    <div id="log" class="log">Ready. Enter a symbol and amount, then click Buy/Sell.</div>
   </div>
 </div>
 <script>
   let chart = null;
   const history = [];
+  let balance = 1000;
+  let totalProfit = 0;
+
   async function apiCall(endpoint, options = {}) {
     const res = await fetch(`/api/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
     return res.json();
@@ -86,23 +84,25 @@
       options: { responsive: true, maintainAspectRatio: false }
     });
   }
+  async function executeTrade(type) {
+    const symbol = document.getElementById('symbol').value.trim();
+    const amount = parseFloat(document.getElementById('amount').value);
+    if (!symbol || isNaN(amount)) return addLog('Enter valid data', true);
+    if (type === 'buy' && amount > balance) return addLog('Insufficient balance', true);
+    const data = await apiCall('trade/execute', { method: 'POST', body: JSON.stringify({ symbol, amountUSD: amount, tradeType: type }) });
+    if (data.error) addLog('❌ ' + data.error, true);
+    else {
+      if (type === 'buy') balance -= amount;
+      else balance += amount;
+      totalProfit += data.profit || 0;
+      document.getElementById('balance').textContent = '$' + balance.toFixed(2);
+      document.getElementById('profit').textContent = '$' + totalProfit.toFixed(2);
+      addLog(`✅ ${type === 'buy' ? 'Bought' : 'Sold'} ${data.units.toFixed(4)} ${symbol} at $${data.price.toFixed(2)}`);
+    }
+  }
   document.getElementById('priceBtn').addEventListener('click', getPrice);
-  document.getElementById('buyBtn').addEventListener('click', async () => {
-    const symbol = document.getElementById('symbol').value.trim();
-    const amount = parseFloat(document.getElementById('amount').value);
-    if (!symbol || isNaN(amount)) return addLog('Enter valid data', true);
-    const data = await apiCall('trade/execute', { method: 'POST', body: JSON.stringify({ symbol, amountUSD: amount, tradeType: 'buy' }) });
-    if (data.error) addLog('❌ ' + data.error, true);
-    else addLog(`✅ Bought ${data.units.toFixed(4)} ${symbol} at $${data.price.toFixed(2)}`);
-  });
-  document.getElementById('sellBtn').addEventListener('click', async () => {
-    const symbol = document.getElementById('symbol').value.trim();
-    const amount = parseFloat(document.getElementById('amount').value);
-    if (!symbol || isNaN(amount)) return addLog('Enter valid data', true);
-    const data = await apiCall('trade/execute', { method: 'POST', body: JSON.stringify({ symbol, amountUSD: amount, tradeType: 'sell' }) });
-    if (data.error) addLog('❌ ' + data.error, true);
-    else addLog(`✅ Sold ${data.units.toFixed(4)} ${symbol} at $${data.price.toFixed(2)}`);
-  });
+  document.getElementById('buyBtn').addEventListener('click', () => executeTrade('buy'));
+  document.getElementById('sellBtn').addEventListener('click', () => executeTrade('sell'));
   getPrice();
 </script>
 </body>
