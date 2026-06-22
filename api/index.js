@@ -68,4 +68,19 @@ module.exports = async (req, res) => {
 
   // 404
   res.status(404).json({ error: 'Not found' });
+
+  // Price endpoint
+  if (url === '/api/trade/price' && method === 'GET') {
+    const { symbol } = req.query;
+    if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
+    try {
+      const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=${symbol.toLowerCase()}&vs_currencies=usd`);
+      const price = response.data[symbol.toLowerCase()]?.usd;
+      if (!price) return res.status(404).json({ error: 'Symbol not found' });
+      return res.status(200).json({ symbol, price });
+    } catch(e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+
 };
