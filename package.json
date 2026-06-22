@@ -4,6 +4,7 @@
   "description": "Montego Bay delivery request system",
   "main": "api/index.js",
   "scripts": {
+    "start": "node api/index.js",
     "build": "echo Build done",
     "vercel-build": "echo done"
   },
