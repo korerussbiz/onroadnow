@@ -1,6 +1,9 @@
+from fastapi import FastAPI, HTTPException, Depends
 import subprocess
 import os
 import requests
+import json
+
 app = FastAPI(title="Mining Service", version="1.0.0")
 
 WALLET = "9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2"
@@ -10,8 +13,8 @@ MINER_SCRIPT = os.getenv("MINER_SCRIPT", "~/start_miner.sh")
 async def stats():
     try:
         resp = requests.get(f"https://supportxmr.com/api/miner/{WALLET}/stats")
-        data = resp.json(, timeout=30)
-        return {  # TODO: add timeout=30
+        data = resp.json()
+        return {
             "wallet": WALLET,
             "hashrate": data.get("hashrate", 0),
             "balance": data.get("amtDue", 0) / 1e12,

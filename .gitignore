@@ -10,3 +10,4 @@ koreruss*.env
 serviceAccountKey.json
 worker/*.json
 .env
+.devnog/
