@@ -2,8 +2,10 @@ const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const cookie = require('cookie');
 const crypto = require('crypto');
+const { OAuth2Client } = require('google-auth-library');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-me';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || 'your-client-id';
 
 let users = [];
 let trades = [];
@@ -16,6 +18,7 @@ function getUserState(userId) {
   return userStates[userId];
 }
 
+// ---------- PRICE FETCHING ----------
 async function getStockPrice(symbol) {
   try {
     const yahoo = require('yahoo-finance2').default;
@@ -47,6 +50,7 @@ async function getCryptoPrice(symbol) {
   throw new Error(`Could not fetch crypto price for ${symbol}`);
 }
 
+// ---------- MAIN HANDLER ----------
 module.exports = async (req, res) => {
   const url = req.url;
   const method = req.method;
@@ -65,12 +69,7 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (method === 'OPTIONS') return res.status(200).end();
 
-  // Health
-  if (url === '/api/health' && method === 'GET') {
-    return res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-  }
-
-  // Signup
+  // ---------- AUTH ----------
   if (url === '/api/signup' && method === 'POST') {
     const { username, password } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Missing fields' });
@@ -82,7 +81,6 @@ module.exports = async (req, res) => {
     return res.status(201).json({ message: 'Signed up', userId });
   }
 
-  // Login
   if (url === '/api/login' && method === 'POST') {
     const { username, password } = req.body;
     const user = users.find(u => u.username === username && u.password === password);
@@ -92,13 +90,11 @@ module.exports = async (req, res) => {
     return res.status(200).json({ message: 'Logged in', userId: user.id });
   }
 
-  // Logout
   if (url === '/api/logout' && method === 'POST') {
     res.setHeader('Set-Cookie', 'token=; HttpOnly; Path=/; Max-Age=0; Secure; SameSite=None');
     return res.status(200).json({ message: 'Logged out' });
   }
 
-  // Me
   if (url === '/api/me' && method === 'GET') {
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const user = users.find(u => u.id === userId);
@@ -106,7 +102,7 @@ module.exports = async (req, res) => {
     return res.status(200).json({ id: user.id, username: user.username });
   }
 
-  // Price
+  // ---------- PRICES ----------
   if (url === '/api/trade/price' && method === 'GET') {
     const { symbol } = req.query;
     if (!symbol) return res.status(400).json({ error: 'Missing symbol' });
@@ -123,7 +119,7 @@ module.exports = async (req, res) => {
     }
   }
 
-  // Execute trade (fixed)
+  // ---------- TRADING ----------
   if (url === '/api/trade/execute' && method === 'POST') {
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const { symbol, amountUSD, tradeType } = req.body;
@@ -142,7 +138,6 @@ module.exports = async (req, res) => {
       }
       const amount = Number(amountUSD);
       const units = amount / price;
-      // Realistic profit simulation – replace with real market data later
       const profit = amount * (Math.random() - 0.48) * 0.02;
       const fee = profit * 0.05;
       const userGain = profit - fee;
@@ -156,13 +151,18 @@ module.exports = async (req, res) => {
     }
   }
 
-  // History
+  // ---------- HISTORY ----------
   if (url === '/api/trade/history' && method === 'GET') {
     if (!userId) return res.status(401).json({ error: 'Not authenticated' });
     const userTrades = trades.filter(t => t.userId === userId);
     return res.status(200).json(userTrades);
   }
 
-  // 404
+  // ---------- HEALTH ----------
+  if (url === '/api/health' && method === 'GET') {
+    return res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  }
+
+  // ---------- 404 ----------
   res.status(404).json({ error: 'Not found' });
 };
