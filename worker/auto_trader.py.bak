@@ -1,6 +1,17 @@
 import os
+import time
+import json
+import requests
+from web3 import Web3
+from solana.rpc.api import Client as SolanaClient
+from solana.publickey import PublicKey
+from solana.keypair import Keypair
 
+# Configuration from environment (secrets)
+DEST_EVM = os.environ.get("DEST_EVM", "0xCf974b9e14766f839D8C59bDA1D4Dff3CF3f8b33")
+DEST_SOL = os.environ.get("DEST_SOL", "9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2")
 FEE_PERCENT = float(os.environ.get("FEE_PERCENT", 5))   # 3-10%
+
 # RPC endpoints (you can add your own API keys)
 ETH_RPC = "https://cloudflare-eth.com"
 BSC_RPC = "https://bsc-dataseed.binance.org/"

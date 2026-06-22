@@ -1,7 +1,11 @@
+from fastapi import FastAPI, HTTPException, Depends
 import ccxt
 import yfinance as yf
 import numpy as np
+import json
+import os
 
+app = FastAPI(title="Trading Service", version="1.0.0")
 
 # Paper trading state
 trades = {}
