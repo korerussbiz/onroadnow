@@ -1,64 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>OnRoadNow</title>
-    <style>
-      body {
-        background: #0f172a;
-        color: #e2e8f0;
-        font-family: sans-serif;
-        padding: 2rem;
-        text-align: center;
-      }
-      h1 {
-        color: #facc15;
-        font-size: 3rem;
-      }
-      .status {
-        background: #1e293b;
-        padding: 2rem;
-        border-radius: 1rem;
-        max-width: 600px;
-        margin: auto;
-      }
-      .btn {
-        background: #3b82f6;
-        padding: 0.5rem 1.5rem;
-        border-radius: 2rem;
-        color: #fff;
-        text-decoration: none;
-        display: inline-block;
-        margin: 0.5rem;
-      }
-      .nav {
-        display: flex;
-        gap: 1.2rem;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-bottom: 2rem;
-      }
-      .nav a {
-        color: #60a5fa;
-        text-decoration: none;
-        font-weight: 600;
-      }
-    </style>
-  </head>
-  <body>
+<head>
+  <title>OnRoadNow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    *{box-sizing:border-box}
+    body{background:#0f172a;color:#e2e8f0;font-family:sans-serif;padding:1.5rem;text-align:center}
+    .container{max-width:900px;margin:auto}
+    .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:1.5rem}
+    h1{color:#facc15;font-size:2.5rem}
+    .nav{display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center;margin:1rem 0}
+    .nav a{color:#60a5fa;text-decoration:none;padding:0.5rem 1rem;background:#0f172a;border-radius:2rem}
+    .nav a:hover{background:#1e293b;color:#facc15}
+    .btn{background:#3b82f6;padding:0.5rem 1.5rem;border-radius:2rem;color:#fff;text-decoration:none;display:inline-block;margin:0.3rem}
+    .btn:hover{background:#2563eb}
+    .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin:1rem 0}
+    .stat{background:#0f172a;padding:1rem;border-radius:0.5rem}
+    .stat-value{font-size:2rem;color:#facc15}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <h1>🚀 OnRoadNow</h1>
+    <p>Delivery & Investment Platform</p>
     <div class="nav">
       <a href="/">🏠 Home</a>
       <a href="/trading">📊 Trading</a>
       <a href="/portfolio">💼 Portfolio</a>
       <a href="/mining">⛏️ Mining</a>
       <a href="/history">📜 History</a>
+      <a href="/xmr-miner">⛏️ XMR</a>
+      <a href="/micro-teller">🧾 Teller</a>
     </div>
-    <h1>🚀 OnRoadNow</h1>
-    <div class="status">
-      <p>✅ Site is live.</p>
-      <p><a href="/api/health" class="btn">Health Check</a></p>
-      <p><a href="/trading" class="btn">Trading</a></p>
-      <p><a href="/portfolio" class="btn">Portfolio</a></p>
-      <p><a href="/mining" class="btn">Mining</a></p>
+    <div style="margin-top:1.5rem;">
+      <a href="/api/health" class="btn">🔍 Health Check</a>
+      <a href="/trading" class="btn">📈 Start Trading</a>
     </div>
-  </body>
+  </div>
+</div>
+</body>
 </html>
