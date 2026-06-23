@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trading Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+      }
+      .container {
+        max-width: 1000px;
+        margin: auto;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+      .flex {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      input,
+      select,
+      button {
+        font-size: 1.2rem;
+        padding: 0.8rem;
+        border-radius: 0.5rem;
+        border: 1px solid #334155;
+        background: #0f172a;
+        color: #fff;
+        margin: 0.5rem 0;
+      }
+      .btn {
+        background: #3b82f6;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 2rem;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn-buy {
+        background: #10b981;
+      }
+      .btn-sell {
+        background: #ef4444;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+      }
+      .stat {
+        background: #0f172a;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+      }
+      .stat-value {
+        font-size: 2rem;
+        color: #facc15;
+      }
+      .log {
+        background: #0f172a;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: monospace;
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      $NAV_HTML
+      <div class="card">
+        <h1>📊 Trading Dashboard</h1>
+        <p>
+          Trade stocks and crypto with real‑time prices. Paper trading
+          (simulated) with fees.
+        </p>
+        <div class="flex">
+          <input
+            type="text"
+            id="symbol"
+            value="BTC"
+            placeholder="Symbol (e.g., BTC, AAPL)"
+          />
+          <button id="priceBtn" class="btn">Get Price</button>
+        </div>
+        <div style="height: 300px; margin: 1rem 0">
+          <canvas id="priceChart"></canvas>
+        </div>
+        <div class="flex">
+          <input
+            type="number"
+            id="amount"
+            placeholder="Amount (USD)"
+            step="0.01"
+          />
+          <button id="buyBtn" class="btn btn-buy">Buy</button>
+          <button id="sellBtn" class="btn btn-sell">Sell</button>
+        </div>
+        <div class="stats-grid" id="priceDisplay">
+          <div class="stat">
+            <div class="stat-value" id="currentPrice">—</div>
+            <div>Price (USD)</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="balance">$0.00</div>
+            <div>Balance</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="profit">$0.00</div>
+            <div>Profit</div>
+          </div>
+        </div>
+        <div id="log" class="log">
+          Ready. Enter a symbol and amount, then click Buy/Sell.
+        </div>
+      </div>
+    </div>
+    <script>
+      let chart = null;
+      const history = [];
+      let balance = 1000;
+      let totalProfit = 0;
+
+      async function apiCall(endpoint, options = {}) {
+        const res = await fetch(`/api/${endpoint}`, {
+          ...options,
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
+        return res.json();
+      }
+      function addLog(msg, isError = false) {
+        const logDiv = document.getElementById("log");
+        const p = document.createElement("div");
+        p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        if (isError) p.style.color = "#ef4444";
+        logDiv.appendChild(p);
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+      async function getPrice() {
+        const symbol = document.getElementById("symbol").value.trim();
+        if (!symbol) return addLog("Enter symbol", true);
+        try {
+          const data = await apiCall(`trade/price?symbol=${symbol}`);
+          if (data.error) throw new Error(data.error);
+          document.getElementById("currentPrice").textContent =
+            "$" + data.price.toFixed(2);
+          history.push(data.price);
+          if (history.length > 20) history.shift();
+          updateChart(history);
+        } catch (e) {
+          addLog("❌ " + e.message, true);
+        }
+      }
+      function updateChart(data) {
+        const ctx = document.getElementById("priceChart").getContext("2d");
+        if (chart) {
+          chart.data.datasets[0].data = data;
+          chart.update();
+          return;
+        }
+        chart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: data.map((_, i) => i + 1),
+            datasets: [
+              { label: "Price", data, borderColor: "#3b82f6", fill: false },
+            ],
+          },
+          options: { responsive: true, maintainAspectRatio: false },
+        });
+      }
+      async function executeTrade(type) {
+        const symbol = document.getElementById("symbol").value.trim();
+        const amount = parseFloat(document.getElementById("amount").value);
+        if (!symbol || isNaN(amount)) return addLog("Enter valid data", true);
+        if (type === "buy" && amount > balance)
+          return addLog("Insufficient balance", true);
+        const data = await apiCall("trade/execute", {
+          method: "POST",
+          body: JSON.stringify({ symbol, amountUSD: amount, tradeType: type }),
+        });
+        if (data.error) addLog("❌ " + data.error, true);
+        else {
+          if (type === "buy") balance -= amount;
+          else balance += amount;
+          totalProfit += data.profit || 0;
+          document.getElementById("balance").textContent =
+            "$" + balance.toFixed(2);
+          document.getElementById("profit").textContent =
+            "$" + totalProfit.toFixed(2);
+          addLog(
+            `✅ ${type === "buy" ? "Bought" : "Sold"} ${data.units.toFixed(4)} ${symbol} at $${data.price.toFixed(2)}`,
+          );
+        }
+      }
+      document.getElementById("priceBtn").addEventListener("click", getPrice);
+      document
+        .getElementById("buyBtn")
+        .addEventListener("click", () => executeTrade("buy"));
+      document
+        .getElementById("sellBtn")
+        .addEventListener("click", () => executeTrade("sell"));
+      getPrice();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Mining Dashboard</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+      }
+      .container {
+        max-width: 900px;
+        margin: auto;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+      .nav {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      }
+      .nav a {
+        color: #60a5fa;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .stat {
+        font-size: 2rem;
+        color: #facc15;
+      }
+      .flex {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .btn {
+        background: #3b82f6;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 2rem;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <a href="/">🏠 Home</a>
+        <a href="/trading">📊 Trading</a>
+        <a href="/portfolio">💼 Portfolio</a>
+        <a href="/mining">⛏️ Mining</a>
+        <a href="/history">📜 History</a>
+      </div>
+      <div class="card">
+        <h1>⛏️ Monero Mining</h1>
+        <div class="stat" id="hashrate">0 H/s</div>
+        <div class="stat" id="balance">0.000000 XMR</div>
+        <div class="stat" id="value">$0.00</div>
+        <div class="flex">
+          <button id="refreshBtn" class="btn">🔄 Refresh</button>
+        </div>
+        <div
+          id="log"
+          style="
+            background: #0f172a;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            font-family: monospace;
+          "
+        >
+          Loading...
+        </div>
+      </div>
+    </div>
+    <script>
+      async function fetchStats() {
+        try {
+          const res = await fetch("/api/mining/stats", {
+            credentials: "include",
+          });
+          const data = await res.json();
+          document.getElementById("hashrate").textContent =
+            data.hashrate.toLocaleString() + " H/s";
+          document.getElementById("balance").textContent =
+            data.balance.toFixed(6) + " XMR";
+          document.getElementById("value").textContent =
+            "$" + data.valueUSD.toFixed(2);
+        } catch (e) {
+          document.getElementById("log").textContent = "❌ " + e.message;
+        }
+      }
+      document
+        .getElementById("refreshBtn")
+        .addEventListener("click", fetchStats);
+      fetchStats();
+      setInterval(fetchStats, 10000);
+    </script>
+  </body>
+</html>
