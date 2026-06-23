@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Review Report — 6/22/2026, 11:33:19 PM</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;padding:24px;max-width:1000px;margin:0 auto}
+h1{font-size:20px;color:#22d3ee;margin-bottom:4px}
+.meta{color:#64748b;font-size:13px;margin-bottom:24px}
+.sc{display:flex;align-items:center;gap:24px;background:#1e293b;border-radius:16px;padding:24px;margin-bottom:24px;border:1px solid #334155}
+.ring{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;border:4px solid #ef4444;color:#ef4444;flex-shrink:0}
+.detail{flex:1}.detail .sum{font-size:15px;margin-bottom:8px}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.b{padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;display:inline-block}
+.br{background:#ef444420;color:#ef4444;border:1px solid #ef444440}
+.by{background:#eab30820;color:#eab308;border:1px solid #eab30840}
+.bg{background:#22c55e20;color:#22c55e;border:1px solid #22c55e40}
+.bb{background:#38bdf820;color:#38bdf8;border:1px solid #38bdf840}
+.bp{background:#22c55e20;color:#22c55e;border:1px solid #22c55e40;font-size:14px;padding:6px 14px}
+.bf{background:#ef444420;color:#ef4444;border:1px solid #ef444440;font-size:14px;padding:6px 14px}
+.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.summary-card{background:#0f172a;border:1px solid #334155;border-radius:10px;padding:12px 14px}
+.summary-card .k{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.summary-card .v{font-size:22px;font-weight:700;line-height:1}
+.summary-card .d{font-size:12px;color:#94a3b8;margin-top:6px}
+.test-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px}
+.test-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.test-note{font-size:13px;color:#fbbf24;margin-bottom:10px}
+.test-meta-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.test-meta-value{font-size:13px;color:#e2e8f0;word-break:break-word}
+.sec{margin-top:24px}.sec h2{font-size:15px;color:#94a3b8;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid #1e293b}
+.severity-section{margin-bottom:24px}
+.severity-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
+.severity-heading h3{font-size:16px;margin-bottom:4px}
+.severity-heading p{font-size:12px;color:#64748b}
+.severity-count{min-width:36px;height:28px;padding:0 10px;border-radius:999px;border:1px solid #334155;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px}
+.file-group{margin-bottom:20px;background:#1e293b;border-radius:12px;border:1px solid #334155;overflow:hidden}
+.file-header{padding:12px 16px;background:#1e293b;border-bottom:1px solid #334155;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.file-path{background:#0f172a;padding:3px 8px;border-radius:4px;font-size:13px;color:#22d3ee}
+.issue-count{color:#64748b;font-size:12px;margin-left:auto}
+.issue-card{padding:12px 16px;border-bottom:1px solid #0f172a20;margin:0}
+.issue-card:last-child{border-bottom:none}
+.issue-header{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.line-badge{background:#334155;color:#94a3b8;padding:1px 6px;border-radius:4px;font-size:11px;font-family:monospace}
+.scope-badge{background:#22d3ee18;color:#22d3ee;padding:1px 8px;border-radius:4px;font-size:11px;font-family:monospace;border:1px solid #22d3ee30}
+.issue-desc{color:#94a3b8;font-size:13px;margin-bottom:6px}
+.issue-fix{font-size:13px;color:#a5b4fc;margin-bottom:6px}
+.code-detail{margin-top:6px}
+.code-toggle{cursor:pointer;font-size:12px;color:#64748b;padding:4px 0;user-select:none}
+.code-toggle:hover{color:#94a3b8}
+.code-block{background:#0f172a;border:1px solid #334155;border-radius:6px;padding:10px 14px;font-size:12px;line-height:1.6;overflow-x:auto;color:#cbd5e1;margin-top:6px;white-space:pre;font-family:'Fira Code','JetBrains Mono',Consolas,'Courier New',monospace}
+.hl-target{background:#ef444418;display:inline-block;width:100%;border-left:2px solid #ef4444;padding-left:4px;margin-left:-6px}
+.hl-ln{color:#475569;user-select:none}
+.hl-k{color:#c084fc}
+.hl-s{color:#86efac}
+.hl-n{color:#fbbf24}
+.hl-c{color:#64748b;font-style:italic}
+.ft{margin-top:32px;padding-top:16px;border-top:1px solid #1e293b;color:#475569;font-size:12px;text-align:center}
+@media (max-width: 700px){.summary-grid,.test-meta-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<h1>🤖 AI Code Review Report</h1>
+<div class="meta">6/22/2026, 11:33:19 PM · Qwen/Qwen3-8B · fix · Rounds: 1/5 ✅</div>
+<div class="sc">
+  <div class="ring">0</div>
+  <div class="detail">
+    <div class="sum">—</div>
+    <div class="badges">
+      <span class="b bf">❌ BLOCKED</span>
+      
+      
+      
+      
+      
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="k">Blocking Issues</div>
+        <div class="v" style="color:#22c55e">0</div>
+        <div class="d">No blocking issues detected.</div>
+      </div>
+      <div class="summary-card">
+        <div class="k">Non-blocking Issues</div>
+        <div class="v" style="color:#22c55e">0</div>
+        <div class="d">Warnings and improvements worth tracking.</div>
+      </div>
+      <div class="summary-card">
+        <div class="k">Suggestions</div>
+        <div class="v" style="color:#94a3b8">0</div>
+        <div class="d">Nice-to-have ideas that do not affect score.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sec">
+  <h2>Issues (0) — grouped by severity</h2>
+  <div style="text-align:center;padding:32px;color:#22c55e;font-size:16px">✅ No issues found</div>
+</div>
+<div class="ft">Generated by ai-review-pipeline · Model: Qwen/Qwen3-8B · ⚠️ AI Review does not replace human Code Review</div>
+</body></html>

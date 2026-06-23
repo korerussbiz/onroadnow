@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Portfolio</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+      }
+      .container {
+        max-width: 900px;
+        margin: auto;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+      .stat {
+        font-size: 2rem;
+        color: #facc15;
+      }
+      .flex {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .btn {
+        background: #3b82f6;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 2rem;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      $NAV_HTML
+      <div class="card">
+        <h1>💼 Portfolio</h1>
+        <div class="stat" id="balance">$0.00</div>
+        <div class="stat" id="profit">$0.00</div>
+        <div id="trades"></div>
+        <button id="refreshBtn" class="btn">🔄 Refresh</button>
+      </div>
+    </div>
+    <script>
+      async function fetchData() {
+        const res = await fetch("/api/trade/history", {
+          credentials: "include",
+        });
+        const data = await res.json();
+        let totalProfit = 0;
+        let totalAmount = 0;
+        let html = "<h3>Recent Trades</h3>";
+        data
+          .slice(-20)
+          .reverse()
+          .forEach((t) => {
+            totalAmount += t.amountUSD || 0;
+            totalProfit += t.profit || 0;
+            html += `<div style="background:#0f172a;padding:0.5rem;border-radius:0.5rem;margin:0.3rem 0;">${t.symbol} – $${t.amountUSD} → profit $${(t.profit || 0).toFixed(4)}</div>`;
+          });
+        document.getElementById("balance").textContent =
+          "$" + totalAmount.toFixed(2);
+        document.getElementById("profit").textContent =
+          "$" + totalProfit.toFixed(2);
+        document.getElementById("trades").innerHTML = html;
+      }
+      document
+        .getElementById("refreshBtn")
+        .addEventListener("click", fetchData);
+      fetchData();
+    </script>
+  </body>
+</html>
