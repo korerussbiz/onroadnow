@@ -11,3 +11,4 @@ serviceAccountKey.json
 worker/*.json
 .env
 .devnog/
+.vercel
