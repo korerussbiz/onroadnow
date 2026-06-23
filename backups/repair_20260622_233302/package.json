@@ -1,0 +1,33 @@
+{
+  "name": "onroadnow",
+  "version": "1.0.0",
+  "description": "Montego Bay delivery request system",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node api/index.js",
+    "build": "echo Build done",
+    "vercel-build": "echo done"
+  },
+  "dependencies": {
+    "@octokit/rest": "^22.0.1",
+    "@solana/web3.js": "^1.98.4",
+    "@walletconnect/modal": "^2.7.0",
+    "axios": "^1.18.0",
+    "ccxt": "^4.5.59",
+    "cookie": "^1.1.1",
+    "cors": "^2.8.6",
+    "crypto": "^1.0.1",
+    "dotenv": "^17.4.2",
+    "ethers": "^6.17.0",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.10.0",
+    "google-auth-library": "^10.7.0",
+    "jsonwebtoken": "^9.0.3",
+    "qrcode": "^1.5.4",
+    "stripe": "^22.2.0",
+    "yahoo-finance2": "^3.15.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
