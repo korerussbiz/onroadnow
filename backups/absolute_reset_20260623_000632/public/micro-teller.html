@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Micro-Teller – Deposit Change</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+      }
+      .container {
+        max-width: 700px;
+        margin: auto;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+      .nav {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      }
+      .nav a {
+        color: #60a5fa;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .nav a:hover {
+        color: #facc15;
+      }
+      input,
+      button {
+        font-size: 1.2rem;
+        padding: 0.8rem;
+        border-radius: 0.5rem;
+        border: 1px solid #334155;
+        background: #0f172a;
+        color: #fff;
+        width: 100%;
+        margin: 0.5rem 0;
+      }
+      .btn {
+        background: #3b82f6;
+        border: none;
+        padding: 0.8rem 1.8rem;
+        border-radius: 2rem;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        width: auto;
+      }
+      .btn-success {
+        background: #10b981;
+      }
+      .receipt-box {
+        background: #0f172a;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        margin-top: 1.5rem;
+        border: 1px solid #334155;
+      }
+      .qr-code {
+        max-width: 200px;
+        margin: auto;
+      }
+      .log {
+        background: #0f172a;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 1rem;
+      }
+      .fee-info {
+        color: #94a3b8;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <a href="/">🏠 Home</a>
+        <a href="/micro-login">🔐 Login</a>
+        <a href="/micro-dashboard">📊 Dashboard</a>
+        <a
+          href="/xmr-miner"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
+          >⛏️ XMR Miner</a
+        >
+        <a
+          href="/mining-dashboard"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
+          >📈 Mining Stats</a
+        >
+        <a href="/micro-teller">🧾 Teller</a>
+        <a href="/micro-trade">📈 Trade</a>
+      </div>
+      <div class="card">
+        <h1>🧾 Deposit Spare Change</h1>
+        <p>
+          Enter the amount and customer details. A receipt will be generated for
+          them to claim.
+        </p>
+        <p class="fee-info">
+          💡 A service fee (3‑9%) will be deducted from the round‑up amount
+          before investment.
+        </p>
+        <input
+          type="number"
+          id="amount"
+          placeholder="Amount (USD)"
+          step="0.01"
+        />
+        <input type="text" id="customerName" placeholder="Customer Full Name" />
+        <input
+          type="text"
+          id="customerPhone"
+          placeholder="Phone Number (optional)"
+        />
+        <input type="text" id="customerEmail" placeholder="Email (optional)" />
+        <button id="generateBtn" class="btn btn-success">
+          Generate Receipt
+        </button>
+        <div id="result" style="display: none" class="receipt-box">
+          <h3>✅ Receipt Generated</h3>
+          <p><strong>Receipt ID:</strong> <span id="receiptId"></span></p>
+          <p><strong>Amount:</strong> $<span id="receiptAmount"></span></p>
+          <p>
+            <strong>Round‑up (before fee):</strong> $<span
+              id="receiptRoundup"
+            ></span>
+          </p>
+          <p><strong>Fee:</strong> $<span id="receiptFee"></span></p>
+          <p><strong>Net Invested:</strong> $<span id="receiptNet"></span></p>
+          <p><strong>Customer:</strong> <span id="receiptCustomer"></span></p>
+          <div class="qr-code" id="qrContainer"></div>
+          <p>
+            <a id="claimLink" href="#" target="_blank"
+              >🔗 Claim Your Investment</a
+            >
+          </p>
+          <p><small>Scan QR or click link to login and claim.</small></p>
+        </div>
+        <div id="log" class="log">Ready.</div>
+      </div>
+    </div>
+    <script>
+      async function apiCall(endpoint, options = {}) {
+        const res = await fetch(`/api/${endpoint}`, {
+          ...options,
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        });
+        return res.json();
+      }
+      function addLog(msg) {
+        const logDiv = document.getElementById("log");
+        const p = document.createElement("div");
+        p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logDiv.appendChild(p);
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+      document.getElementById("generateBtn").onclick = async () => {
+        const amount = parseFloat(document.getElementById("amount").value);
+        const name = document.getElementById("customerName").value.trim();
+        const phone = document.getElementById("customerPhone").value.trim();
+        const email = document.getElementById("customerEmail").value.trim();
+        if (isNaN(amount) || amount <= 0) {
+          addLog("❌ Enter a valid amount.");
+          return;
+        }
+        if (!name) {
+          addLog("❌ Customer name is required.");
+          return;
+        }
+        const data = await apiCall("micro/deposit/create", {
+          method: "POST",
+          body: JSON.stringify({ amount, customerName: name, phone, email }),
+        });
+        if (data.error) {
+          addLog(`❌ ${data.error}`);
+          return;
+        }
+        addLog(
+          `✅ Receipt ${data.depositId} – $${data.netInvested.toFixed(2)} invested (fee $${data.fee.toFixed(2)})`,
+        );
+        document.getElementById("receiptId").textContent = data.depositId;
+        document.getElementById("receiptAmount").textContent =
+          data.total.toFixed(2);
+        document.getElementById("receiptRoundup").textContent =
+          data.roundup.toFixed(2);
+        document.getElementById("receiptFee").textContent = data.fee.toFixed(2);
+        document.getElementById("receiptNet").textContent =
+          data.netInvested.toFixed(2);
+        document.getElementById("receiptCustomer").textContent = name;
+        document.getElementById("claimLink").href = data.claimUrl;
+        const qrContainer = document.getElementById("qrContainer");
+        qrContainer.innerHTML = `<img src="${data.qrCode}" alt="QR" style="width:100%;">`;
+        document.getElementById("result").style.display = "block";
+      };
+    </script>
+  </body>
+</html>
