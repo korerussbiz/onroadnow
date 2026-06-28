@@ -1,66 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Xmr-miner</title>
-    <style>
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        font-family: "Inter", sans-serif;
-        background: #0f172a;
-        color: #e2e8f0;
-        padding: 1.5rem;
-        font-size: 1.2rem;
-      }
-      .container {
-        max-width: 900px;
-        margin: auto;
-      }
-      .card {
-        background: #1e293b;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        margin-bottom: 2rem;
-      }
-      .nav {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin-bottom: 1rem;
-      }
-      .nav a {
-        color: #60a5fa;
-        text-decoration: none;
-        font-weight: 600;
-      }
-      .btn {
-        background: #3b82f6;
-        padding: 0.5rem 1.5rem;
-        border-radius: 2rem;
-        color: #fff;
-        text-decoration: none;
-        display: inline-block;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="nav">
-        <a href="/">🏠 Home</a>
-        <a href="/trading">📊 Trading</a>
-        <a href="/portfolio">💼 Portfolio</a>
-        <a href="/mining">⛏️ Mining</a>
-        <a href="/history">📜 History</a>
-        <a href="/xmr-miner">⛏️ XMR</a>
-        <a href="/micro-teller">🧾 Teller</a>
-      </div>
-      <div class="card">
-        <h1>Xmr-miner</h1>
-        <p>This page is under construction. Check back soon.</p>
-        <a href="/" class="btn">Back to Home</a>
-      </div>
-    </div>
-  </body>
-</html>
+<head><meta charset="UTF-8"><title>⛏️ XMR Native Miner</title>
+<style>*{box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}.container{max-width:1000px;margin:auto}.card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}.nav{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;background:#0f172a;padding:0.8rem;border-radius:1rem}.nav a{color:#60a5fa;text-decoration:none;font-weight:600;padding:0.4rem 0.8rem}.nav a:hover{color:#facc15}.btn{background:#3b82f6;padding:0.6rem 1.5rem;border-radius:2rem;color:#fff;text-decoration:none;display:inline-block;border:none;cursor:pointer}.btn:hover{background:#2563eb}.btn-buy{background:#10b981}.btn-sell{background:#ef4444}.log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:200px;overflow-y:auto;font-family:monospace;margin-top:1rem}.flex{display:flex;gap:1rem;flex-wrap:wrap;align-items:center}</style>
+</head>
+<body>
+<div class="container"><div class="nav"><a href="/">🏠 Home</a><a href="/trading">📊 Trading</a><a href="/portfolio">💼 Portfolio</a><a href="/mining">⛏️ Mining</a><a href="/history">📜 History</a><a href="/roundup">🪙 Round‑Up</a><a href="/receipt-invest">🧾 Receipt</a><a href="/referral">👥 Referral</a><a href="/xmr-miner">⛏️ XMR</a><a href="/micro-teller">🧾 Teller</a></div><div class="card"><h1>⛏️ XMR Native Miner</h1>
+<p>Control your local XMRig miner.</p>
+<div class="flex"><button class="btn btn-buy" onclick="startMiner()">▶ Start</button><button class="btn btn-sell" onclick="stopMiner()">⏹ Stop</button><button class="btn" onclick="checkMinerStatus()">🔄 Status</button></div>
+<div id="minerLog" class="log">Ready.</div>
+<script>
+async function startMiner() {
+  const res = await fetch("/api/miner/start", { method: "POST", credentials: "include" });
+  const data = await res.json();
+  document.getElementById("minerLog").innerHTML = "✅ " + (data.message || "Miner started.");
+}
+async function stopMiner() {
+  const res = await fetch("/api/miner/stop", { method: "POST", credentials: "include" });
+  const data = await res.json();
+  document.getElementById("minerLog").innerHTML = "✅ " + (data.message || "Miner stopped.");
+}
+async function checkMinerStatus() {
+  const res = await fetch("/api/miner/status", { credentials: "include" });
+  const data = await res.json();
+  document.getElementById("minerLog").innerHTML = data.running ? "✅ Running" : "⏹ Stopped";
+}
+</script>
+</div></div></body></html>

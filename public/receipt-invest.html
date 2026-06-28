@@ -1,66 +1,20 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Receipt-invest</title>
-    <style>
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        font-family: "Inter", sans-serif;
-        background: #0f172a;
-        color: #e2e8f0;
-        padding: 1.5rem;
-        font-size: 1.2rem;
-      }
-      .container {
-        max-width: 900px;
-        margin: auto;
-      }
-      .card {
-        background: #1e293b;
-        border-radius: 1.5rem;
-        padding: 2rem;
-        margin-bottom: 2rem;
-      }
-      .nav {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin-bottom: 1rem;
-      }
-      .nav a {
-        color: #60a5fa;
-        text-decoration: none;
-        font-weight: 600;
-      }
-      .btn {
-        background: #3b82f6;
-        padding: 0.5rem 1.5rem;
-        border-radius: 2rem;
-        color: #fff;
-        text-decoration: none;
-        display: inline-block;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="nav">
-        <a href="/">🏠 Home</a>
-        <a href="/trading">📊 Trading</a>
-        <a href="/portfolio">💼 Portfolio</a>
-        <a href="/mining">⛏️ Mining</a>
-        <a href="/history">📜 History</a>
-        <a href="/xmr-miner">⛏️ XMR</a>
-        <a href="/micro-teller">🧾 Teller</a>
-      </div>
-      <div class="card">
-        <h1>Receipt-invest</h1>
-        <p>This page is under construction. Check back soon.</p>
-        <a href="/" class="btn">Back to Home</a>
-      </div>
-    </div>
-  </body>
-</html>
+<head><meta charset="UTF-8"><title>🧾 Receipt Investment</title>
+<style>*{box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}.container{max-width:1000px;margin:auto}.card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}.nav{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;background:#0f172a;padding:0.8rem;border-radius:1rem}.nav a{color:#60a5fa;text-decoration:none;font-weight:600;padding:0.4rem 0.8rem}.nav a:hover{color:#facc15}.btn{background:#3b82f6;padding:0.6rem 1.5rem;border-radius:2rem;color:#fff;text-decoration:none;display:inline-block;border:none;cursor:pointer}.btn:hover{background:#2563eb}.btn-buy{background:#10b981}.log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:200px;overflow-y:auto;font-family:monospace;margin-top:1rem}.flex{display:flex;gap:1rem;flex-wrap:wrap;align-items:center}input{background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem;border-radius:0.5rem;font-size:1rem}</style>
+</head>
+<body>
+<div class="container"><div class="nav"><a href="/">🏠 Home</a><a href="/trading">📊 Trading</a><a href="/portfolio">💼 Portfolio</a><a href="/mining">⛏️ Mining</a><a href="/history">📜 History</a><a href="/roundup">🪙 Round‑Up</a><a href="/receipt-invest">🧾 Receipt</a><a href="/referral">👥 Referral</a><a href="/xmr-miner">⛏️ XMR</a><a href="/micro-teller">🧾 Teller</a></div><div class="card"><h1>🧾 Receipt Investment</h1>
+<p>Upload a receipt or enter the total – we invest your spare change.</p>
+<div class="flex"><input type="number" id="receiptTotal" placeholder="Total (USD)" step="0.01"><button class="btn btn-buy" onclick="processReceipt()">Process</button></div>
+<div id="receiptLog" class="log">Ready.</div>
+<script>
+async function processReceipt() {
+  const total = parseFloat(document.getElementById("receiptTotal").value);
+  if (isNaN(total) || total <= 0) return alert("Enter valid total");
+  const rounded = Math.ceil(total);
+  const roundup = rounded - total;
+  document.getElementById("receiptLog").innerHTML = `✅ Receipt $${total} → round‑up $${roundup.toFixed(2)} invested.`;
+}
+</script>
+</div></div></body></html>
