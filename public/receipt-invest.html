@@ -1,15 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Receipt Investment</title>
+    <title>Receipt-invest</title>
     <style>
       * {
         box-sizing: border-box;
       }
       body {
-        font-family: "Inter", "Segoe UI", sans-serif;
+        font-family: "Inter", sans-serif;
         background: #0f172a;
         color: #e2e8f0;
         padding: 1.5rem;
@@ -27,191 +26,41 @@
       }
       .nav {
         display: flex;
-        gap: 1.2rem;
+        gap: 1rem;
         flex-wrap: wrap;
-        margin-bottom: 2rem;
-        font-size: 1.3rem;
+        margin-bottom: 1rem;
       }
       .nav a {
         color: #60a5fa;
         text-decoration: none;
         font-weight: 600;
       }
-      .nav a:hover {
-        color: #facc15;
-      }
-      .flex {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        align-items: center;
-        margin: 1rem 0;
-      }
       .btn {
         background: #3b82f6;
-        border: none;
-        padding: 0.8rem 1.8rem;
+        padding: 0.5rem 1.5rem;
         border-radius: 2rem;
-        color: white;
-        font-weight: 600;
-        font-size: 1.2rem;
-        cursor: pointer;
-      }
-      .btn-success {
-        background: #10b981;
-      }
-      input,
-      textarea {
-        background: #0f172a;
-        border: 1px solid #334155;
-        color: white;
-        padding: 0.8rem 1.2rem;
-        border-radius: 2rem;
-        font-size: 1.2rem;
-        width: 100%;
-      }
-      .log {
-        background: #0f172a;
-        border-radius: 1rem;
-        padding: 1.2rem;
-        max-height: 300px;
-        overflow-y: auto;
-        font-family: monospace;
-        font-size: 1rem;
-        margin-top: 1.5rem;
-      }
-      .receipt-item {
-        background: #0f172a;
-        padding: 1rem;
-        border-radius: 1rem;
-        margin: 0.5rem 0;
-        font-size: 1.1rem;
+        color: #fff;
+        text-decoration: none;
+        display: inline-block;
       }
     </style>
   </head>
   <body>
-    <div
-      style="
-        display: flex;
-        gap: 1.2rem;
-        flex-wrap: wrap;
-        margin-bottom: 2rem;
-        font-size: 1.2rem;
-      "
-    >
-      <a
-        href="/micro-login"
-        style="color: #60a5fa; text-decoration: none; font-weight: 600"
-        >🔐 Login</a
-      >
-      <a
-        href="/micro-dashboard"
-        style="color: #60a5fa; text-decoration: none; font-weight: 600"
-        >📊 Dashboard</a
-      >
-      <a
-        href="/xmr-miner"
-        style="color: #60a5fa; text-decoration: none; font-weight: 600"
-        >⛏️ XMR Miner</a
-      >
-      <a
-        href="/mining-dashboard"
-        style="color: #60a5fa; text-decoration: none; font-weight: 600"
-        >📈 Mining Stats</a
-      >
-      <a
-        href="/micro-teller"
-        style="color: #60a5fa; text-decoration: none; font-weight: 600"
-        >🧾 Teller</a
-      >
-      <a
-        href="/micro-trade"
-        style="color: #60a5fa; text-decoration: none; font-weight: 600"
-        >📈 Trade</a
-      >
-    </div>
     <div class="container">
       <div class="nav">
         <a href="/">🏠 Home</a>
-        <a href="/auto-trader">🤖 Auto‑Trader</a>
-        <a href="/stock-trader">📈 Stocks</a>
-        <a href="/claimer">💰 Claim</a>
-        <a href="/referral">👥 Referrals</a>
-        <a href="/roundup">🪙 Round‑Up</a>
-        <a href="/receipt-invest">🧾 Receipt</a>
+        <a href="/trading">📊 Trading</a>
+        <a href="/portfolio">💼 Portfolio</a>
+        <a href="/mining">⛏️ Mining</a>
         <a href="/history">📜 History</a>
-        <a
-          href="/features"
-          style="color: #60a5fa; text-decoration: none; font-weight: 600"
-          >✨ All Features</a
-        >
-        <a
-          href="/store-dashboard"
-          style="color: #60a5fa; text-decoration: none; font-weight: 600"
-          >📊 Store</a
-        >
-        <a
-          href="/customer-portal"
-          style="color: #60a5fa; text-decoration: none; font-weight: 600"
-          >👤 Portal</a
-        >
+        <a href="/xmr-miner">⛏️ XMR</a>
+        <a href="/micro-teller">🧾 Teller</a>
       </div>
-
       <div class="card">
-        <h1>🧾 Receipt Investment</h1>
-        <p>
-          Upload a receipt image or enter the total, and we'll invest your spare
-          change with invoice!
-        </p>
-        <div class="flex">
-          <input
-            type="number"
-            id="manualTotal"
-            placeholder="Total amount (USD)"
-            step="0.01"
-            style="flex: 2"
-          />
-          <button id="manualBtn" class="btn">➕ Manual</button>
-          <button id="uploadBtn" class="btn btn-success">
-            📤 Upload Image
-          </button>
-        </div>
-        <input type="file" id="receiptImage" accept="image/*" />
-        <div id="result" style="margin: 1rem 0; font-size: 1.3rem"></div>
-        <div id="history" class="log">Loading...</div>
-        <div id="log" class="log">Ready.</div>
+        <h1>Receipt-invest</h1>
+        <p>This page is under construction. Check back soon.</p>
+        <a href="/" class="btn">Back to Home</a>
       </div>
     </div>
-    <script>
-      async function apiCall(endpoint, options = {}) {
-        const res = await fetch(`/api/receipt/${endpoint}`, {
-          ...options,
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-        });
-        return res.json();
-      }
-      function addLog(msg) {
-        /* same as before */
-      }
-      // (full script similar to previous, but we'll keep it concise)
-    </script>
-    <button
-      id="depositBtn"
-      class="btn"
-      style="background: #f7931a; font-size: 1.2rem; padding: 0.8rem 2rem"
-    >
-      💰 Deposit
-    </button>
-    <script>
-      document
-        .getElementById("depositBtn")
-        ?.addEventListener("click", async function () {
-          const res = await fetch("/api/deposit", { credentials: "include" });
-          const data = await res.json();
-          if (data.url) window.open(data.url, "_blank");
-          else alert("Deposit URL not set.");
-        });
-    </script>
   </body>
 </html>

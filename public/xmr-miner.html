@@ -1,135 +1,66 @@
 <!doctype html>
 <html>
   <head>
-    <title>XMR Mining – Local Bridge</title>
+    <meta charset="UTF-8" />
+    <title>Xmr-miner</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
       body {
+        font-family: "Inter", sans-serif;
         background: #0f172a;
         color: #e2e8f0;
-        font-family: monospace;
-        padding: 2rem;
+        padding: 1.5rem;
+        font-size: 1.2rem;
       }
-      .stats {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        gap: 1rem;
+      .container {
+        max-width: 900px;
+        margin: auto;
       }
-      .stat {
+      .card {
         background: #1e293b;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        text-align: center;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
       }
-      .value {
-        font-size: 2.5rem;
-        color: #facc15;
+      .nav {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
       }
-      button {
-        background: #10b981;
-        border: none;
-        padding: 0.8rem 2rem;
+      .nav a {
+        color: #60a5fa;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .btn {
+        background: #3b82f6;
+        padding: 0.5rem 1.5rem;
         border-radius: 2rem;
         color: #fff;
-        font-size: 1.2rem;
-        cursor: pointer;
-        margin: 0.3rem;
-      }
-      .danger {
-        background: #ef4444;
-      }
-      .log {
-        background: #1e293b;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin-top: 1rem;
-        max-height: 200px;
-        overflow-y: auto;
+        text-decoration: none;
+        display: inline-block;
       }
     </style>
   </head>
   <body>
-    <h1>⛏️ XMR Mining (Local Bridge)</h1>
-    <p>Wallet: 9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2</p>
-    <p>
-      <small>Status: <span id="bridgeStatus">Checking...</span></small>
-    </p>
-    <div>
-      <button id="startBtn">▶ Start Miner</button>
-      <button id="stopBtn" class="danger">⏹ Stop</button>
-      <button id="statusBtn">🔄 Check Status</button>
-    </div>
-    <div class="stats">
-      <div class="stat">
-        <div class="value" id="hashrate">0</div>
-        <div>Hashrate (H/s)</div>
+    <div class="container">
+      <div class="nav">
+        <a href="/">🏠 Home</a>
+        <a href="/trading">📊 Trading</a>
+        <a href="/portfolio">💼 Portfolio</a>
+        <a href="/mining">⛏️ Mining</a>
+        <a href="/history">📜 History</a>
+        <a href="/xmr-miner">⛏️ XMR</a>
+        <a href="/micro-teller">🧾 Teller</a>
       </div>
-      <div class="stat">
-        <div class="value" id="balance">0.000000</div>
-        <div>Unpaid Balance</div>
-      </div>
-      <div class="stat">
-        <div class="value" id="value">$0.00</div>
-        <div>Value (USD)</div>
+      <div class="card">
+        <h1>Xmr-miner</h1>
+        <p>This page is under construction. Check back soon.</p>
+        <a href="/" class="btn">Back to Home</a>
       </div>
     </div>
-    <div id="log" class="log">Ready.</div>
-
-    <script>
-      const BASE = "http://localhost:3001"; // local bridge
-
-      function log(msg) {
-        const el = document.getElementById("log");
-        el.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
-        el.scrollTop = el.scrollHeight;
-      }
-
-      async function api(method, endpoint, body) {
-        try {
-          const res = await fetch(`${BASE}${endpoint}`, {
-            method,
-            headers: { "Content-Type": "application/json" },
-            body: body ? JSON.stringify(body) : undefined,
-          });
-          return await res.json();
-        } catch (e) {
-          document.getElementById("bridgeStatus").textContent = "❌ Offline";
-          log("❌ Cannot reach bridge. Is it running?");
-          throw e;
-        }
-      }
-
-      async function fetchStats() {
-        try {
-          const data = await api("GET", "/api/mining/stats");
-          document.getElementById("hashrate").textContent =
-            data.hashrate.toLocaleString();
-          document.getElementById("balance").textContent =
-            data.balance.toFixed(6);
-          document.getElementById("value").textContent =
-            "$" + data.valueUSD.toFixed(2);
-          document.getElementById("bridgeStatus").textContent = "✅ Online";
-        } catch (e) {
-          /* ignore */
-        }
-      }
-
-      document.getElementById("startBtn").onclick = async () => {
-        const data = await api("POST", "/api/miner/start");
-        log("✅ " + (data.status || "Started"));
-      };
-
-      document.getElementById("stopBtn").onclick = async () => {
-        const data = await api("POST", "/api/miner/stop");
-        log("⏹️ " + (data.status || "Stopped"));
-      };
-
-      document.getElementById("statusBtn").onclick = async () => {
-        const data = await api("GET", "/api/miner/status");
-        log("🔄 " + (data.running ? "Miner is running" : "Miner is stopped"));
-      };
-
-      fetchStats();
-      setInterval(fetchStats, 10000);
-    </script>
   </body>
 </html>
