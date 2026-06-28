@@ -1,21 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head><meta charset="UTF-8"><title>👥 Referral & MLM</title>
-<style>*{box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}.container{max-width:1000px;margin:auto}.card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}.nav{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;background:#0f172a;padding:0.8rem;border-radius:1rem}.nav a{color:#60a5fa;text-decoration:none;font-weight:600;padding:0.4rem 0.8rem}.nav a:hover{color:#facc15}.btn{background:#3b82f6;padding:0.6rem 1.5rem;border-radius:2rem;color:#fff;text-decoration:none;display:inline-block;border:none;cursor:pointer}.btn:hover{background:#2563eb}.grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}.stat{background:#0f172a;padding:1rem;border-radius:0.5rem;text-align:center}.stat-value{font-size:2.5rem;color:#facc15}</style>
-</head>
-<body>
-<div class="container"><div class="nav"><a href="/">🏠 Home</a><a href="/trading">📊 Trading</a><a href="/portfolio">💼 Portfolio</a><a href="/mining">⛏️ Mining</a><a href="/history">📜 History</a><a href="/roundup">🪙 Round‑Up</a><a href="/receipt-invest">🧾 Receipt</a><a href="/referral">👥 Referral</a><a href="/xmr-miner">⛏️ XMR</a><a href="/micro-teller">🧾 Teller</a></div><div class="card"><h1>👥 Referral & MLM</h1>
-<p>Share your referral link and earn commissions.</p>
-<p>Your link: <span id="refLink">Loading...</span></p>
-<button class="btn" onclick="copyRef()">📋 Copy Link</button>
-<div class="grid"><div class="stat"><div class="stat-value">$12.50</div><div>Earnings</div></div><div class="stat"><div class="stat-value">3</div><div>Downline</div></div></div>
-<script>
-const refId = Math.random().toString(36).substr(2,6);
-document.getElementById("refLink").textContent = window.location.origin + "/?ref=" + refId;
-function copyRef() {
-  const link = document.getElementById("refLink").textContent;
-  navigator.clipboard?.writeText(link);
-  alert("Link copied!");
-}
-</script>
-</div></div></body></html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>👥 Referral & MLM</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+      }
+      .container {
+        max-width: 1000px;
+        margin: auto;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+      .nav {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        background: #0f172a;
+        padding: 0.8rem;
+        border-radius: 1rem;
+      }
+      .nav a {
+        color: #60a5fa;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.4rem 0.8rem;
+      }
+      .nav a:hover {
+        color: #facc15;
+      }
+      .btn {
+        background: #3b82f6;
+        padding: 0.6rem 1.5rem;
+        border-radius: 2rem;
+        color: #fff;
+        text-decoration: none;
+        display: inline-block;
+        border: none;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #2563eb;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+      .stat {
+        background: #0f172a;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+      }
+      .stat-value {
+        font-size: 2.5rem;
+        color: #facc15;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="nav">
+        <a href="/">🏠 Home</a><a href="/trading">📊 Trading</a
+        ><a href="/portfolio">💼 Portfolio</a><a href="/mining">⛏️ Mining</a
+        ><a href="/history">📜 History</a><a href="/roundup">🪙 Round‑Up</a
+        ><a href="/receipt-invest">🧾 Receipt</a
+        ><a href="/referral">👥 Referral</a><a href="/xmr-miner">⛏️ XMR</a
+        ><a href="/micro-teller">🧾 Teller</a>
+      </div>
+      <div class="card">
+        <h1>👥 Referral & MLM</h1>
+        <p>Share your referral link and earn commissions.</p>
+        <p>Your link: <span id="refLink">Loading...</span></p>
+        <button class="btn" onclick="copyRef()">📋 Copy Link</button>
+        <div class="grid">
+          <div class="stat">
+            <div class="stat-value">$12.50</div>
+            <div>Earnings</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">3</div>
+            <div>Downline</div>
+          </div>
+        </div>
+        <script>
+          const refId = Math.random().toString(36).substr(2, 6);
+          document.getElementById("refLink").textContent =
+            window.location.origin + "/?ref=" + refId;
+          function copyRef() {
+            const link = document.getElementById("refLink").textContent;
+            navigator.clipboard?.writeText(link);
+            alert("Link copied!");
+          }
+        </script>
+      </div>
+    </div>
+  </body>
+</html>

@@ -6,12 +6,7 @@
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/index.js" },
-    { "src": "/trading", "dest": "/public/trading.html" },
-    { "src": "/portfolio", "dest": "/public/portfolio.html" },
-    { "src": "/mining", "dest": "/public/mining.html" },
-    { "src": "/history", "dest": "/public/history.html" },
-    { "src": "/xmr-miner", "dest": "/public/xmr-miner.html" },
-    { "src": "/micro-teller", "dest": "/public/micro-teller.html" },
+\n    { "src": "/auto-trader", "dest": "/public/auto-trader.html" },\n    { "src": "/claim-bot", "dest": "/public/claim-bot.html" },\n    { "src": "/claimer", "dest": "/public/claimer.html" },\n    { "src": "/customer-portal", "dest": "/public/customer-portal.html" },\n    { "src": "/features", "dest": "/public/features.html" },\n    { "src": "/history", "dest": "/public/history.html" },\n    { "src": "/marketplace", "dest": "/public/marketplace.html" },\n    { "src": "/micro-dashboard", "dest": "/public/micro-dashboard.html" },\n    { "src": "/micro-login", "dest": "/public/micro-login.html" },\n    { "src": "/micro-signup", "dest": "/public/micro-signup.html" },\n    { "src": "/micro-teller", "dest": "/public/micro-teller.html" },\n    { "src": "/micro-trade", "dest": "/public/micro-trade.html" },\n    { "src": "/mining-dashboard", "dest": "/public/mining-dashboard.html" },\n    { "src": "/mining-stats", "dest": "/public/mining-stats.html" },\n    { "src": "/mining", "dest": "/public/mining.html" },\n    { "src": "/portfolio", "dest": "/public/portfolio.html" },\n    { "src": "/poster", "dest": "/public/poster.html" },\n    { "src": "/receipt-invest", "dest": "/public/receipt-invest.html" },\n    { "src": "/referral", "dest": "/public/referral.html" },\n    { "src": "/roundup", "dest": "/public/roundup.html" },\n    { "src": "/share-banner", "dest": "/public/share-banner.html" },\n    { "src": "/stock-trader", "dest": "/public/stock-trader.html" },\n    { "src": "/store-dashboard", "dest": "/public/store-dashboard.html" },\n    { "src": "/terms", "dest": "/public/terms.html" },\n    { "src": "/trader", "dest": "/public/trader.html" },\n    { "src": "/trading", "dest": "/public/trading.html" },\n    { "src": "/xmr-miner", "dest": "/public/xmr-miner.html" },
     { "src": "/", "dest": "/public/index.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
