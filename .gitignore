@@ -11,7 +11,3 @@ serviceAccountKey.json
 worker/*.json
 .env
 .devnog/
-.vercel
-koreruss*.env
-.env*
-serviceAccountKey.json
