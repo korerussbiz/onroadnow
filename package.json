@@ -2,9 +2,9 @@
   "name": "onroadnow",
   "version": "1.0.0",
   "description": "Montego Bay delivery request system",
-  "main": "api/index.js",
+  "main": "api/main.js",
   "scripts": {
-    "start": "node api/index.js",
+    "start": "node api/main.js",
     "build": "echo Build done",
     "vercel-build": "echo done"
   },

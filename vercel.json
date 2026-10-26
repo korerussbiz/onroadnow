@@ -14,8 +14,12 @@
       "dest": "/api/webhook/stripe.js"
     },
     {
+      "src": "/api/integrate/(.*)",
+      "dest": "/api/integrate/index.js"
+    },
+    {
       "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "dest": "/api/main.js"
     },
     {
       "src": "/products",
