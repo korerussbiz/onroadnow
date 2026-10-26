@@ -3,26 +3,6 @@
   "framework": null,
   "rewrites": [
     {
-      "source": "/api/quote",
-      "destination": "/api/sales"
-    },
-    {
-      "source": "/api/checkout",
-      "destination": "/api/sales"
-    },
-    {
-      "source": "/api/webhook/stripe",
-      "destination": "/api/sales"
-    },
-    {
-      "source": "/api/sales/(.*)",
-      "destination": "/api/sales"
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index"
-    },
-    {
       "source": "/products",
       "destination": "/public/products.html"
     },

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jamaican Products — OnRoadNow</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #f8f4e9; color: #2c3e50; }
+    header { background: #2c3e50; color: white; padding: 1rem 2rem; }
+    header a { color: #f8f4e9; margin-right: 1.5rem; text-decoration: none; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; padding: 2rem; }
+    .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+    .card img { width: 100%; height: 200px; object-fit: cover; background: #ddd; }
+    .card .body { padding: 1rem; }
+    .card h3 { margin: 0 0 0.5rem; }
+    .card .price { font-size: 1.25rem; font-weight: bold; color: #e67e22; }
+    .card select, .card button { width: 100%; padding: 0.6rem; margin-top: 0.5rem; border-radius: 6px; border: 1px solid #ccc; font-size: 1rem; }
+    .card button { background: #27ae60; color: white; border: none; cursor: pointer; }
+    .card button:hover { background: #229954; }
+    .card button:disabled { background: #95a5a6; cursor: wait; }
+    .affiliate { background: #ecf0f1; padding: 2rem; margin: 2rem; border-radius: 12px; }
+    .affiliate a { display: inline-block; background: #8e44ad; color: white; padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; margin: 0.3rem; }
+    .note { font-size: 0.85rem; color: #7f8c8d; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/">← Home</a>
+    <a href="/store-dashboard">Store Dashboard</a>
+    <a href="/features">Features</a>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="affiliate">
+    <h2>Partner Brands (earn 10% commission)</h2>
+    <p>These Jamaican brands pay you directly when you refer customers. Click to join their affiliate program:</p>
+    <a href="https://www.cookiesjamaica.com/partner/" target="_blank" rel="noopener">Cookies Jamaica — 10%</a>
+    <a href="https://boadhaus.com/store/" target="_blank" rel="noopener">BoadHaus — 10% / 25% recurring</a>
+    <a href="https://sekkle.com" target="_blank" rel="noopener">Sekkle — 10%</a>
+  </div>
+
+  <script>
+    const PRODUCTS = [
+      { id: 'jerk-sauce-001', name: 'Authentic Jamaican Jerk Sauce', image: '/images/products/jerk-sauce.jpg', desc: 'Slow-cooked Scotch bonnet and pimento jerk sauce.' },
+      { id: 'bmg-coffee-001', name: 'Blue Mountain Coffee (454g)', image: '/images/products/bmg-coffee.jpg', desc: 'Genuine Jamaica Blue Mountain Coffee, roasted and sealed.' },
+      { id: 'sea-moss-001', name: 'Wildcrafted Sea Moss Gel (4oz)', image: '/images/products/sea-moss.jpg', desc: 'Sorrel-infused sea moss gel.' },
+    ];
+
+    const DESTINATIONS = [
+      { code: 'US', label: 'United States (USD)' },
+      { code: 'CA', label: 'Canada (CAD)' },
+      { code: 'UK', label: 'United Kingdom (GBP)' },
+      { code: 'JM', label: 'Jamaica (JMD)' },
+    ];
+
+    const grid = document.getElementById('grid');
+    grid.innerHTML = PRODUCTS.map(p => `
+      <div class="card" data-id="${p.id}">
+        <img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'">
+        <div class="body">
+          <h3>${p.name}</h3>
+          <p class="note">${p.desc}</p>
+          <select class="dest">
+            ${DESTINATIONS.map(d => `<option value="${d.code}">${d.label}</option>`).join('')}
+          </select>
+          <div class="price">Loading…</div>
+          <button class="buy" disabled>Buy</button>
+        </div>
+      </div>
+    `).join('');
+
+    async function quote(card) {
+      const id = card.dataset.id;
+      const dest = card.querySelector('.dest').value;
+      const priceEl = card.querySelector('.price');
+      priceEl.textContent = 'Calculating…';
+      try {
+        const r = await fetch('/api/quote', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId: id, destination: dest }),
+        });
+        if (!r.ok) throw new Error('quote failed');
+        const q = await r.json();
+        priceEl.textContent = `${q.totalLocal.toFixed(2)} ${q.currency}`;
+        card.querySelector('.buy').disabled = false;
+      } catch (e) {
+        priceEl.textContent = 'Unavailable';
+      }
+    }
+
+    grid.querySelectorAll('.card').forEach(card => {
+      card.querySelector('.dest').addEventListener('change', () => quote(card));
+      quote(card);
+
+      card.querySelector('.buy').addEventListener('click', async () => {
+        const btn = card.querySelector('.buy');
+        btn.disabled = true;
+        btn.textContent = 'Redirecting…';
+        const dest = card.querySelector('.dest').value;
+        const r = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ destination: dest, items: [{ productId: card.dataset.id, quantity: 1 }] }),
+        });
+        const data = await r.json();
+        if (data.url) window.location.href = data.url;
+        else { btn.textContent = 'Try again'; btn.disabled = false; }
+      });
+    });
+  </script>
+</body>
+</html>
