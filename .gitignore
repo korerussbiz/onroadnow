@@ -12,3 +12,7 @@ worker/*.json
 .env
 .devnog/
 .env.*
+*.broken.*
+*.legacy-builds
+*.backup-before-sales
+vercel.json.bak*
