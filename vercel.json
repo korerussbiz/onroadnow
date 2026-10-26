@@ -3,23 +3,23 @@
   "routes": [
     {
       "src": "/api/quote",
-      "dest": "/api/quote.js"
+      "dest": "/api/quote"
     },
     {
       "src": "/api/checkout",
-      "dest": "/api/checkout.js"
+      "dest": "/api/checkout"
     },
     {
       "src": "/api/webhook/stripe",
-      "dest": "/api/webhook/stripe.js"
+      "dest": "/api/webhook/stripe"
     },
     {
       "src": "/api/integrate/(.*)",
-      "dest": "/api/integrate/index.js"
+      "dest": "/api/integrate/index"
     },
     {
       "src": "/api/(.*)",
-      "dest": "/api/main.js"
+      "dest": "/api/main"
     },
     {
       "src": "/products",

@@ -1,4 +1,4 @@
-const { computePrice } = require('../lib/pricing');
+const { computePrice } = require('../lib/pricing.js');
 
 const PRODUCTS = {
   'jerk-sauce-001': { name: 'Authentic Jamaican Jerk Sauce', baseCostJMD: 450,  packagingJMD: 80,  localDeliveryJMD: 200, weight_kg: 0.5, image: '/images/products/jerk-sauce.jpg' },
