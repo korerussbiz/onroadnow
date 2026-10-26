@@ -1,159 +1,146 @@
 {
   "version": 2,
-  "builds": [
+  "framework": null,
+  "rewrites": [
     {
-      "src": "api/index.js",
-      "use": "@vercel/node"
+      "source": "/api/quote",
+      "destination": "/api/sales"
     },
     {
-      "src": "api/sales.js",
-      "use": "@vercel/node"
+      "source": "/api/checkout",
+      "destination": "/api/sales"
     },
     {
-      "src": "public/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/quote",
-      "dest": "/api/sales.js"
+      "source": "/api/webhook/stripe",
+      "destination": "/api/sales"
     },
     {
-      "src": "/api/checkout",
-      "dest": "/api/sales.js"
+      "source": "/api/sales/(.*)",
+      "destination": "/api/sales"
     },
     {
-      "src": "/api/webhook/stripe",
-      "dest": "/api/sales.js"
+      "source": "/api/(.*)",
+      "destination": "/api/index"
     },
     {
-      "src": "/api/sales/(.*)",
-      "dest": "/api/sales.js"
+      "source": "/products",
+      "destination": "/public/products.html"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/index.js"
+      "source": "/auto-trader",
+      "destination": "/public/auto-trader.html"
     },
     {
-      "src": "/products",
-      "dest": "/public/products.html"
+      "source": "/claim-bot",
+      "destination": "/public/claim-bot.html"
     },
     {
-      "src": "/auto-trader",
-      "dest": "/public/auto-trader.html"
+      "source": "/claimer",
+      "destination": "/public/claimer.html"
     },
     {
-      "src": "/claim-bot",
-      "dest": "/public/claim-bot.html"
+      "source": "/customer-portal",
+      "destination": "/public/customer-portal.html"
     },
     {
-      "src": "/claimer",
-      "dest": "/public/claimer.html"
+      "source": "/features",
+      "destination": "/public/features.html"
     },
     {
-      "src": "/customer-portal",
-      "dest": "/public/customer-portal.html"
+      "source": "/history",
+      "destination": "/public/history.html"
     },
     {
-      "src": "/features",
-      "dest": "/public/features.html"
+      "source": "/marketplace",
+      "destination": "/public/marketplace.html"
     },
     {
-      "src": "/history",
-      "dest": "/public/history.html"
+      "source": "/micro-dashboard",
+      "destination": "/public/micro-dashboard.html"
     },
     {
-      "src": "/marketplace",
-      "dest": "/public/marketplace.html"
+      "source": "/micro-login",
+      "destination": "/public/micro-login.html"
     },
     {
-      "src": "/micro-dashboard",
-      "dest": "/public/micro-dashboard.html"
+      "source": "/micro-signup",
+      "destination": "/public/micro-signup.html"
     },
     {
-      "src": "/micro-login",
-      "dest": "/public/micro-login.html"
+      "source": "/micro-teller",
+      "destination": "/public/micro-teller.html"
     },
     {
-      "src": "/micro-signup",
-      "dest": "/public/micro-signup.html"
+      "source": "/micro-trade",
+      "destination": "/public/micro-trade.html"
     },
     {
-      "src": "/micro-teller",
-      "dest": "/public/micro-teller.html"
+      "source": "/mining-dashboard",
+      "destination": "/public/mining-dashboard.html"
     },
     {
-      "src": "/micro-trade",
-      "dest": "/public/micro-trade.html"
+      "source": "/mining-stats",
+      "destination": "/public/mining-stats.html"
     },
     {
-      "src": "/mining-dashboard",
-      "dest": "/public/mining-dashboard.html"
+      "source": "/mining",
+      "destination": "/public/mining.html"
     },
     {
-      "src": "/mining-stats",
-      "dest": "/public/mining-stats.html"
+      "source": "/portfolio",
+      "destination": "/public/portfolio.html"
     },
     {
-      "src": "/mining",
-      "dest": "/public/mining.html"
+      "source": "/poster",
+      "destination": "/public/poster.html"
     },
     {
-      "src": "/portfolio",
-      "dest": "/public/portfolio.html"
+      "source": "/receipt-invest",
+      "destination": "/public/receipt-invest.html"
     },
     {
-      "src": "/poster",
-      "dest": "/public/poster.html"
+      "source": "/referral",
+      "destination": "/public/referral.html"
     },
     {
-      "src": "/receipt-invest",
-      "dest": "/public/receipt-invest.html"
+      "source": "/roundup",
+      "destination": "/public/roundup.html"
     },
     {
-      "src": "/referral",
-      "dest": "/public/referral.html"
+      "source": "/share-banner",
+      "destination": "/public/share-banner.html"
     },
     {
-      "src": "/roundup",
-      "dest": "/public/roundup.html"
+      "source": "/stock-trader",
+      "destination": "/public/stock-trader.html"
     },
     {
-      "src": "/share-banner",
-      "dest": "/public/share-banner.html"
+      "source": "/store-dashboard",
+      "destination": "/public/store-dashboard.html"
     },
     {
-      "src": "/stock-trader",
-      "dest": "/public/stock-trader.html"
+      "source": "/terms",
+      "destination": "/public/terms.html"
     },
     {
-      "src": "/store-dashboard",
-      "dest": "/public/store-dashboard.html"
+      "source": "/trader",
+      "destination": "/public/trader.html"
     },
     {
-      "src": "/terms",
-      "dest": "/public/terms.html"
+      "source": "/trading",
+      "destination": "/public/trading.html"
     },
     {
-      "src": "/trader",
-      "dest": "/public/trader.html"
+      "source": "/xmr-miner",
+      "destination": "/public/xmr-miner.html"
     },
     {
-      "src": "/trading",
-      "dest": "/public/trading.html"
+      "source": "/",
+      "destination": "/public/index.html"
     },
     {
-      "src": "/xmr-miner",
-      "dest": "/public/xmr-miner.html"
-    },
-    {
-      "src": "/",
-      "dest": "/public/index.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/public/$1"
+      "source": "/(.*)",
+      "destination": "/public/$1"
     }
   ]
 }
