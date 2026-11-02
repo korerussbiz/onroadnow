@@ -1,0 +1,35 @@
+{
+  "owner": "KorerussBiz",
+  "tagline": "Tools & platforms I actually use",
+  "categories": [
+    {
+      "title": "Crypto",
+      "links": [
+        { "name": "Binance", "url": "https://account.binance.com/register?ref=815612060", "note": "Trade, earn, launchpad" },
+        { "name": "Coinbase", "url": "https://www.coinbase.com/join/russel_wd", "note": "Get $10 in BTC on first trade" }
+      ]
+    },
+    {
+      "title": "Music & Creative",
+      "links": [
+        { "name": "DistroKid", "url": "https://distrokid.com/vip/seven/5424203", "note": "Upload unlimited music" },
+        { "name": "Koreruss Music", "url": "https://koreruss-music.vercel.app", "note": "My own catalogue" }
+      ]
+    },
+    {
+      "title": "Money & Business",
+      "links": [
+        { "name": "KorerussBiz Signals", "url": "https://korerussbiz-signals.vercel.app", "note": "Trading scripts & tools" },
+        { "name": "Patreon", "url": "https://www.patreon.com/koreruss", "note": "Monthly support" }
+      ]
+    },
+    {
+      "title": "Support",
+      "links": [
+        { "name": "PayPal", "url": "https://www.paypal.me/KoreyRussell809/4.99", "note": "Buy a track" },
+        { "name": "Cash App", "url": "https://cash.app/$koreruss", "note": "Direct tip" },
+        { "name": "Ko-fi", "url": "https://ko-fi.com/koreruss", "note": "Coffee" }
+      ]
+    }
+  ]
+}

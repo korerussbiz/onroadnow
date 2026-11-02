@@ -1,0 +1,7 @@
+node_modules/
+.env
+*.env
+data/events.csv
+data/subscribers.csv
+*.log
+.DS_Store

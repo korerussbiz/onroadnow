@@ -1,0 +1,17 @@
+{
+  "platforms": {
+    "meta": {"allowed":"restricted","requires_approval":true},
+    "x": {"allowed":"yes_with_rules"},
+    "google": {"allowed":"restricted"},
+    "tiktok": {"allowed":"restricted"},
+    "reddit": {"allowed":"yes_in_promoted"}
+  },
+  "campaign_template": {
+    "name":"referral-hub-launch","objective":"traffic","budget_daily_usd":10,
+    "geo":["US","CA","GB","AU","JM"],"age_min":25,"exclude":["minors"],
+    "creative_variants":["A","B"],
+    "landing_url":"https://REPLACE_WITH_TUNNEL_OR_DOMAIN/?utm_source={platform}&utm_campaign=launch",
+    "compliance":{"affiliate_disclosure_on_page":true,"risk_warning_on_page":true,
+      "no_guaranteed_earnings_claims":true,"no_shortlink_destinations":true}
+  }
+}

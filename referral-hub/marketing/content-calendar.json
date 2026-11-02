@@ -1,0 +1,18 @@
+{
+  "cadence":"3-5 posts/week per platform",
+  "rotate":[
+    {"type":"project-update","hook":"What I'm building this week","cta":"Hub in bio"},
+    {"type":"explainer","hook":"How referral links fund my tools","cta":"Full disclosure on hub"},
+    {"type":"safety","hook":"Never share your seed phrase","cta":"Only vetted links on my hub"},
+    {"type":"progress","hook":"Where referral funds went this month","cta":"See breakdown"},
+    {"type":"spotlight","hook":"One vetted tool this week","cta":"Link + risk note on hub"}
+  ],
+  "rules":[
+    "Never post same link twice in a row",
+    "Never DM links unsolicited",
+    "Only post where self-promo is allowed",
+    "Always disclose referral status",
+    "Always include risk warning",
+    "Link to the hub, not individual offers"
+  ]
+}

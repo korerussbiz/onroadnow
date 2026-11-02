@@ -1,0 +1,33 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Metrics</title>
+<style>
+body{font-family:system-ui;background:#0a0a0a;color:#e0e0e0;max-width:900px;margin:2rem auto;padding:0 1rem}
+h1,h2{color:#f7931a}
+table{border-collapse:collapse;width:100%;margin:1rem 0}
+td,th{border:1px solid #2a2a2a;padding:.4rem .6rem;text-align:left}
+.num{font-variant-numeric:tabular-nums}
+</style></head><body>
+<h1>Funnel Metrics</h1>
+<div id="out">Loading…</div>
+<script>
+const token = new URLSearchParams(location.search).get("token");
+fetch("/api/metrics?token=" + encodeURIComponent(token))
+  .then(r => r.json())
+  .then(render)
+  .catch(() => document.getElementById("out").textContent = "Unauthorized or error.");
+function table(title, obj) {
+  const rows = Object.entries(obj).map(([k, v]) => {
+    const ctr = v.view ? ((v.click / v.view) * 100).toFixed(1) + "%" : "—";
+    const cv = v.click ? ((v.signup / v.click) * 100).toFixed(1) + "%" : "—";
+    return `<tr><td>${k}</td><td class="num">${v.view}</td><td class="num">${v.click}</td><td class="num">${v.signup||0}</td><td class="num">${ctr}</td><td class="num">${cv}</td></tr>`;
+  }).join("");
+  return `<h2>${title}</h2><table><tr><th>Key</th><th>Views</th><th>Clicks</th><th>Signups</th><th>CTR</th><th>Click→Signup</th></tr>${rows}</table>`;
+}
+function render(d) {
+  document.getElementById("out").innerHTML =
+    `<p><strong>Subscribers:</strong> ${d.subscribers}</p>` +
+    table("By source", d.bySource) +
+    table("By variant", d.byVariant) +
+    table("By link", d.byLink);
+}
+</script></body></html>

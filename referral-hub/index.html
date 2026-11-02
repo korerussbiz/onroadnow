@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KorerussBiz — Tools I Use</title>
+<meta name="description" content="Curated tools, platforms, and services I use and recommend. Support KorerussBiz when you sign up. Some links are referral links.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>⚡ KorerussBiz</h1>
+  <p id="tagline"></p>
+</header>
+<main>
+  <div id="hub"></div>
+
+  <section class="capture">
+    <h2>Get updates</h2>
+    <p>Occasional notes on tools, projects, and where referral funds go. No spam, unsubscribe anytime.</p>
+    <form id="sub-form">
+      <input type="email" id="sub-email" placeholder="you@example.com" required>
+      <button type="submit">Subscribe</button>
+    </form>
+    <p id="sub-msg" role="status"></p>
+  </section>
+
+  <section class="disclosure">
+    <h2>Disclosure</h2>
+    <p>Some links on this page are referral/affiliate links. We may earn a commission at no extra cost to you. This doesn’t change what we recommend.</p>
+    <h2>Risk warning</h2>
+    <p>Crypto and cloud-mining services are high-risk. Never share seed phrases or private keys. No earnings are guaranteed. Nothing here is financial advice.</p>
+    <h2>Privacy</h2>
+    <p>We log anonymous click counts (hashed, rotating daily). We do not store raw IPs.</p>
+  </section>
+</main>
+<footer>
+  <p>Some links are referral links. Signing up supports my work at no extra cost to you.</p>
+  <p><a href="https://koreruss-music.vercel.app">Music</a> · <a href="https://korerussbiz-signals.vercel.app">Signals</a></p>
+</footer>
+<script>
+const params = new URLSearchParams(location.search);
+const utm = { source: params.get("utm_source") || "direct", campaign: params.get("utm_campaign") || "" };
+
+function sendEvent(event, linkId, variant) {
+  const payload = JSON.stringify({ event, linkId, variant, utm });
+  navigator.sendBeacon?.("/api/event", new Blob([payload], { type: "application/json" }));
+}
+
+function trackedUrl(base) {
+  try {
+    const u = new URL(base);
+    if (!u.searchParams.has("utm_source")) {
+      u.searchParams.set("utm_source", utm.source);
+      if (utm.campaign) u.searchParams.set("utm_campaign", utm.campaign);
+    }
+    return u.toString();
+  } catch { return null; }
+}
+
+// A/B variant
+fetch("/api/variant").then(r => r.json()).then(({ variant }) => {
+  document.body.dataset.variant = variant;
+  sendEvent("view", null, variant);
+});
+
+// Load gated links
+fetch("/api/links")
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById("tagline").textContent = data.tagline;
+    const hub = document.getElementById("hub");
+    data.categories.forEach(cat => {
+      const sec = document.createElement("section");
+      sec.innerHTML = "<h2>" + cat.title + "</h2>";
+      const grid = document.createElement("div");
+      grid.className = "grid";
+      cat.links.forEach(l => {
+        const a = document.createElement("a");
+        a.className = "card";
+        a.href = trackedUrl(l.url) || l.url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer sponsored";
+        a.innerHTML = "<strong>" + l.name + "</strong><span>" + (l.note || "") + "</span>";
+        a.addEventListener("click", () => sendEvent("click", l.id, document.body.dataset.variant));
+        grid.appendChild(a);
+      });
+      sec.appendChild(grid);
+      hub.appendChild(sec);
+    });
+  })
+  .catch(() => { document.getElementById("hub").textContent = "Links temporarily unavailable."; });
+
+// Subscribe
+document.getElementById("sub-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = document.getElementById("sub-email").value;
+  const msg = document.getElementById("sub-msg");
+  const res = await fetch("/api/subscribe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) });
+  const data = await res.json();
+  msg.textContent = data.ok ? "Thanks — check your inbox." : "Please enter a valid email.";
+  if (data.ok) sendEvent("signup");
+  e.target.reset();
+});
+</script>
+</body>
+</html>
