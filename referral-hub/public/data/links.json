@@ -210,6 +210,75 @@
           "published": true
         }
       ]
+    },
+    {
+      "title": "Shopping",
+      "links": [
+        {
+          "id": "sovrn-ewovbil",
+          "name": "Sovrn Product 1",
+          "url": "https://sovrn.co/ewovbil",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-1ij6xd8",
+          "name": "Sovrn Product 2",
+          "url": "https://sovrn.co/1ij6xd8",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-6do1p4y",
+          "name": "Sovrn Product 3",
+          "url": "https://sovrn.co/6do1p4y",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-1bdyg48",
+          "name": "Sovrn Product 4",
+          "url": "https://sovrn.co/1bdyg48",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-1km3g2k",
+          "name": "Sovrn Product 5",
+          "url": "https://sovrn.co/1km3g2k",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-1iet6g4",
+          "name": "Sovrn Product 6",
+          "url": "https://sovrn.co/1iet6g4",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-6w2okg3",
+          "name": "Sovrn Product 7",
+          "url": "https://sovrn.co/6w2okg3",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-mz62jar",
+          "name": "Sovrn Product 8",
+          "url": "https://sovrn.co/mz62jar",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        }
+      ]
     }
   ]
 }
