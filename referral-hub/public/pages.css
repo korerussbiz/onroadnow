@@ -1,0 +1,10 @@
+.page-body { margin: 1rem 0 2rem; }
+.page-body p { color: #ccc; margin: .8rem 0; }
+.page-body strong { color: #f7931a; }
+.cta-box { margin: 2rem 0; padding: 1.5rem; background: var(--surface); border: 1px solid #2a2a2a; border-radius: 12px; }
+.cta-btn { display: inline-block; padding: .8rem 1.4rem; background: var(--primary); color: #000; font-weight: 700; border-radius: 8px; text-decoration: none; margin-top: .5rem; }
+.cta-btn:hover { opacity: .85; }
+.cta-box form { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .8rem; }
+.cta-box input { font: inherit; padding: .6rem .8rem; border-radius: 8px; border: 1px solid #2a2a2a; background: var(--bg); color: var(--text); flex: 1; min-width: 200px; }
+.cta-box button { font: inherit; padding: .6rem 1.2rem; border-radius: 8px; background: var(--primary); color: #000; font-weight: 600; border: none; cursor: pointer; }
+.muted { color: var(--muted); font-size: .9rem; }
