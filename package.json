@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node api/main.js",
     "build": "echo Build done",
-    "vercel-build": "echo done"
+    "vercel-build": "echo done",
+    "test": "echo 'no tests configured'"
   },
   "dependencies": {
     "@octokit/rest": "^22.0.1",
