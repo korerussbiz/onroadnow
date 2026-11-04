@@ -277,6 +277,70 @@
           "note": "Edit: product name",
           "risk": "none",
           "published": true
+        },
+        {
+          "id": "amz-cheerios",
+          "name": "Honey Nut Cheerios (Limited Edition)",
+          "url": "PASTE_REAL_AMAZON_URL",
+          "note": "Grocery",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "amz-moneybox",
+          "name": "LUSEN Stainless Steel Money Box",
+          "url": "PASTE_REAL_AMAZON_URL",
+          "note": "Toys & Games",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "wmt-productcreation",
+          "name": "Pre-Owned Product Creation (Paperback)",
+          "url": "PASTE_REAL_WALMART_URL",
+          "note": "Books",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "wmt-managingproducts",
+          "name": "Managing Products to Deliver Solutions (Paperback)",
+          "url": "PASTE_REAL_WALMART_URL",
+          "note": "Books",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "etsy-yearofdates",
+          "name": "A Year of Dates \u2013 Heart Edition",
+          "url": "PASTE_REAL_ETSY_URL",
+          "note": "Gift",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "etsy-blinddate",
+          "name": "Blind Date With a Book Box \u2013 Luxury",
+          "url": "PASTE_REAL_ETSY_URL",
+          "note": "Gift",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "temu-gloves",
+          "name": "100 Black Reusable Nitrile Gloves",
+          "url": "PASTE_REAL_TEMU_URL",
+          "note": "Home & Cleaning",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "ebay-transformed",
+          "name": "Transformed: Moving to the Product Operating Model",
+          "url": "PASTE_REAL_EBAY_URL",
+          "note": "Book",
+          "risk": "none",
+          "published": true
         }
       ]
     }
