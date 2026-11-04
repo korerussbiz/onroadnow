@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KorerussBiz — Tools I Use</title>
+<meta name="description" content="Curated tools, platforms, and services I use and recommend. Some links are referral links.">
+<link rel="stylesheet" href="/styles.css">
+
+<script type="text/javascript">
+  var vglnk = { key: 'PUBLISHER_KEY' };
+  (function(d, t) {
+    var s = d.createElement(t);
+    s.type = 'text/javascript';
+    s.async = true;
+    s.src = '//cdn.viglink.com/api/vglnk.js';
+    var r = d.getElementsByTagName(t)[0];
+    r.parentNode.insertBefore(s, r);
+  }(document, 'script'));
+</script>
+</head>
+<body>
+<header>
+  <h1>⚡ KorerussBiz</h1>
+  <p id="tagline"></p>
+</header>
+<main>
+  <div id="hub">Loading…</div>
+
+  <section class="disclosure">
+    <h2>Disclosure</h2>
+    <p>Some links on this page are referral/affiliate links. I may earn a commission at no extra cost to you.</p>
+    <h2>Risk warning</h2>
+    <p>Crypto and cloud-mining services are high-risk. Never share seed phrases or private keys. No earnings are guaranteed. Nothing here is financial advice.</p>
+  </section>
+</main>
+<footer>
+  <p>Some links are referral links. Signing up supports my work at no extra cost to you.</p>
+</footer>
+
+<script>
+const params = new URLSearchParams(location.search);
+const utm = {
+  source: params.get("utm_source") || "direct",
+  campaign: params.get("utm_campaign") || "",
+};
+
+function trackedUrl(base) {
+  try {
+    const u = new URL(base);
+    if (!u.searchParams.has("utm_source")) {
+      u.searchParams.set("utm_source", utm.source);
+      if (utm.campaign) u.searchParams.set("utm_campaign", utm.campaign);
+    }
+    return u.toString();
+  } catch { return null; }
+}
+
+fetch("/data/links.json")
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById("tagline").textContent = data.tagline || "";
+    const hub = document.getElementById("hub");
+    hub.innerHTML = "";
+    let totalRendered = 0;
+
+    data.categories.forEach(cat => {
+      const links = cat.links.filter(l => l.published === true);
+      if (!links.length) return;
+
+      const sec = document.createElement("section");
+      sec.innerHTML = "<h2>" + cat.title + "</h2>";
+      const grid = document.createElement("div");
+      grid.className = "grid";
+
+      links.forEach(l => {
+        const href = trackedUrl(l.url);
+        if (!href) return;
+        const a = document.createElement("a");
+        a.className = "card";
+        a.href = href;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer sponsored";
+        a.innerHTML = "<strong>" + l.name + "</strong><span>" + (l.note || "") + "</span>";
+        grid.appendChild(a);
+        totalRendered++;
+      });
+
+      sec.appendChild(grid);
+      hub.appendChild(sec);
+    });
+
+    if (!totalRendered) {
+      hub.innerHTML = "<p>No links configured yet.</p>";
+    }
+  })
+  .catch(err => {
+    document.getElementById("hub").innerHTML =
+      "<p>Could not load links: " + err.message + "</p>";
+  });
+</script>
+</body>
+</html>
