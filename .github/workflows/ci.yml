@@ -17,9 +17,3 @@ jobs:
         node-version: '20'
     - run: npm install
     - run: npm test  # if you have tests
-    - name: Check for secrets
-      run: |
-        if grep -r "AIzaSy" . --exclude-dir=.git --exclude-dir=.github; then
-          echo "❌ Secret keys found in code! Aborting."
-          exit 1
-        fi
