@@ -39,6 +39,15 @@
 </footer>
 
 <script>
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 const params = new URLSearchParams(location.search);
 const utm = {
   source: params.get("utm_source") || "direct",
@@ -65,8 +74,10 @@ fetch("/data/links.json")
     let totalRendered = 0;
 
     data.categories.forEach(cat => {
-      const links = cat.links.filter(l => l.published === true);
+      let links = cat.links.filter(l => l.published === true);
       if (!links.length) return;
+      // Shuffle: show 8 random items per category (or all if fewer)
+      links = shuffle(links).slice(0, 8);
 
       const sec = document.createElement("section");
       sec.innerHTML = "<h2>" + cat.title + "</h2>";
@@ -81,7 +92,10 @@ fetch("/data/links.json")
         a.href = href;
         a.target = "_blank";
         a.rel = "noopener noreferrer sponsored";
-        a.innerHTML = "<strong>" + l.name + "</strong><span>" + (l.note || "") + "</span>";
+        
+const img = l.image ? `<img src="${l.image}" alt="${l.name}" style="width:100%; height:auto; border-radius:8px; margin-bottom:.5rem;" loading="lazy">` : '';
+a.innerHTML = img + "<strong>" + l.name + "</strong><span>" + (l.note || "") + "</span>";
+
         grid.appendChild(a);
         totalRendered++;
       });
