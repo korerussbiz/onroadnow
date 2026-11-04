@@ -1,0 +1,284 @@
+{
+  "owner": "KorerussBiz",
+  "tagline": "Tools & platforms I actually use",
+  "categories": [
+    {
+      "title": "Crypto",
+      "links": [
+        {
+          "id": "binance-account",
+          "name": "Binance",
+          "url": "https://account.binance.com/register?ref=815612060",
+          "note": "Trade, earn, launchpad",
+          "risk": "high-legal",
+          "published": true
+        },
+        {
+          "id": "coinbase-join",
+          "name": "Coinbase",
+          "url": "https://www.coinbase.com/join/russel_wd",
+          "note": "US-listed exchange, simpler UI",
+          "risk": "high-legal",
+          "published": true
+        },
+        {
+          "id": "binance-refer2earn",
+          "name": "Binance Refer2Earn",
+          "url": "https://www.binance.com/referral/earn-together/refer2earn-usdc/claim?hl=en&ref=GRO_28502_7C64B",
+          "note": "USDC referral campaign",
+          "risk": "high-legal",
+          "published": true,
+          "internal_note": "Verify campaign still live before publishing"
+        },
+        {
+          "id": "pi",
+          "name": "Pi Network",
+          "url": "https://minepi.com/Korerussbiz0",
+          "note": "Invite code: Korerussbiz0",
+          "risk": "medium",
+          "published": true,
+          "internal_note": "Never imply guaranteed value"
+        },
+        {
+          "id": "hiveon",
+          "name": "Hiveon",
+          "url": "https://hiveon.com?ref=4259982911",
+          "note": "Mining pool",
+          "risk": "medium",
+          "published": true
+        },
+        {
+          "id": "gomining",
+          "name": "GoMining",
+          "url": "https://gomining.com/?ref=WX7gZ",
+          "note": "Bitcoin cloud mining",
+          "risk": "high",
+          "published": true
+        },
+        {
+          "id": "abmining",
+          "name": "AB Mining",
+          "url": "https://user.abmining.pro?ref=REPLACE_WITH_ROLE_EMAIL",
+          "note": "Cloud mining",
+          "risk": "high",
+          "published": true,
+          "internal_note": "Replace personal email with role address"
+        },
+        {
+          "id": "aiminers",
+          "name": "AI Miners",
+          "url": "https://user.aiminers.pro?ref=REPLACE_WITH_ROLE_EMAIL",
+          "note": "Cloud mining",
+          "risk": "high",
+          "published": true,
+          "internal_note": "Replace personal email with role address"
+        },
+        {
+          "id": "tedlcash",
+          "name": "TEDL Cash",
+          "url": "https://tedlcash.com/r/FF312A",
+          "note": "Unverified \u2014 under review",
+          "risk": "unknown",
+          "published": true
+        },
+        {
+          "id": "cbclick-wjpxf6",
+          "name": "Shortlink 1",
+          "url": "https://g.cb.click/WjPxF6",
+          "note": "Redirect",
+          "risk": "unknown",
+          "published": true
+        },
+        {
+          "id": "cbclick-5nt04b",
+          "name": "Tap to get free miner",
+          "url": "https://g.cb.click/5nT04B",
+          "note": "Free miner",
+          "risk": "unknown",
+          "published": true
+        },
+        {
+          "id": "621134",
+          "name": "PowerMine ETH (Nexora)",
+          "url": "https://eth.nexora-meta.com",
+          "note": "Invite code: 621134",
+          "risk": "high",
+          "published": true,
+          "invite_code": "621134"
+        },
+        {
+          "id": "bittycoon",
+          "name": "BitTycoon",
+          "url": "https://bit-tycoon.com/app",
+          "note": "Code: 65206283",
+          "risk": "high",
+          "published": true
+        }
+      ]
+    },
+    {
+      "title": "Music & Creative",
+      "links": [
+        {
+          "id": "distrokid",
+          "name": "DistroKid",
+          "url": "https://distrokid.com/vip/seven/5424203",
+          "note": "Upload unlimited music",
+          "risk": "low",
+          "published": true
+        },
+        {
+          "id": "koreruss-music",
+          "name": "Koreruss Music",
+          "url": "https://koreruss-music.vercel.app",
+          "note": "My own catalogue",
+          "risk": "none",
+          "published": true
+        }
+      ]
+    },
+    {
+      "title": "Money & Business",
+      "links": [
+        {
+          "id": "signals",
+          "name": "KorerussBiz Signals",
+          "url": "https://korerussbiz-signals.vercel.app",
+          "note": "Trading scripts & tools",
+          "risk": "medium",
+          "published": true
+        },
+        {
+          "id": "patreon",
+          "name": "Patreon",
+          "url": "https://www.patreon.com/koreruss",
+          "note": "Monthly support",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "rewards1",
+          "name": "Rewards1",
+          "url": "https://www.rewards1.com/korerussbiz",
+          "note": "Reward site",
+          "risk": "medium",
+          "published": true
+        },
+        {
+          "id": "firefaucet",
+          "name": "FireFaucet",
+          "url": "https://firefaucet.win/ref/1446757",
+          "note": "Faucet",
+          "risk": "medium",
+          "published": true
+        },
+        {
+          "id": "rollercoin",
+          "name": "RollerCoin",
+          "url": "https://rollercoin.com/?r=mco62a5j",
+          "note": "Mining game",
+          "risk": "low-medium",
+          "published": true
+        }
+      ]
+    },
+    {
+      "title": "Support",
+      "links": [
+        {
+          "id": "paypal",
+          "name": "PayPal",
+          "url": "https://www.paypal.me/KoreyRussell809/4.99",
+          "note": "Buy a track",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "cashapp",
+          "name": "Cash App",
+          "url": "https://cash.app/$koreruss",
+          "note": "Direct tip",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "kofi",
+          "name": "Ko-fi",
+          "url": "https://ko-fi.com/koreruss",
+          "note": "Coffee",
+          "risk": "none",
+          "published": true
+        }
+      ]
+    },
+    {
+      "title": "Shopping",
+      "links": [
+        {
+          "id": "sovrn-ewovbil",
+          "name": "Sovrn Product 1",
+          "url": "https://sovrn.co/ewovbil",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-1ij6xd8",
+          "name": "Sovrn Product 2",
+          "url": "https://sovrn.co/1ij6xd8",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-6do1p4y",
+          "name": "Sovrn Product 3",
+          "url": "https://sovrn.co/6do1p4y",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-1bdyg48",
+          "name": "Sovrn Product 4",
+          "url": "https://sovrn.co/1bdyg48",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-1km3g2k",
+          "name": "Sovrn Product 5",
+          "url": "https://sovrn.co/1km3g2k",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-1iet6g4",
+          "name": "Sovrn Product 6",
+          "url": "https://sovrn.co/1iet6g4",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-6w2okg3",
+          "name": "Sovrn Product 7",
+          "url": "https://sovrn.co/6w2okg3",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "sovrn-mz62jar",
+          "name": "Sovrn Product 8",
+          "url": "https://sovrn.co/mz62jar",
+          "note": "Edit: product name",
+          "risk": "none",
+          "published": true
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "tutorials": [
+    {
+      "slug": "crypto-safety-12-checks",
+      "title": "The 12-Point Crypto Safety Checklist",
+      "description": "Before you sign up to any crypto platform, run these 12 checks. Most scams fail three or more immediately.",
+      "duration": "PT8M32S",
+      "difficulty": "beginner",
+      "topics": [
+        "crypto",
+        "safety",
+        "scams"
+      ],
+      "video_provider": "youtube",
+      "video_id": "@KoreyRussell-e2h",
+      "placeholder": false,
+      "related_page": "/guide/",
+      "published": true
+    },
+    {
+      "slug": "binance-account-setup",
+      "title": "How to Set Up a Binance Account Safely",
+      "description": "Step-by-step: register, complete KYC, enable 2FA, and make your first deposit without mistakes.",
+      "duration": "PT12M15S",
+      "difficulty": "beginner",
+      "topics": [
+        "crypto",
+        "binance",
+        "setup"
+      ],
+      "video_provider": "youtube",
+      "video_id": "",
+      "placeholder": true,
+      "related_page": "/crypto/",
+      "published": true
+    },
+    {
+      "slug": "distrokid-first-release",
+      "title": "Your First Release on DistroKid",
+      "description": "Upload your first track, set up royalties, and avoid the takedown mistakes most new artists make.",
+      "duration": "PT10M48S",
+      "difficulty": "beginner",
+      "topics": [
+        "music",
+        "distrokid",
+        "distribution"
+      ],
+      "video_provider": "youtube",
+      "video_id": "",
+      "placeholder": true,
+      "related_page": "/music/",
+      "published": true
+    },
+    {
+      "slug": "hiveon-pool-setup",
+      "title": "Pointing Your ASIC at Hiveon",
+      "description": "Pool configuration, payout thresholds, and what to expect in your first 24 hours of mining.",
+      "duration": "PT9M20S",
+      "difficulty": "intermediate",
+      "topics": [
+        "crypto",
+        "mining",
+        "hiveon"
+      ],
+      "video_provider": "youtube",
+      "video_id": "",
+      "placeholder": true,
+      "related_page": "/mining/",
+      "published": true
+    }
+  ]
+}
