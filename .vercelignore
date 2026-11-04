@@ -1,0 +1,13 @@
+# Ignore everything Python-related — this repo is a static site
+services/
+api/
+docker/
+k8s/
+worker/
+backups/
+scripts/
+*.py
+*.pyc
+__pycache__/
+*.env.bak*
+.env.local
