@@ -341,6 +341,105 @@
           "note": "Book",
           "risk": "none",
           "published": true
+        },
+        {
+          "id": "amz-echo-dot",
+          "name": "Echo Dot (4th Gen)",
+          "url": "https://www.amazon.com/dp/B09B8V1LZ3",
+          "image": "https://images-na.ssl-images-amazon.com/images/P/B09B8V1LZ3.01.LZZZZZZZ.jpg",
+          "note": "Smart speaker with Alexa",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "amz-soundcore2",
+          "name": "Anker Soundcore 2 Speaker",
+          "url": "https://www.amazon.com/dp/B01MTB55WH",
+          "image": "https://images-na.ssl-images-amazon.com/images/P/B01MTB55WH.01.LZZZZZZZ.jpg",
+          "note": "Portable Bluetooth speaker",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "amz-p20i",
+          "name": "Soundcore P20i Earbuds",
+          "url": "https://www.amazon.com/dp/B0BTYCRJSS",
+          "image": "https://images-na.ssl-images-amazon.com/images/P/B0BTYCRJSS.01.LZZZZZZZ.jpg",
+          "note": "True wireless earbuds",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "amz-firetv",
+          "name": "Fire TV Stick 4K Plus",
+          "url": "https://www.amazon.com/dp/B0F7Z4QZTT",
+          "image": "https://images-na.ssl-images-amazon.com/images/P/B0F7Z4QZTT.01.LZZZZZZZ.jpg",
+          "note": "Streaming device with Alexa",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "amz-jblflip5",
+          "name": "JBL Flip 5 Speaker",
+          "url": "https://www.amazon.com/dp/B07QK2SPP7",
+          "image": "https://images-na.ssl-images-amazon.com/images/P/B07QK2SPP7.01.LZZZZZZZ.jpg",
+          "note": "Waterproof portable speaker",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "amz-sonyzx",
+          "name": "Sony ZX Series Headphones",
+          "url": "https://www.amazon.com/dp/B00NJ2M33I",
+          "image": "https://images-na.ssl-images-amazon.com/images/P/B00NJ2M33I.01.LZZZZZZZ.jpg",
+          "note": "Wired on-ear headphones",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "amz-tozo",
+          "name": "TOZO A1 Earbuds",
+          "url": "https://www.amazon.com/dp/B09FT58QQP",
+          "image": "https://images-na.ssl-images-amazon.com/images/P/B09FT58QQP.01.LZZZZZZZ.jpg",
+          "note": "Wireless earbuds",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "wmt-airpods4",
+          "name": "Apple AirPods 4 (ANC)",
+          "url": "https://www.walmart.com/ip/Apple-AirPods-4-with-Active-Noise-Cancellation/11384707978",
+          "image": "https://i5.walmartimages.com/seo/Apple-AirPods-4-with-Active-Noise-Cancellation_970671e7-764d-4536-9f51-666941f35ad3.012d4c1b577966703dc4b6947a77677b.jpeg",
+          "note": "Active Noise Cancellation",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "wmt-legion5",
+          "name": "Lenovo Legion 5a Laptop",
+          "url": "https://www.walmart.com/ip/Lenovo-Legion-5a-15-3-WQXGA-Laptop-Ryzen-7-250-1-6GB-1TB-NVIDIA-GeForce-RTX-5060-83Q70003US/19977723464",
+          "image": "https://i5.walmartimages.com/seo/Lenovo-Legion-5a-15-3-WQXGA-Laptop-Ryzen-7-250-1-6GB-1TB-NVIDIA-GeForce-RTX-5060-83Q70003US_e80bebe5-54ef-493b-9279-30b80bf418c4.7f12718d5f45e24a48da9bc53d2f8f44.jpeg",
+          "note": "Gaming laptop, RTX 5060",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "temu-601099512345678",
+          "name": "Temu Trending Item 1",
+          "url": "https://www.temu.com/goods.html?goods_id=601099512345678",
+          "image": "https://via.placeholder.com/300x300?text=Temu",
+          "note": "Popular Temu product",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "etsy-1775556485",
+          "name": "Etsy Custom Charm Necklace",
+          "url": "https://www.etsy.com/listing/1775556485/",
+          "image": "https://via.placeholder.com/300x300?text=Etsy",
+          "note": "Handmade jewelry",
+          "risk": "none",
+          "published": true
         }
       ]
     }
