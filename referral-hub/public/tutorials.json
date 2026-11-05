@@ -1,6 +1,24 @@
 {
   "tutorials": [
     {
+      "slug": "tools-i-use-overview",
+      "title": "Tools I Actually Use \u2014 Overview",
+      "description": "A walkthrough of every tool on the site: crypto exchanges, mining pools, music distribution, and shopping picks \u2014 with risk notes on each.",
+      "duration": "PT2M",
+      "difficulty": "beginner",
+      "topics": [
+        "overview",
+        "crypto",
+        "music",
+        "shopping"
+      ],
+      "video_provider": "youtube",
+      "video_id": "https://youtube.com/shorts/jlwVX-zx0iI?si=xZu7sSiXoaDUzPF6",
+      "placeholder": false,
+      "related_page": "/start/",
+      "published": true
+    },
+    {
       "slug": "crypto-safety-12-checks",
       "title": "The 12-Point Crypto Safety Checklist",
       "description": "Before you sign up to any crypto platform, run these 12 checks. Most scams fail three or more immediately.",
