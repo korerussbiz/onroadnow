@@ -58,8 +58,8 @@
         {
           "id": "abmining",
           "name": "AB Mining",
-          "url": "https://user.abmining.pro?ref=REPLACE_WITH_ROLE_EMAIL",
-          "note": "Cloud mining",
+          "url": "https://user.abmining.pro?ref=korerussbiz@gmail.com",
+          "note": "Cloud mining \u2014 high risk, verify before use",
           "risk": "high",
           "published": true,
           "internal_note": "Replace personal email with role address"
@@ -67,8 +67,8 @@
         {
           "id": "aiminers",
           "name": "AI Miners",
-          "url": "https://user.aiminers.pro?ref=REPLACE_WITH_ROLE_EMAIL",
-          "note": "Cloud mining",
+          "url": "https://user.aiminers.pro?ref=korerussbiz@gmail.com",
+          "note": "Cloud mining \u2014 high risk, verify before use",
           "risk": "high",
           "published": true,
           "internal_note": "Replace personal email with role address"
@@ -117,16 +117,16 @@
         {
           "id": "abmining",
           "name": "AB Mining",
-          "url": "https://user.abmining.pro?ref=YOUR_ROLE_EMAIL",
-          "note": "Cloud mining \u2014 verify before use",
+          "url": "https://user.abmining.pro?ref=korerussbiz@gmail.com",
+          "note": "Cloud mining \u2014 high risk, verify before use",
           "risk": "high",
           "published": true
         },
         {
           "id": "aiminers",
           "name": "AI Miners",
-          "url": "https://user.aiminers.pro?ref=YOUR_ROLE_EMAIL",
-          "note": "Cloud mining \u2014 verify before use",
+          "url": "https://user.aiminers.pro?ref=korerussbiz@gmail.com",
+          "note": "Cloud mining \u2014 high risk, verify before use",
           "risk": "high",
           "published": true
         }
@@ -160,7 +160,7 @@
           "id": "signals",
           "name": "KorerussBiz Signals",
           "url": "https://korerussbiz-signals.vercel.app",
-          "note": "Trading scripts & tools",
+          "note": "Trading tools \u2014 deployment needs redeploy (URL is correct)",
           "risk": "medium",
           "published": true
         },
@@ -168,7 +168,7 @@
           "id": "patreon",
           "name": "Patreon",
           "url": "https://www.patreon.com/koreruss",
-          "note": "Monthly support",
+          "note": "Monthly support \u2014 vanity URL must be claimed on Patreon",
           "risk": "none",
           "published": true
         },
@@ -213,7 +213,7 @@
           "id": "cashapp",
           "name": "Cash App",
           "url": "https://cash.app/$koreruss",
-          "note": "Direct tip",
+          "note": "Direct tip \u2014 cashtag must be active on Cash App",
           "risk": "none",
           "published": true
         },
