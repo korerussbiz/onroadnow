@@ -113,6 +113,22 @@
           "note": "Code: 65206283",
           "risk": "high",
           "published": true
+        },
+        {
+          "id": "abmining",
+          "name": "AB Mining",
+          "url": "https://user.abmining.pro?ref=YOUR_ROLE_EMAIL",
+          "note": "Cloud mining \u2014 verify before use",
+          "risk": "high",
+          "published": true
+        },
+        {
+          "id": "aiminers",
+          "name": "AI Miners",
+          "url": "https://user.aiminers.pro?ref=YOUR_ROLE_EMAIL",
+          "note": "Cloud mining \u2014 verify before use",
+          "risk": "high",
+          "published": true
         }
       ]
     },
