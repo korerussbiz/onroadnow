@@ -232,65 +232,65 @@
       "links": [
         {
           "id": "sovrn-ewovbil",
-          "name": "Sovrn Product 1",
+          "name": "Amazon Deals",
           "url": "https://sovrn.co/ewovbil",
-          "note": "Edit: product name",
+          "note": "Amazon product picks",
           "risk": "none",
           "published": true
         },
         {
           "id": "sovrn-1ij6xd8",
-          "name": "Sovrn Product 2",
+          "name": "Alibaba Wholesale",
           "url": "https://sovrn.co/1ij6xd8",
-          "note": "Edit: product name",
+          "note": "Bulk supplier prices",
           "risk": "none",
           "published": true
         },
         {
           "id": "sovrn-6do1p4y",
-          "name": "Sovrn Product 3",
+          "name": "Temu Finds",
           "url": "https://sovrn.co/6do1p4y",
-          "note": "Edit: product name",
+          "note": "Budget marketplace picks",
           "risk": "none",
           "published": true
         },
         {
           "id": "sovrn-1bdyg48",
-          "name": "Sovrn Product 4",
+          "name": "Target Picks",
           "url": "https://sovrn.co/1bdyg48",
-          "note": "Edit: product name",
+          "note": "Everyday items & deals",
           "risk": "none",
           "published": true
         },
         {
           "id": "sovrn-1km3g2k",
-          "name": "Sovrn Product 5",
+          "name": "eBay Finds",
           "url": "https://sovrn.co/1km3g2k",
-          "note": "Edit: product name",
+          "note": "Auctions & used items",
           "risk": "none",
           "published": true
         },
         {
           "id": "sovrn-1iet6g4",
-          "name": "Sovrn Product 6",
+          "name": "Amazon Top Picks",
           "url": "https://sovrn.co/1iet6g4",
-          "note": "Edit: product name",
+          "note": "Bestselling products",
           "risk": "none",
           "published": true
         },
         {
           "id": "sovrn-6w2okg3",
-          "name": "Sovrn Product 7",
+          "name": "AliExpress Deals",
           "url": "https://sovrn.co/6w2okg3",
-          "note": "Edit: product name",
+          "note": "Low-cost products",
           "risk": "none",
           "published": true
         },
         {
           "id": "sovrn-mz62jar",
-          "name": "Sovrn Product 8",
+          "name": "Etsy Handmade",
           "url": "https://sovrn.co/mz62jar",
-          "note": "Edit: product name",
+          "note": "Custom & handmade goods",
           "risk": "none",
           "published": true
         },
