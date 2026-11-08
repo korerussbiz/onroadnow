@@ -16,3 +16,5 @@ worker/*.json
 *.legacy-builds
 *.backup-before-sales
 vercel.json.bak*
+my-pseo-site/
+**/links.json.bak*
