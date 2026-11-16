@@ -35,7 +35,28 @@ h1{color:#f7931a;font-size:1.5em}
 <p class="muted">Powered by Google. Ads may appear on results pages.</p>
 <!-- Replace d4b21938da6784f72 with your Programmable Search Engine ID -->
 <script async src="https://cse.google.com/cse.js?cx=d4b21938da6784f72"></script>
-<div class="gcse-search"></div>
+<div class="gcse-search" data-queryParameterName="q"></div>
+<script>
+  // If the page was opened as /ai/?q=... , prefill and run the search
+  (function () {
+    var q = new URLSearchParams(location.search).get("q");
+    if (q) {
+      var input = document.querySelector(".gcse-search input.gsc-input");
+      // Google's CSE renders late — poll briefly
+      var tries = 0;
+      var timer = setInterval(function () {
+        var el = document.querySelector("input.gsc-input");
+        if (el) {
+          clearInterval(timer);
+          el.value = q;
+          var btn = document.querySelector("button.gsc-search-button");
+          if (btn) btn.click();
+        }
+        if (++tries > 20) clearInterval(timer);
+      }, 250);
+    }
+  })();
+</script>
 <p class="muted" style="margin-top:.6rem">Setup: <a href="https://programmablesearchengine.google.com/" style="color:#f7931a">programmablesearchengine.google.com</a> → Create → copy the <code>cx</code> ID → replace d4b21938da6784f72 above.</p>
 </div>
 
