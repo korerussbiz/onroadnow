@@ -1,10 +1,5 @@
-/go/binance      https://account.binance.com/register?ref=815612060      302
-/go/coinbase     https://www.coinbase.com/join/russel_wd                 302
-/go/hiveon       https://hiveon.com?ref=4259982911                       302
-/go/distrokid    https://distrokid.com/vip/seven/5424203                 302
-/go/margex       https://margex.partners/REPLACE_MARGEX_ID               302
-/go/bitget       https://www.bitget.com/referral/register?from=REPLACE_BITGET_ID 302
-/join            /join/          301
-/signals         /signals/       301
-/ai              /ai/            301
-/shop            /shop/          301
+/food       /food/index.html      200
+/shop       /shop/index.html      200
+/business   /business/index.html  200
+/flyer      /flyer/index.html     200
+/go/*       /404.html             200
