@@ -1,0 +1,50 @@
+{
+  "products": [
+    {
+      "id": "local-honey-500g",
+      "name": "Raw Honey — 500g",
+      "description": "Local Montego Bay market honey. Pure, unprocessed.",
+      "price": 12.00,
+      "currency": "USD",
+      "image": "/images/honey.jpg",
+      "type": "direct",
+      "payment_link": "https://paypal.me/KoreyRussell809/12.00",
+      "note": "Local pickup in Montego Bay. Contact to arrange.",
+      "stock": 10,
+      "published": true
+    },
+    {
+      "id": "local-coffee-250g",
+      "name": "Blue Mountain Coffee — 250g",
+      "description": "Genuine Jamaican Blue Mountain coffee, roasted locally.",
+      "price": 18.00,
+      "currency": "USD",
+      "image": "/images/coffee.jpg",
+      "type": "direct",
+      "payment_link": "https://paypal.me/KoreyRussell809/18.00",
+      "note": "Local pickup or shipping at cost.",
+      "stock": 5,
+      "published": true
+    },
+    {
+      "id": "affiliate-binance",
+      "name": "Binance — Crypto Exchange",
+      "description": "Lower spot fees. KYC required. High-risk asset class.",
+      "price": null,
+      "type": "affiliate",
+      "affiliate_url": "/go/binance",
+      "note": "Referral link. I earn a commission at no cost to you.",
+      "published": true
+    },
+    {
+      "id": "affiliate-distrokid",
+      "name": "DistroKid — Music Distribution",
+      "description": "Unlimited uploads, keep 100% royalties.",
+      "price": null,
+      "type": "affiliate",
+      "affiliate_url": "/go/distrokid",
+      "note": "Referral link. I earn a commission at no cost to you.",
+      "published": true
+    }
+  ]
+}

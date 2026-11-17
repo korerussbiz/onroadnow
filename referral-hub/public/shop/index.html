@@ -1,0 +1,76 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shop — local goods and tools I use | KorerussBiz</title>
+<meta name="description" content="Local Montego Bay goods for sale, plus the crypto and music tools I use. Direct payment links and affiliate disclosure.">
+<link rel="canonical" href="https://onroadnow.pages.dev/shop/">
+<link rel="stylesheet" href="/styles.css">
+<style>
+body{background:#0a0a0a;color:#e0e0e0;font-family:system-ui,sans-serif;margin:0;line-height:1.6}
+main{max-width:1000px;margin:0 auto;padding:1.5rem}
+h1{color:#f7931a}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin:1.5rem 0}
+.card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:1rem;display:flex;flex-direction:column}
+.card img{width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:.6rem;background:#0f0f0f}
+.card h3{color:#f7931a;font-size:1em;margin:0 0 .3rem}
+.card p{font-size:.85em;color:#aaa;flex:1}
+.card .price{color:#e0e0e0;font-weight:700;font-size:1.1em;margin:.4rem 0}
+.card .btn{display:block;padding:.6rem;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;margin-top:.4rem}
+.card .btn.direct{background:#f7931a;color:#000}
+.card .btn.affiliate{background:#2a2a2a;color:#f7931a;border:1px solid #f7931a}
+.card .note{font-size:.75em;color:#666;margin-top:.4rem}
+.disclosure{background:#141414;border-left:3px solid #f7931a;padding:1rem;border-radius:8px;font-size:.85em;color:#bbb;margin:1rem 0}
+</style>
+</head><body>
+<header style="padding:1rem 1.5rem;border-bottom:1px solid #2a2a2a">
+<h1 style="margin:0"><a href="/" style="color:inherit;text-decoration:none">⚡ KorerussBiz</a></h1>
+</header>
+<main>
+<h1>Shop</h1>
+<div class="disclosure">
+<strong>Disclosure:</strong> Some items are affiliate links — I may earn a commission at no cost to you. Direct items use a payment link; local pickup is available for Montego Bay goods. Crypto is high-risk. Not financial advice.
+</div>
+<div id="catalog">Loading products…</div>
+</main>
+<footer style="max-width:1000px;margin:2rem auto;padding:1rem 1.5rem;border-top:1px solid #2a2a2a;color:#888;font-size:.85em">
+<p><a href="/join/" style="color:#f7931a">Signup hub</a> · <a href="/disclaimer/" style="color:#f7931a">Disclaimer</a></p>
+</footer>
+<script>
+(function () {
+  var HOST = document.getElementById("catalog");
+  fetch("/data/products.json")
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+      var products = (data.products || []).filter(function (p) { return p.published !== false; });
+      if (!products.length) { HOST.innerHTML = "<p>No products yet.</p>"; return; }
+
+      var html = '<div class="grid">';
+      products.forEach(function (p) {
+        var img = p.image
+          ? '<img src="' + p.image + '" alt="" loading="lazy">'
+          : '<img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22160%22%3E%3Crect width=%22200%22 height=%22160%22 fill=%22%23111%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22%23555%22 text-anchor=%22middle%22 font-family=%22system-ui%22 font-size=%2212%22%3ENo image%3C/text%3E%3C/svg%3E" alt="">';
+
+        var price = (p.price != null) ? '<div class="price">$' + Number(p.price).toFixed(2) + '</div>' : '';
+        var btn, note;
+        if (p.type === "direct") {
+          btn = '<a class="btn direct" href="' + p.payment_link + '" target="_blank" rel="noopener">Buy — $' + Number(p.price).toFixed(2) + '</a>';
+          note = p.note ? '<div class="note">' + p.note + '</div>' : '';
+        } else {
+          btn = '<a class="btn affiliate" href="' + p.affiliate_url + '" target="_blank" rel="noopener sponsored">Open offer</a>';
+          note = p.note ? '<div class="note">' + p.note + '</div>' : '';
+        }
+
+        html += '<div class="card">' + img +
+                '<h3>' + p.name + '</h3>' +
+                '<p>' + (p.description || "") + '</p>' +
+                price + btn + note +
+                '</div>';
+      });
+      html += '</div>';
+      HOST.innerHTML = html;
+    })
+    .catch(function (e) {
+      HOST.innerHTML = "<p>Could not load catalog: " + e.message + "</p>";
+    });
+})();
+</script>
+</body></html>
