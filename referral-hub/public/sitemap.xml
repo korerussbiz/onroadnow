@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap><loc>https://onroadnow-ggpe.vercel.app/sitemap-core.xml</loc></sitemap>
-  <sitemap><loc>https://onroadnow-ggpe.vercel.app/sitemap-cities-1.xml</loc></sitemap>
-  <sitemap><loc>https://onroadnow-ggpe.vercel.app/sitemap-cities-2.xml</loc></sitemap>
-  <sitemap><loc>https://onroadnow-ggpe.vercel.app/sitemap-cities-3.xml</loc></sitemap>
-  <sitemap><loc>https://onroadnow-ggpe.vercel.app/sitemap-cities-4.xml</loc></sitemap>
-  <sitemap><loc>https://onroadnow-ggpe.vercel.app/sitemap-cities-5.xml</loc></sitemap>
-  <sitemap><loc>https://onroadnow-ggpe.vercel.app/sitemap-cities-6.xml</loc></sitemap>
-  <sitemap><loc>https://onroadnow-ggpe.vercel.app/sitemap-cities-7.xml</loc></sitemap>
+  <sitemap><loc>https://onroadnow.pages.dev/sitemap-core.xml</loc></sitemap>
+  <sitemap><loc>https://onroadnow.pages.dev/sitemap-cities-1.xml</loc></sitemap>
+  <sitemap><loc>https://onroadnow.pages.dev/sitemap-cities-2.xml</loc></sitemap>
+  <sitemap><loc>https://onroadnow.pages.dev/sitemap-cities-3.xml</loc></sitemap>
+  <sitemap><loc>https://onroadnow.pages.dev/sitemap-cities-4.xml</loc></sitemap>
+  <sitemap><loc>https://onroadnow.pages.dev/sitemap-cities-5.xml</loc></sitemap>
+  <sitemap><loc>https://onroadnow.pages.dev/sitemap-cities-6.xml</loc></sitemap>
+  <sitemap><loc>https://onroadnow.pages.dev/sitemap-cities-7.xml</loc></sitemap>
 </sitemapindex>

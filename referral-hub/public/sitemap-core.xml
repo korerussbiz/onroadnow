@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://onroadnow-ggpe.vercel.app/</loc></url>
-  <url><loc>https://onroadnow-ggpe.vercel.app/crypto/</loc></url>
-  <url><loc>https://onroadnow-ggpe.vercel.app/music/</loc></url>
-  <url><loc>https://onroadnow-ggpe.vercel.app/mining/</loc></url>
-  <url><loc>https://onroadnow-ggpe.vercel.app/start/</loc></url>
-  <url><loc>https://onroadnow-ggpe.vercel.app/newsletter/</loc></url>
-  <url><loc>https://onroadnow-ggpe.vercel.app/contact/</loc></url>
-  <url><loc>https://onroadnow-ggpe.vercel.app/guide/</loc></url>
-  <url><loc>https://onroadnow-ggpe.vercel.app/updates/</loc></url>
-  <url><loc>https://onroadnow-ggpe.vercel.app/tutorials/</loc></url>
-  <url><loc>https://onroadnow.pages.dev/disclaimer/</loc></url>
-  <url><loc>https://onroadnow.pages.dev/signals/</loc></url>
-  <url><loc>https://onroadnow.pages.dev/ai/</loc></url>
-  <url><loc>https://onroadnow.pages.dev/shop/</loc></url>
-  <url><loc>https://onroadnow.pages.dev/food/</loc></url>
+  <url><loc>https://onroadnow.pages.dev/</loc></url>
+  <url><loc>https://onroadnow.pages.dev/crypto/</loc></url>
+  <url><loc>https://onroadnow.pages.dev/music/</loc></url>
+  <url><loc>https://onroadnow.pages.dev/mining/</loc></url>
+  <url><loc>https://onroadnow.pages.dev/start/</loc></url>
+  <url><loc>https://onroadnow.pages.dev/newsletter/</loc></url>
+  <url><loc>https://onroadnow.pages.dev/contact/</loc></url>
+  <url><loc>https://onroadnow.pages.dev/guide/</loc></url>
+  <url><loc>https://onroadnow.pages.dev/updates/</loc></url>
+  <url><loc>https://onroadnow.pages.dev/tutorials/</loc></url>
+  <url><loc>https://pages.dev/business/</loc></url>
+  <url><loc>https://pages.dev/flyer/</loc></url>
 </urlset>
