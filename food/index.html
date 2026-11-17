@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="google-adsense-account" content="ca-pub-2772533792093956" />
+  <title>OnRoadNow Food, Delivery & Global Deals</title>
+  <script async src="https://googlesyndication.com" crossorigin="anonymous"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; background: #0f172a; color: #f8fafc; }
+    h1, h2 { color: #f7931a; margin-top: 0; }
+    .nav { display: flex; gap: 10px; flex-wrap: wrap; background: #1e293b; padding: 12px; border-radius: 10px; margin-bottom: 16px; }
+    .nav a { color: #38bdf8; text-decoration: none; font-weight: 700; }
+    .ad-banner { background: #020617; border: 1px dashed #475569; padding: 12px; text-align: center; margin-bottom: 18px; border-radius: 10px; overflow: hidden; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: #1e293b; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .card img { width: 100%; height: 180px; object-fit: cover; background: #334155; }
+    .card-body { padding: 14px; }
+    .tag { display: inline-block; background: #0284c7; color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 6px; margin-bottom: 6px; }
+    .btn { display: block; text-align: center; padding: 11px; background: #22c55e; color: #052e16; font-weight: 700; text-decoration: none; border-radius: 8px; margin-top: 10px; border: none; width: 100%; cursor: pointer; font-size: 15px; }
+    .btn-alt { background: #f7931a; color: #000; }
+    input, button { width: 100%; padding: 11px; margin: 6px 0; border-radius: 8px; border: 1px solid #334155; box-sizing: border-box; font-size: 15px; }
+    input { background: #0f172a; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/food">🍔 Food & Deals</a>
+    <a href="/auto-trader">🤖 Auto-Trader</a>
+    <a href="https://pages.dev">🎵 Music</a>
+  </div>
+
+  <h1>OnRoadNow Food, Vendor Scanner & Cashback Deals</h1>
+
+  <!-- TOP LIVE ADSTERRA BANNER -->
+  <div class="ad-banner">
+    <script type="text/javascript">
+      atOptions = {
+        'key' : '3a250a252f65294cd6db694d6e4c3edc',
+        'format' : 'iframe',
+        'height' : 90,
+        'width' : 728,
+        'params' : {}
+      };
+      document.write('<scr' + 'ipt type="text/javascript" src="//://topcreativeformat.com"></scr' + 'ipt>');
+    </script>
+  </div>
+
+  <!-- VENDOR ITEM SCANNER -->
+  <div class="card" style="padding:16px; margin-bottom:20px;">
+    <h2>Scan or Add Vendor Item</h2>
+    <input type="text" id="vName" placeholder="Vendor Name (e.g. MoBay Grill)" />
+    <input type="text" id="iName" placeholder="Item Name / Scanned Barcode" />
+    <input type="text" id="iPrice" placeholder="Price (e.g. J$1,500 / $12 USD)" />
+    <input type="text" id="iImg" placeholder="Image URL (optional)" />
+    <input type="tel" id="vPhone" placeholder="Vendor WhatsApp (default: 18768090958)" />
+    <button class="btn" onclick="addProduct()">+ Publish Item to Store</button>
+  </div>
+
+  <!-- PRODUCT GRID WITH PICTURES & REFERRAL LINKS -->
+  <h2>Order Food, Delivery & Earn Bonuses</h2>
+  <div class="grid" id="productGrid"></div>
+
+  <!-- BOTTOM LIVE ADSTERRA 300x250 BANNER -->
+  <div class="ad-banner">
+    <script type="text/javascript">
+      atOptions = {
+        'key' : '3a250a252f65294cd6db694d6e4c3edc',
+        'format' : 'iframe',
+        'height' : 250,
+        'width' : 300,
+        'params' : {}
+      };
+      document.write('<scr' + 'ipt type="text/javascript" src="//://topcreativeformat.com"></scr' + 'ipt>');
+    </script>
+  </div>
+
+  <script>
+    const starterGoods = [
+      {
+        category: "Local Hot Food",
+        title: "Jamaican Jerk Chicken & Festival Platter",
+        price: "J$1,800 / $12 USD",
+        img: "https://unsplash.com",
+        link: "https://wa.me",
+        cta: "Order via WhatsApp"
+      },
+      {
+        category: "Fresh Produce",
+        title: "Tropical Farm Fruit & Grocery Box",
+        price: "J$3,500 / $25 USD",
+        img: "https://unsplash.com",
+        link: "https://wa.me",
+        cta: "Order Delivery"
+      },
+      {
+        category: "Food Delivery Bonus",
+        title: "DoorDash Food Delivery & Discounts",
+        price: "Referral Bonus",
+        img: "https://unsplash.com",
+        link: "/go/doordash",
+        cta: "Claim Food Deal"
+      },
+      {
+        category: "Rides & Delivery",
+        title: "Uber Rides & Express Eats",
+        price: "Invite Bonus",
+        img: "https://unsplash.com",
+        link: "/go/uber",
+        cta: "Get Uber Bonus"
+      },
+      {
+        category: "Shopping Cashback",
+        title: "Rakuten $30 Cashback on Groceries & Tech",
+        price: "$30 Signup Bonus",
+        img: "https://unsplash.com",
+        link: "/go/rakuten",
+        cta: "Claim $30 Bonus"
+      },
+      {
+        category: "Crypto Rewards",
+        title: "Binance & FreeBitcoin Instant Rewards",
+        price: "Earn Crypto",
+        img: "https://unsplash.com",
+        link: "/go/binance",
+        cta: "Start Earning"
+      }
+    ];
+
+    function loadProducts() {
+      const saved = JSON.parse(localStorage.getItem("custom_goods") || "[]");
+      const all = [...saved, ...starterGoods];
+      document.getElementById("productGrid").innerHTML = all.map(item => `
+        <div class="card">
+          <img src="${item.img}" alt="${item.title}" onerror="this.src='https://unsplash.com'" />
+          <div class="card-body">
+            <span class="tag">${item.category}</span>
+            <h3 style="margin:6px 0;">${item.title}</h3>
+            <p style="color:#4ade80; font-weight:bold; margin:4px 0;">${item.price}</p>
+            <a href="${item.link}" class="btn ${item.link.startsWith('/go/') ? 'btn-alt' : ''}">${item.cta}</a>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function addProduct() {
+      const vendor = document.getElementById("vName").value.trim();
+      const title = document.getElementById("iName").value.trim();
+      const price = document.getElementById("iPrice").value.trim();
+      const img = document.getElementById("iImg").value.trim() || "https://unsplash.com";
+      const contact = document.getElementById("vPhone").value.trim() || "18768090958";
+
+      if (!title || !price) return alert("Enter item name and price.");
+
+      let link = contact;
+      if (!contact.startsWith("http")) {
+        const msg = encodeURIComponent(`Hi ${vendor || "OnRoadNow"}, I want to order: ${title} (${price})`);
+        link = `https://wa.me{contact.replace(/\D/g, "")}?text=${msg}`;
+      }
+
+      const saved = JSON.parse(localStorage.getItem("custom_goods") || "[]");
+      saved.unshift({ category: vendor || "Vendor Item", title, price, img, link, cta: "Order Now" });
+      localStorage.setItem("custom_goods", JSON.stringify(saved));
+      loadProducts();
+    }
+
+    loadProducts();
+  </script>
+</body>
+</html>
