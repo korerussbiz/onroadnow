@@ -6,10 +6,18 @@
       "title": "Food & Montego Bay Market",
       "links": [
         {
-          "id": "bruges-waffles",
-          "name": "Bruges Belgian Waffles (6-Pack)",
+          "id": "bruges-waffles-main",
+          "name": "Bruges Belgian Bistro \u2014 Official Waffle Store",
           "url": "https://viglink.com",
-          "note": "Hand-made Liege waffles shipped fresh \u2014 Classics, Cookies & Cream",
+          "note": "Shop authentic hand-made Liege waffles direct from Bruges ($26.99+)",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "bruges-bestsellers",
+          "name": "Bruges 6-Pack: Best Sellers Variety ($32.99)",
+          "url": "https://viglink.com",
+          "note": "Top-rated 6-pack box shipped fresh weekly",
           "risk": "none",
           "published": true
         },
@@ -23,9 +31,9 @@
         },
         {
           "id": "vendor-submit-deal",
-          "name": "Selling Food or Produce? Post Your Price",
-          "url": "https://wa.me18768090958?text=Hi%20KorerussBiz%2C%20I%20have%20food%2Fproduce%20prices%20to%20list%20on%20OnRoadNow",
-          "note": "Tap to WhatsApp or call with today's market deals",
+          "name": "Post Your Food or Produce Prices (MoBay)",
+          "url": "https://wa.me18760000000?text=Hi%20KorerussBiz%2C%20I%20have%20food%2Fproduce%20prices%20to%20list%20on%20OnRoadNow",
+          "note": "Vendors: Tap to send today's tomato & veggie prices from your phone",
           "risk": "none",
           "published": true
         }
