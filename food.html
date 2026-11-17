@@ -3,116 +3,134 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OnRoadNow Food & Vendor Marketplace</title>
+  <title>OnRoadNow Global & Local Marketplace</title>
   <style>
     body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; background: #0f172a; color: #f8fafc; }
-    .card { background: #1e293b; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    h1, h2 { margin-top: 0; color: #38bdf8; }
-    input, select, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #334155; font-size: 16px; box-sizing: border-box; }
-    input, select { background: #0f172a; color: #fff; }
-    button { background: #22c55e; color: #052e16; font-weight: 700; border: none; cursor: pointer; }
-    button.secondary { background: #38bdf8; color: #082f49; }
-    .item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding: 10px 0; }
-    .ad-slot { background: #020617; border: 1px dashed #475569; padding: 12px; text-align: center; margin: 16px 0; border-radius: 8px; }
+    h1, h2 { color: #38bdf8; margin-top: 0; }
+    .ad-banner { background: #020617; border: 1px dashed #475569; padding: 14px; text-align: center; margin-bottom: 18px; border-radius: 10px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: #1e293b; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .card img { width: 100%; height: 180px; object-fit: cover; background: #334155; }
+    .card-body { padding: 14px; }
+    .tag { display: inline-block; background: #0284c7; color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 6px; margin-bottom: 6px; }
+    .btn { display: block; text-align: center; padding: 11px; background: #22c55e; color: #052e16; font-weight: 700; text-decoration: none; border-radius: 8px; margin-top: 10px; border: none; width: 100%; cursor: pointer; font-size: 15px; }
+    .btn-alt { background: #f59e0b; color: #451a03; }
+    input, button { width: 100%; padding: 11px; margin: 6px 0; border-radius: 8px; border: 1px solid #334155; box-sizing: border-box; font-size: 15px; }
+    input { background: #0f172a; color: #fff; }
   </style>
 </head>
 <body>
-  <h1>OnRoadNow Food & Vendor Hub</h1>
+  <h1>OnRoadNow Deals, Food & Global Store</h1>
 
-  <!-- AD SLOT -->
-  <div class="ad-slot" id="ad-top">
-    <!-- Paste your Adsterra / Direct Offer Banner Script Here -->
-    <small>Sponsored Partner Deals</small>
+  <!-- TOP ADSTERRA / DISPLAY AD SLOT -->
+  <div class="ad-banner" id="ad-top">
+    <!-- PASTE YOUR ADSTERRA BANNER / POPUNDER SCRIPT HERE -->
+    <strong>Featured Partner Deals & Instant Rewards</strong>
   </div>
 
-  <!-- VENDOR QUICK SCAN / ADD ITEM -->
-  <div class="card">
-    <h2>Vendor Item Scanner & Listing</h2>
-    <input type="text" id="vendorName" placeholder="Vendor / Restaurant Name" />
-    <input type="text" id="itemName" placeholder="Item Name or Barcode (Scan here)" />
-    <input type="number" id="itemPrice" placeholder="Price (JMD / USD)" />
-    <input type="tel" id="vendorPhone" placeholder="Vendor WhatsApp (e.g. 18765550199)" />
-    <button onclick="addVendorItem()">+ Add Item to Live Store</button>
+  <!-- QUICK VENDOR SCANNER -->
+  <div class="card" style="padding:16px; margin-bottom:20px;">
+    <h2>Scan or Add Vendor Item</h2>
+    <input type="text" id="vName" placeholder="Vendor Name (e.g. MoBay Grill)" />
+    <input type="text" id="iName" placeholder="Item Name / Scanned Barcode" />
+    <input type="text" id="iPrice" placeholder="Price (e.g. $15 USD / $1,500 JMD)" />
+    <input type="text" id="iImg" placeholder="Image URL (optional - auto-fills if blank)" />
+    <input type="tel" id="vPhone" placeholder="WhatsApp Number or Affiliate Link" />
+    <button class="btn" onclick="addProduct()">+ Publish Item Now</button>
   </div>
 
-  <!-- LIVE CATALOG FOR CUSTOMERS -->
-  <div class="card">
-    <h2>Available Items Near You</h2>
-    <div id="catalog"></div>
-  </div>
+  <!-- PRODUCT GRID WITH PICTURES -->
+  <h2>Trending Goods & Referral Deals</h2>
+  <div class="grid" id="productGrid"></div>
 
-  <!-- CUSTOMER LEAD CAPTURE -->
-  <div class="card">
-    <h2>Get Daily Food & Delivery Alerts</h2>
-    <form id="leadForm" onsubmit="saveLead(event)">
-      <input type="text" id="leadName" placeholder="Your Name" required />
-      <input type="tel" id="leadContact" placeholder="WhatsApp Number or Email" required />
-      <select id="leadInterest">
-        <option value="Food Delivery">Food & Meals</option>
-        <option value="Vendor Partner">Register as a Vendor</option>
-        <option value="Wholesale Deals">Wholesale / Bulk Deals</option>
-      </select>
-      <button type="submit" class="secondary">Join & Unlock Deals</button>
-    </form>
-    <p id="leadStatus" style="color:#4ade80; font-weight:600;"></p>
+  <!-- BOTTOM AD SLOT -->
+  <div class="ad-banner" id="ad-bottom">
+    <!-- PASTE SECOND ADSTERRA / CPA OFFER BANNER HERE -->
+    <small>Sponsored Offers • Powered by OnRoadNow</small>
   </div>
 
   <script>
-    const defaultItems = [
-      { vendor: "Montego Bay Grill", name: "Jerk Chicken & Festival Combo", price: "1200", phone: "18765550101" },
-      { vendor: "Island Fresh Mart", name: "Farm Fresh Produce Box", price: "2500", phone: "18765550102" }
+    const starterGoods = [
+      {
+        category: "Hot Food & Meals",
+        title: "Authentic Jamaican Jerk Chicken Platter",
+        price: "$15.00 / J$1,800",
+        img: "https://unsplash.com",
+        link: "/go/food",
+        cta: "Order / View Deal"
+      },
+      {
+        category: "Fresh Produce",
+        title: "Tropical Farm Fruit & Grocery Box",
+        price: "$25.00 / J$3,500",
+        img: "https://unsplash.com",
+        link: "/go/grocery",
+        cta: "Shop Fresh Box"
+      },
+      {
+        category: "Electronics & Mobile",
+        title: "Fast Chargers, Earbuds & Phone Gear",
+        price: "From $9.99",
+        img: "https://unsplash.com",
+        link: "/go/tech",
+        cta: "Buy Now (Global)"
+      },
+      {
+        category: "Wholesale & Bulk",
+        title: "Bulk Household & Pantry Supplies",
+        price: "Save up to 40%",
+        img: "https://unsplash.com",
+        link: "/go/wholesale",
+        cta: "Claim Wholesale Deal"
+      },
+      {
+        category: "Crypto & Earning Apps",
+        title: "Instant Crypto & Cashback Rewards",
+        price: "Sign-Up Bonus",
+        img: "https://unsplash.com",
+        link: "/go/signals",
+        cta: "Claim Bonus"
+      }
     ];
 
-    function getItems() {
-      return JSON.parse(localStorage.getItem("vendor_items") || JSON.stringify(defaultItems));
-    }
-
-    function renderCatalog() {
-      const items = getItems();
-      const container = document.getElementById("catalog");
-      container.innerHTML = items.map((item, idx) => {
-        const msg = encodeURIComponent(`Hi ${item.vendor}, I want to order: ${item.name} ($${item.price}) via OnRoadNow.`);
-        const waLink = `https://wa.me{item.phone.replace(/\D/g, "")}?text=${msg}`;
-        return `
-          <div class="item">
-            <div>
-              <strong>${item.name}</strong><br/>
-              <small>${item.vendor} • $${item.price}</small>
-            </div>
-            <a href="${waLink}" target="_blank" style="background:#22c55e;color:#052e16;padding:8px 12px;border-radius:6px;text-decoration:none;font-weight:bold;">Order</a>
+    function loadProducts() {
+      const saved = JSON.parse(localStorage.getItem("custom_goods") || "[]");
+      const all = [...saved, ...starterGoods];
+      document.getElementById("productGrid").innerHTML = all.map(item => `
+        <div class="card">
+          <img src="${item.img}" alt="${item.title}" onerror="this.src='https://unsplash.com'" />
+          <div class="card-body">
+            <span class="tag">${item.category}</span>
+            <h3 style="margin:6px 0;">${item.title}</h3>
+            <p style="color:#4ade80; font-weight:bold; margin:4px 0;">${item.price}</p>
+            <a href="${item.link}" class="btn ${item.link.startsWith('/go/') ? 'btn-alt' : ''}">${item.cta}</a>
           </div>
-        `;
-      }).join("");
+        </div>
+      `).join("");
     }
 
-    function addVendorItem() {
-      const vendor = document.getElementById("vendorName").value.trim();
-      const name = document.getElementById("itemName").value.trim();
-      const price = document.getElementById("itemPrice").value.trim();
-      const phone = document.getElementById("vendorPhone").value.trim();
-      if (!vendor || !name || !price || !phone) return alert("Fill in all vendor item fields.");
+    function addProduct() {
+      const vendor = document.getElementById("vName").value.trim();
+      const title = document.getElementById("iName").value.trim();
+      const price = document.getElementById("iPrice").value.trim();
+      const img = document.getElementById("iImg").value.trim() || "https://unsplash.com";
+      const contact = document.getElementById("vPhone").value.trim();
 
-      const items = getItems();
-      items.unshift({ vendor, name, price, phone });
-      localStorage.setItem("vendor_items", JSON.stringify(items));
-      renderCatalog();
-      document.getElementById("itemName").value = "";
-      document.getElementById("itemPrice").value = "";
+      if (!title || !price || !contact) return alert("Enter item name, price, and WhatsApp or URL.");
+
+      let link = contact;
+      if (!contact.startsWith("http")) {
+        const msg = encodeURIComponent(`Hi ${vendor || "Vendor"}, I want to buy ${title} (${price}) from OnRoadNow.`);
+        link = `https://wa.me{contact.replace(/\D/g, "")}?text=${msg}`;
+      }
+
+      const saved = JSON.parse(localStorage.getItem("custom_goods") || "[]");
+      saved.unshift({ category: vendor || "Local Vendor", title, price, img, link, cta: "Order Now" });
+      localStorage.setItem("custom_goods", JSON.stringify(saved));
+      loadProducts();
     }
 
-    function saveLead(e) {
-      e.preventDefault();
-      const name = document.getElementById("leadName").value;
-      const contact = document.getElementById("leadContact").value;
-      const interest = document.getElementById("leadInterest").value;
-      const leads = JSON.parse(localStorage.getItem("customer_leads") || "[]");
-      leads.push({ name, contact, interest, date: new Date().toISOString() });
-      localStorage.setItem("customer_leads", JSON.stringify(leads));
-      document.getElementById("leadStatus").textContent = "Saved! Redirecting to featured partner offer...";
-      setTimeout(() => { window.location.href = "/go/offer"; }, 2000);
-    }
-
-    renderCatalog();
+    loadProducts();
   </script>
 </body>
 </html>
