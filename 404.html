@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Preparing Your Destination...</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; text-align: center; padding: 32px 16px; }
+    .box { max-width: 540px; margin: 0 auto; background: #1e293b; padding: 24px; border-radius: 12px; }
+    .ad-frame { margin: 20px 0; padding: 16px; border: 1px dashed #64748b; background: #020617; min-height: 250px; }
+    .btn { display: inline-block; margin-top: 12px; padding: 12px 20px; background: #38bdf8; color: #082f49; font-weight: 700; border-radius: 8px; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Connecting You to Your Destination</h2>
+    <p>Please wait <strong id="countdown">20</strong> seconds while we verify the link...</p>
+
+    <div class="ad-frame" id="ad-zone">
+      <!-- INSERT ADSTERRA / SPONSORED BANNER CODE HERE -->
+      <p>Sponsored Offer</p>
+    </div>
+
+    <a id="continue-btn" class="btn" href="/">Continue Now</a>
+  </div>
+
+  <script>
+    // Map your earning & affiliate destinations here
+    const destinations = {
+      "/go/offer": "https://pages.dev",
+      "/go/food": "https://pages.dev",
+      "/go/signals": "https://pages.dev/signals"
+    };
+
+    const path = window.location.pathname.toLowerCase();
+    // Fallback to main page "/" if route is missing or invalid
+    let targetUrl = destinations[path] || "/";
+
+    // Safety check: ensure targetUrl is valid, otherwise force main page "/"
+    try {
+      if (targetUrl !== "/") new URL(targetUrl);
+    } catch (err) {
+      targetUrl = "/";
+    }
+
+    document.getElementById("continue-btn").href = targetUrl;
+
+    // 20-second countdown (within your 15s-30s requirement)
+    let seconds = 20;
+    const timerDisplay = document.getElementById("countdown");
+
+    const interval = setInterval(() => {
+      seconds--;
+      timerDisplay.textContent = seconds;
+      if (seconds <= 0) {
+        clearInterval(interval);
+        window.location.replace(targetUrl);
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
