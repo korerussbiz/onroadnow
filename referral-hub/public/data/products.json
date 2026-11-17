@@ -1,60 +1,66 @@
 [
   {
-    "name": "Scotchies Montego Bay — Jerk Chicken & Festival",
+    "name": "Scotchies Montego Bay \u2014 Jerk Chicken & Festival",
     "description": "Authentic pimento-wood jerk chicken from Coral Gardens, MoBay. View establishment or book OnRoadNow runner pickup.",
-    "price": 10.50,
+    "price": 10.5,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "Real Price: ~J$1,100–J$1,350 + J$400 MoBay Runner Fee | Info: tripadvisor.com"
+    "note": "Real Price: ~J$1,100\u2013J$1,350 + J$400 MoBay Runner Fee | Info: tripadvisor.com",
+    "store_url": "/go/scotchies"
   },
   {
-    "name": "Juici Patties MoBay — Patty, Coco Bread & Drink Combo",
+    "name": "Juici Patties MoBay \u2014 Patty, Coco Bread & Drink Combo",
     "description": "Fresh beef or chicken patty with coco bread from Juici Patties (Fairview / Sam Sharpe Sq).",
-    "price": 6.50,
+    "price": 6.5,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "Real Price: ~J$750 + J$350 Runner Fee | Official: juicipatties.com"
+    "note": "Real Price: ~J$750 + J$350 Runner Fee | Official: juicipatties.com",
+    "store_url": "/go/juici"
   },
   {
-    "name": "Tastee Patties MoBay — Cheese & Beef Patty Box",
+    "name": "Tastee Patties MoBay \u2014 Cheese & Beef Patty Box",
     "description": "Hot Tastee patties & pastries from St. James St or Fairview, Montego Bay.",
-    "price": 6.50,
+    "price": 6.5,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "Real Price: ~J$330–J$750 + J$350 Runner Fee | Official: tasteejamaica.com"
+    "note": "Real Price: ~J$330\u2013J$750 + J$350 Runner Fee | Official: tasteejamaica.com",
+    "store_url": "/go/tastee"
   },
   {
-    "name": "Hi-Lo Food Stores (Fairview MoBay) — Grocery Shopper Service",
+    "name": "Hi-Lo Food Stores (Fairview MoBay) \u2014 Grocery Shopper Service",
     "description": "Shop Hi-Lo Montego Bay prices online or send us your grocery list for same-day personal shopping & delivery.",
-    "price": 22.00,
+    "price": 22.0,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "Real Store: hilofoodstoresja.com | J$500 Personal Shopper Fee"
+    "note": "Real Store: hilofoodstoresja.com | J$500 Personal Shopper Fee",
+    "store_url": "/go/hilo"
   },
   {
-    "name": "Fontana Pharmacy (Fairview MoBay) — Health, Baby & Everyday Goods",
+    "name": "Fontana Pharmacy (Fairview MoBay) \u2014 Health, Baby & Everyday Goods",
     "description": "Order pharmacy items, toiletries, snacks, and household essentials from Fontana Fairview with MoBay courier drop-off.",
-    "price": 18.00,
+    "price": 18.0,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "Real Store: fontanapharmacy.com | J$500 MoBay Courier Fee"
+    "note": "Real Store: fontanapharmacy.com | J$500 MoBay Courier Fee",
+    "store_url": "/go/fontana"
   },
   {
-    "name": "Charles Gordon Market MoBay — Fresh Produce & Fruit Basket",
+    "name": "Charles Gordon Market MoBay \u2014 Fresh Produce & Fruit Basket",
     "description": "Local yam, green banana, callaloo, pumpkin, mango, and pineapple picked fresh in Montego Bay.",
-    "price": 11.00,
+    "price": 11.0,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "Real Market Prices: ~J$1,400 + J$400 Runner Fee"
+    "note": "Real Market Prices: ~J$1,400 + J$400 Runner Fee",
+    "store_url": "/go/food"
   },
   {
-    "name": "7Krave Montego Bay — Multi-Restaurant Food Delivery",
+    "name": "7Krave Montego Bay \u2014 Multi-Restaurant Food Delivery",
     "description": "Browse 50+ Montego Bay restaurants on 7Krave or request an OnRoadNow rider.",
     "price": null,
     "type": "affiliate",
@@ -63,7 +69,7 @@
     "note": "Official 7Krave Montego Bay portal (8s sponsor view)"
   },
   {
-    "name": "Rakuten — Get $30 Cashback on Walmart, Target & Groceries",
+    "name": "Rakuten \u2014 Get $30 Cashback on Walmart, Target & Groceries",
     "description": "Free to join: earn a $30 referral bonus when you sign up and spend $30+ at partner stores.",
     "price": null,
     "type": "affiliate",
@@ -81,7 +87,7 @@
     "note": "Amazon Associates commission on every qualifying order"
   },
   {
-    "name": "DoorDash — Food & Supermarket Delivery Discounts",
+    "name": "DoorDash \u2014 Food & Supermarket Delivery Discounts",
     "description": "Order restaurant meals and groceries with new-user referral savings.",
     "price": null,
     "type": "affiliate",
@@ -90,7 +96,7 @@
     "note": "Verified DoorDash invite link"
   },
   {
-    "name": "Uber & Uber Eats — Ride & Meal Invite Credit",
+    "name": "Uber & Uber Eats \u2014 Ride & Meal Invite Credit",
     "description": "Claim ride and food delivery discounts through our official Uber referral link.",
     "price": null,
     "type": "affiliate",
@@ -99,7 +105,7 @@
     "note": "Verified Uber invite link"
   },
   {
-    "name": "Binance — Buy/Sell Crypto & Earn Referral Rewards",
+    "name": "Binance \u2014 Buy/Sell Crypto & Earn Referral Rewards",
     "description": "Trade BTC, BNB, and USDT with referral ID 815612060.",
     "price": null,
     "type": "affiliate",
