@@ -1,128 +1,110 @@
 [
   {
-    "name": "Quarter Jerk Chicken + Hardo Bread (MoBay Deal)",
-    "description": "Hot Montego Bay jerk chicken with hardo bread. Order via WhatsApp, Telegram, or Messenger.",
-    "price": 5.00,
+    "name": "Scotchies Montego Bay — Jerk Chicken & Festival",
+    "description": "Authentic pimento-wood jerk chicken from Coral Gardens, MoBay. View establishment or book OnRoadNow runner pickup.",
+    "price": 10.50,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "J$750 local | Chat: WhatsApp / Telegram (+18768090958) / Messenger"
+    "note": "Real Price: ~J$1,100–J$1,350 + J$400 MoBay Runner Fee | Info: tripadvisor.com"
   },
   {
-    "name": "2 Beef Patties + Coco Bread + Cold Drink Combo",
-    "description": "Fresh baked Jamaican patties with coco bread and chilled drink delivered in Montego Bay.",
-    "price": 4.25,
+    "name": "Juici Patties MoBay — Patty, Coco Bread & Drink Combo",
+    "description": "Fresh beef or chicken patty with coco bread from Juici Patties (Fairview / Sam Sharpe Sq).",
+    "price": 6.50,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "J$650 local | Fast Montego Bay delivery"
+    "note": "Real Price: ~J$750 + J$350 Runner Fee | Official: juicipatties.com"
   },
   {
-    "name": "MoBay Wholesale Grocery Bundle (Rice, Flour, Sugar, Oil)",
-    "description": "Essential family pantry pack at wholesale prices with same-day Montego Bay drop-off.",
-    "price": 15.50,
+    "name": "Tastee Patties MoBay — Cheese & Beef Patty Box",
+    "description": "Hot Tastee patties & pastries from St. James St or Fairview, Montego Bay.",
+    "price": 6.50,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "J$2,400 local | Wholesale savings"
+    "note": "Real Price: ~J$330–J$750 + J$350 Runner Fee | Official: tasteejamaica.com"
   },
   {
-    "name": "Fresh Market Produce Box (Yam, Banana, Callaloo, Pumpkin)",
-    "description": "Farm-fresh Jamaican ground provisions and seasonal tropical fruits.",
-    "price": 8.00,
+    "name": "Hi-Lo Food Stores (Fairview MoBay) — Grocery Shopper Service",
+    "description": "Shop Hi-Lo Montego Bay prices online or send us your grocery list for same-day personal shopping & delivery.",
+    "price": 22.00,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "J$1,200 local | Direct farm pickup & delivery"
+    "note": "Real Store: hilofoodstoresja.com | J$500 Personal Shopper Fee"
   },
   {
-    "name": "5-Pack BPO & Office Group Lunch (FREE Delivery)",
-    "description": "5 Quarter Jerk Chicken lunches + 5 drinks delivered free to Freeport, Fairview, or Barnett Tech Park.",
-    "price": 24.00,
+    "name": "Fontana Pharmacy (Fairview MoBay) — Health, Baby & Everyday Goods",
+    "description": "Order pharmacy items, toiletries, snacks, and household essentials from Fontana Fairview with MoBay courier drop-off.",
+    "price": 18.00,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "J$3,750 total | Free office delivery"
+    "note": "Real Store: fontanapharmacy.com | J$500 MoBay Courier Fee"
   },
   {
-    "name": "Airbnb & Villa Welcome Grocery Basket",
-    "description": "Water, tropical fruit, eggs, bread, Blue Mountain coffee & snacks stocked before guest arrival.",
-    "price": 35.00,
+    "name": "Charles Gordon Market MoBay — Fresh Produce & Fruit Basket",
+    "description": "Local yam, green banana, callaloo, pumpkin, mango, and pineapple picked fresh in Montego Bay.",
+    "price": 11.00,
     "type": "direct",
     "image": "https://unsplash.com",
     "payment_link": "https://wa.me.",
-    "note": "J$5,500 / $35 USD | Montego Bay villas & Airbnbs"
+    "note": "Real Market Prices: ~J$1,400 + J$400 Runner Fee"
   },
   {
-    "name": "Fast USB-C Charger & Braided Cable Kit",
-    "description": "20W fast wall charger + durable charging cable for iPhone & Android with local drop-off.",
-    "price": 10.00,
-    "type": "direct",
+    "name": "7Krave Montego Bay — Multi-Restaurant Food Delivery",
+    "description": "Browse 50+ Montego Bay restaurants on 7Krave or request an OnRoadNow rider.",
+    "price": null,
+    "type": "affiliate",
     "image": "https://unsplash.com",
-    "payment_link": "https://wa.me.",
-    "note": "J$1,500 local | Same-day MoBay delivery"
+    "affiliate_url": "/go/7krave",
+    "note": "Official 7Krave Montego Bay portal (8s sponsor view)"
   },
   {
-    "name": "Rakuten $30 Cashback on Groceries & Everyday Shopping",
-    "description": "Earn $30 welcome bonus plus automatic cashback at Walmart, Target, and 3,500+ stores.",
+    "name": "Rakuten — Get $30 Cashback on Walmart, Target & Groceries",
+    "description": "Free to join: earn a $30 referral bonus when you sign up and spend $30+ at partner stores.",
     "price": null,
     "type": "affiliate",
     "image": "https://unsplash.com",
     "affiliate_url": "/go/rakuten",
-    "note": "Official Rakuten referral — $30 bonus after qualifying spend"
+    "note": "Verified Referral Commission: $30 per qualified signup"
   },
   {
-    "name": "DoorDash Food & Grocery Delivery Discounts",
-    "description": "Save on restaurant meals and supermarket delivery orders.",
-    "price": null,
-    "type": "affiliate",
-    "image": "https://unsplash.com",
-    "affiliate_url": "/go/doordash",
-    "note": "Official DoorDash invite discount"
-  },
-  {
-    "name": "Uber Rides & Uber Eats Invite Credit",
-    "description": "Get ride and food delivery discounts when signing up via our invite link.",
-    "price": null,
-    "type": "affiliate",
-    "image": "https://unsplash.com",
-    "affiliate_url": "/go/uber",
-    "note": "Official Uber referral"
-  },
-  {
-    "name": "Amazon Bulk Pantry, Snacks & Household Deals",
-    "description": "Shop discounted bulk groceries, coffee, snacks, and home essentials.",
+    "name": "Amazon Grocery & Bulk Pantry Deals",
+    "description": "Shop discounted snacks, coffee, household bulk items, and electronics shipped worldwide or via freight forwarder.",
     "price": null,
     "type": "affiliate",
     "image": "https://unsplash.com",
     "affiliate_url": "/go/amazon",
-    "note": "Direct Amazon grocery & pantry deals"
+    "note": "Amazon Associates commission on every qualifying order"
   },
   {
-    "name": "Binance Crypto Trading & Rewards Account",
-    "description": "Buy, sell, and earn rewards on Bitcoin, BNB, and USDT with referral code 815612060.",
+    "name": "DoorDash — Food & Supermarket Delivery Discounts",
+    "description": "Order restaurant meals and groceries with new-user referral savings.",
+    "price": null,
+    "type": "affiliate",
+    "image": "https://unsplash.com",
+    "affiliate_url": "/go/doordash",
+    "note": "Verified DoorDash invite link"
+  },
+  {
+    "name": "Uber & Uber Eats — Ride & Meal Invite Credit",
+    "description": "Claim ride and food delivery discounts through our official Uber referral link.",
+    "price": null,
+    "type": "affiliate",
+    "image": "https://unsplash.com",
+    "affiliate_url": "/go/uber",
+    "note": "Verified Uber invite link"
+  },
+  {
+    "name": "Binance — Buy/Sell Crypto & Earn Referral Rewards",
+    "description": "Trade BTC, BNB, and USDT with referral ID 815612060.",
     "price": null,
     "type": "affiliate",
     "image": "https://unsplash.com",
     "affiliate_url": "/go/binance",
-    "note": "Ref ID: 815612060"
-  },
-  {
-    "name": "Coinbase Welcome Crypto Bonus",
-    "description": "Create a verified Coinbase account and earn welcome rewards.",
-    "price": null,
-    "type": "affiliate",
-    "image": "https://unsplash.com",
-    "affiliate_url": "/go/coinbase",
-    "note": "Official Coinbase invite"
-  },
-  {
-    "name": "DistroKid VIP Artist Music Distribution (7% Off)",
-    "description": "Upload unlimited music to Spotify, Apple Music, and TikTok with 7% VIP discount.",
-    "price": null,
-    "type": "affiliate",
-    "image": "https://unsplash.com",
-    "affiliate_url": "/go/distrokid",
-    "note": "Official DistroKid VIP link"
+    "note": "Lifetime trading fee commission (Ref: 815612060)"
   }
 ]
