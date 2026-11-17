@@ -167,5 +167,21 @@
 
     loadProducts();
   </script>
+
+  <div class="card" style="padding:16px; margin-bottom:20px; border:2px solid #22c55e;">
+    <h2>🔥 Get Daily Cheap Food & $30 Cashback Alerts</h2>
+    <p style="margin:4px 0 10px; color:#cbd5e1;">Join our VIP list for daily Montego Bay lunch specials, wholesale grocery drops, and instant promo codes.</p>
+    <input type="text" id="vipContact" placeholder="Enter WhatsApp Number or Email" />
+    <button class="btn" onclick="joinVip()">📲 Send Me Daily Deals</button>
+  </div>
+  <script>
+    function joinVip() {
+      const c = document.getElementById('vipContact').value.trim();
+      if (!c) return alert('Enter your WhatsApp number or email first.');
+      const msg = encodeURIComponent('Hi OnRoadNow! Add me to the VIP Cheap Food & Discount Alerts list: ' + c);
+      window.open('https://wa.me' + msg, '_blank');
+    }
+  </script>
+
 </body>
 </html>
