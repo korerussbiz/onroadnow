@@ -3,6 +3,35 @@
   "tagline": "Tools & platforms I actually use",
   "categories": [
     {
+      "title": "Food & Montego Bay Market",
+      "links": [
+        {
+          "id": "bruges-waffles",
+          "name": "Bruges Belgian Waffles (6-Pack)",
+          "url": "https://viglink.com",
+          "note": "Hand-made Liege waffles shipped fresh \u2014 Classics, Cookies & Cream",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "mobay-market-deals",
+          "name": "Montego Bay Market & Low-Price Foods",
+          "url": "/market/",
+          "note": "Daily tomato, veggie & grocery prices in MoBay \u2014 Vendors post free",
+          "risk": "none",
+          "published": true
+        },
+        {
+          "id": "vendor-submit-deal",
+          "name": "Selling Food or Produce? Post Your Price",
+          "url": "https://wa.me18768090958?text=Hi%20KorerussBiz%2C%20I%20have%20food%2Fproduce%20prices%20to%20list%20on%20OnRoadNow",
+          "note": "Tap to WhatsApp or call with today's market deals",
+          "risk": "none",
+          "published": true
+        }
+      ]
+    },
+    {
       "title": "Crypto",
       "links": [
         {
