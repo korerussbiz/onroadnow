@@ -28,7 +28,15 @@ document.getElementById('lf').addEventListener('submit', async (e) => {
   if (r.ok) { fireConv('generate_lead', {page:'guide'}); f.innerHTML='<p>Thanks — check your inbox.</p>'; }
   else { document.getElementById('lm').textContent='Something went wrong. Try again.'; }
 });
-</script></div></main>
+</script></div>
+<section style="margin:1.5rem auto;max-width:340px">
+  <h3 style="color:#f7931a;font-size:.9em;margin:0 0 .5rem;text-align:center">Featured product</h3>
+  <div id="rotator" style="min-height:240px"></div>
+  <script src="/rotator.js" defer></script>
+  <p style="color:#555;font-size:.72em;text-align:center;margin:.5rem 0 0">Some links are referrals. No extra cost to you.</p>
+</section>
+
+</main>
 <footer><p>Some links are referral links. I may earn a commission at no extra cost to you. · <a href="/disclaimer/" style="color:#f7931a">Disclaimer</a></p>
 <p>Crypto is high-risk. Never share seed phrases. Not financial advice.</p></footer>
 </body></html>
