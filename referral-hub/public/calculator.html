@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fee Calculator — KorerussBiz</title>
+<meta name="description" content="Compare crypto exchange trading fees over a month or a year.">
+<link rel="canonical" href="https://onroadnow.pages.dev/calculator.html">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/theme.css">
+</head><body>
+<header class="site-header"><div class="nav-inner">
+<a href="/" class="logo">⚡ KorerussBiz</a>
+<nav class="main-nav"><a href="/crypto/">Crypto</a><a href="/music/">Music</a><a href="/shop/">Shop</a><a href="/signals/">Signals</a><a href="/support/">Support</a><a href="/join/" class="nav-cta">Join</a></nav>
+</div></header>
+<main>
+<h1>Fee calculator</h1>
+<p class="lead">See how a small fee compounds over time. Compare 0.1% (Binance tier) against 0.6% (Coinbase tier).</p>
+<div class="disclosure">Educational only — not financial advice. Actual fees vary by pair, volume, and account tier.</div>
+<form id="calc" style="display:grid;gap:.7rem;max-width:420px;margin:1.5rem 0">
+  <label>Monthly trading volume (USD)
+    <input type="number" id="vol" value="1000" min="0" step="100" style="width:100%;padding:.6rem;border-radius:8px;border:1px solid #e4e2dc;font:inherit">
+  </label>
+  <label>Fee rate (%)
+    <select id="rate" style="width:100%;padding:.6rem;border-radius:8px;border:1px solid #e4e2dc;font:inherit">
+      <option value="0.1">0.1% — Binance</option>
+      <option value="0.6">0.6% — Coinbase</option>
+      <option value="1.0">1.0% — typical card buy</option>
+    </select>
+  </label>
+  <button type="submit" style="padding:.7rem;border-radius:8px;border:none;background:#ff5a3c;color:#fff;font-weight:700;cursor:pointer;font:inherit">Calculate</button>
+</form>
+<div id="out" style="padding:1.2rem;background:#fff;border:1px solid #e4e2dc;border-radius:12px;font-size:1.05em"></div>
+<script>
+document.getElementById("calc").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var v = parseFloat(document.getElementById("vol").value) || 0;
+  var r = parseFloat(document.getElementById("rate").value) || 0;
+  var monthly = v * (r / 100);
+  var yearly = monthly * 12;
+  document.getElementById("out").innerHTML =
+    "<p><strong>Monthly fee:</strong> $" + monthly.toFixed(2) + "</p>" +
+    "<p><strong>Yearly fee:</strong> $" + yearly.toFixed(2) + "</p>" +
+    "<p style='color:#6b6b6b;font-size:.9em'>On $0.1% instead of 0.6%, you would save $" + (yearly - (v * 0.001 * 12)).toFixed(2) + " per year.</p>";
+});
+</script>
+</main>
+<footer class="site-footer"><p><a href="/">Home</a> · <a href="/disclaimer/">Disclaimer</a></p></footer>
+</body></html>
