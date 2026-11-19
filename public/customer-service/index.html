@@ -3,124 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KorerussBiz Customer Service & Telemarketing Hub</title>
+  <title>KorerussBiz Customer Service — Telemarketing & Email Support</title>
   <style>
-    body{font-family:system-ui,sans-serif;background:#0b0e14;color:#f3f4f6;max-width:860px;margin:1.5rem auto;padding:1rem;line-height:1.5}
-    .card{background:#151922;border:1px solid #262c3a;border-radius:12px;padding:1.25rem;margin-bottom:1rem}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:.75rem}
+    body{font-family:system-ui,sans-serif;background:#0b0e14;color:#f3f4f6;max-width:880px;margin:0 auto;padding:1rem;line-height:1.5}
+    .card{background:#151922;border:1px solid #262c3a;border-radius:12px;padding:1.2rem;margin-bottom:1rem}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:.75rem}
     label{font-size:.82rem;color:#9ca3af;display:block;margin-bottom:.2rem}
     input,select{width:100%;padding:.65rem;border-radius:8px;border:1px solid #374151;background:#0b0e14;color:#fff;font-size:.95rem;box-sizing:border-box}
-    button,.btn{padding:.65rem 1rem;border:0;border-radius:8px;font-weight:700;cursor:pointer;font-size:.9rem;text-decoration:none;display:inline-block}
+    button,.btn{padding:.6rem .95rem;border:0;border-radius:8px;font-weight:700;cursor:pointer;font-size:.88rem;text-decoration:none;display:inline-block}
     .btn-green{background:#059669;color:#fff}.btn-red{background:#dc2626;color:#fff}.btn-blue{background:#2563eb;color:#fff}.btn-amber{background:#d97706;color:#111}
-    table{width:100%;border-collapse:collapse;margin-top:.75rem;font-size:.85rem}
-    th,td{border-bottom:1px solid #262c3a;padding:.55rem;text-align:left}
-    .prompt-box{border:2px solid #f59e0b;background:#1c1917}
-    .stat{font-size:1.3rem;font-weight:700;color:#34d399}
+    table{width:100%;border-collapse:collapse;margin-top:.75rem;font-size:.84rem}
+    th,td{border-bottom:1px solid #262c3a;padding:.5rem;text-align:left}
+    .gate{border:2px solid #f59e0b;background:#1c1917}
+    .stat{font-size:1.25rem;font-weight:700;color:#34d399}
   </style>
 </head>
 <body>
   <h1>KorerussBiz Customer Service</h1>
-  <p>Inbound &amp; Outbound Telemarketing Desk, Call Gate &amp; Sales CRM.</p>
-  <div class="card prompt-box">
-    <h2 style="margin-top:0;color:#fbbf24">Call Gate — Will you take this call?</h2>
+  <p><strong>Scope of Operations:</strong> Telemarketing (Inbound &amp; Outbound Calls) and Email Support Only &bull; Montego Bay, Jamaica.</p>
+  <div class="card">
+    <h2 style="margin-top:0">Company &amp; Agent Signup Profile (1-Click Copy for Applications)</h2>
+    <p style="font-size:.9rem;color:#d1d5db"><strong>Business Name:</strong> KorerussBiz Customer Service &bull; <strong>Location:</strong> Montego Bay, St. James, Jamaica<br>
+    <strong>Support Email:</strong> korerussbiz@gmail.com &bull; <strong>Phone / WhatsApp:</strong> +1-876-809-0958<br>
+    <strong>Channels Offered:</strong> Inbound/Outbound Telemarketing &amp; Email Customer Support Only<br>
+    <strong>Payout Rails:</strong> PayPal (<code>paypal.me/KoreyRussell809</code>) | EVM Crypto (<code>0xc2a49710d26e023f129c429f6494f2db04809464</code>)</p>
+    <div>
+      <a class="btn btn-blue" href="https://arise.com" target="_blank">Signup: Arise (Bi-Weekly)</a>
+      <a class="btn btn-blue" href="https://liveops.com" target="_blank">Signup: Liveops (Bi-Weekly)</a>
+      <a class="btn btn-blue" href="https://nexrep.com" target="_blank">Signup: NexRep (Bi-Weekly)</a>
+      <a class="btn btn-blue" href="https://workingsolutions.com" target="_blank">Signup: Working Solutions</a>
+      <a class="btn btn-green" href="mailto:korerussbiz@://gmail.com">Email Support Desk</a>
+    </div>
+  </div>
+  <div class="card gate">
+    <h2 style="margin-top:0;color:#fbbf24">Call &amp; Email Queue Gate — Will you take this interaction?</h2>
     <div class="grid">
-      <div><label>Company</label><select id="company"><option>Arise Platform</option><option>Liveops</option><option>Working Solutions</option><option>NexRep</option><option>Itel / Concentrix MoBay</option><option>KorerussBiz Direct</option></select></div>
-      <div><label>Direction</label><select id="direction"><option>Inbound</option><option>Outbound</option></select></div>
-      <div><label>Customer Name</label><input id="custName" placeholder="Jane Doe"></div>
-      <div><label>Phone / Email</label><input id="custContact" placeholder="+1-876-555-0199"></div>
+      <div><label>Partner Company</label><select id="company"><option>Arise Platform</option><option>Liveops</option><option>NexRep</option><option>Working Solutions</option><option>Itel / Concentrix MoBay</option><option>KorerussBiz Direct</option></select></div>
+      <div><label>Channel (Telemarketing / Email)</label><select id="direction"><option>Inbound Telemarketing</option><option>Outbound Telemarketing</option><option>Email Support</option></select></div>
+      <div><label>Customer Name</label><input id="custName" placeholder="Full Name"></div>
+      <div><label>Customer Phone / Email</label><input id="custContact" placeholder="Phone or Email"></div>
     </div>
-    <div style="margin-top:.85rem;display:flex;gap:.6rem;flex-wrap:wrap">
-      <button class="btn-green" onclick="callGate('ACCEPTED')">Accept Call &amp; Start Timer</button>
-      <button class="btn-red" onclick="callGate('DECLINED')">Decline Call</button>
+    <div style="margin-top:.8rem;display:flex;gap:.6rem;flex-wrap:wrap">
+      <button class="btn-green" onclick="gate('ACCEPTED')">Accept &amp; Start Timer</button>
+      <button class="btn-red" onclick="gate('DECLINED')">Decline / Skip</button>
     </div>
-    <div id="activeTimer" style="margin-top:.6rem;color:#34d399;font-weight:600"></div>
+    <div id="timer" style="margin-top:.5rem;color:#34d399;font-weight:600"></div>
   </div>
   <div class="card">
-    <h2 style="margin-top:0">Record Outcome &amp; Sale</h2>
+    <h2 style="margin-top:0">Log Outcome &amp; Sale Record</h2>
     <div class="grid">
-      <div><label>Outcome</label><select id="outcome"><option>Sale Closed</option><option>Follow-Up</option><option>Support Resolved</option><option>No Sale</option><option>Declined</option></select></div>
-      <div><label>Pay Model</label><select id="payModel"><option>Hourly + Commission</option><option>Hourly Only</option><option>Commission Only</option></select></div>
-      <div><label>Sale ($ USD)</label><input type="number" id="saleAmt" value="0" step="0.01"></div>
-      <div><label>Earned ($ USD)</label><input type="number" id="commAmt" value="0" step="0.01"></div>
+      <div><label>Disposition</label><select id="outcome"><option>Sale Closed</option><option>Email Ticket Resolved</option><option>Follow-Up Scheduled</option><option>No Sale</option><option>Declined</option></select></div>
+      <div><label>Pay Structure</label><select id="payModel"><option>Hourly + Commission</option><option>Hourly Rate</option><option>Commission Only</option></select></div>
+      <div><label>Sale Amount ($ USD)</label><input type="number" id="saleAmt" value="0" step="0.01"></div>
+      <div><label>Earned Pay / Comm ($ USD)</label><input type="number" id="commAmt" value="0" step="0.01"></div>
     </div>
-    <div style="margin-top:.6rem"><label>Notes</label><input id="notes" placeholder="Order details, callback time..."></div>
+    <div style="margin-top:.6rem"><label>Customer &amp; Order Notes</label><input id="notes" placeholder="Order summary, ticket ref, follow-up..."></div>
     <div style="margin-top:.8rem;display:flex;gap:.6rem;flex-wrap:wrap">
-      <button class="btn-blue" onclick="saveRec()">Save Record</button>
+      <button class="btn-blue" onclick="save()">Save to CRM</button>
       <button class="btn-amber" onclick="exportCSV()">Export CSV</button>
     </div>
   </div>
   <div class="card">
     <div class="grid">
-      <div><label>Calls</label><div class="stat" id="sCalls">0</div></div>
-      <div><label>Sales</label><div class="stat" id="sSales">$0.00</div></div>
-      <div><label>Earned</label><div class="stat" id="sEarned">$0.00</div></div>
+      <div><label>Interactions</label><div class="stat" id="sCalls">0</div></div>
+      <div><label>Total Sales</label><div class="stat" id="sSales">$0.00</div></div>
+      <div><label>Total Earned</label><div class="stat" id="sEarned">$0.00</div></div>
     </div>
-    <div style="margin-top:.75rem"><label>Filter Company</label><select id="fComp" onchange="render()"><option value="ALL">All Companies</option><option>Arise Platform</option><option>Liveops</option><option>Working Solutions</option><option>NexRep</option><option>Itel / Concentrix MoBay</option><option>KorerussBiz Direct</option></select></div>
-    <div style="overflow-x:auto"><table><thead><tr><th>Time</th><th>Company</th><th>Call</th><th>Customer</th><th>Outcome</th><th>Sale</th><th>Earned</th></tr></thead><tbody id="tbody"></tbody></table></div>
+    <div style="margin-top:.75rem"><label>Filter by Company</label><select id="fComp" onchange="render()"><option value="ALL">All Companies</option><option>Arise Platform</option><option>Liveops</option><option>NexRep</option><option>Working Solutions</option><option>Itel / Concentrix MoBay</option><option>KorerussBiz Direct</option></select></div>
+    <div style="overflow-x:auto"><table><thead><tr><th>Time</th><th>Company</th><th>Channel</th><th>Customer</th><th>Outcome</th><th>Sale</th><th>Earned</th></tr></thead><tbody id="tbody"></tbody></table></div>
   </div>
-  <div class="card">
-    <a class="btn btn-blue" href="https://arise.com" target="_blank">Arise</a>
-    <a class="btn btn-blue" href="https://liveops.com" target="_blank">Liveops</a>
-    <a class="btn btn-blue" href="https://nexrep.com" target="_blank">NexRep</a>
-    <a class="btn btn-green" id="ppBtn" href="#" target="_blank">Client PayPal.Me</a>
-    <p style="font-size:.82rem;color:#9ca3af;margin-top:.6rem">Crypto: <code>0xc2a49710d26e023f129c429f6494f2db04809464</code></p>
-  </div>
-  <div id="geo-deals-container"></div><script src="/geo-deals.js"></script>
   <script>
-    document.getElementById("ppBtn").href = "https://paypal.me" + "KoreyRussell809";
-    let dec = "ACCEPTED", t0 = null, iv = null;
-    function callGate(c) {
-      dec = c;
-      if (c === "ACCEPTED") {
-        t0 = Date.now(); clearInterval(iv);
-        iv = setInterval(() => {
-          const s = Math.floor((Date.now() - t0) / 1000);
-          document.getElementById("activeTimer").innerText = "Active: " + Math.floor(s/60) + "m " + (s%60) + "s";
-        }, 1000);
-      } else {
-        document.getElementById("outcome").value = "Declined";
-        saveRec();
-      }
-    }
-    const get = () => JSON.parse(localStorage.getItem("koreruss_cs") || "[]");
-    function saveRec() {
-      clearInterval(iv);
-      const sec = t0 ? Math.floor((Date.now() - t0) / 1000) : 0; t0 = null;
-      document.getElementById("activeTimer").innerText = "";
-      const all = get();
-      all.unshift({
-        time: new Date().toISOString().replace("T", " ").slice(0, 19),
-        company: document.getElementById("company").value,
-        call: document.getElementById("direction").value + " (" + dec + ", " + sec + "s)",
-        cust: (document.getElementById("custName").value || "Unknown") + " | " + (document.getElementById("custContact").value || "-"),
-        outcome: document.getElementById("outcome").value,
-        sale: parseFloat(document.getElementById("saleAmt").value) || 0,
-        earned: parseFloat(document.getElementById("commAmt").value) || 0,
-        notes: document.getElementById("notes").value || ""
-      });
-      localStorage.setItem("koreruss_cs", JSON.stringify(all));
-      ["custName","custContact","notes"].forEach(id => document.getElementById(id).value = "");
-      ["saleAmt","commAmt"].forEach(id => document.getElementById(id).value = "0");
-      dec = "ACCEPTED"; render();
-    }
-    function render() {
-      const f = document.getElementById("fComp").value, all = get();
-      let ts = 0, te = 0; all.forEach(r => { ts += r.sale; te += r.earned; });
-      document.getElementById("sCalls").innerText = all.length;
-      document.getElementById("sSales").innerText = "$" + ts.toFixed(2);
-      document.getElementById("sEarned").innerText = "$" + te.toFixed(2);
-      const rows = f === "ALL" ? all : all.filter(r => r.company === f);
-      document.getElementById("tbody").innerHTML = rows.map(r => `<tr><td>${r.time}</td><td><b>${r.company}</b></td><td>${r.call}</td><td>${r.cust}</td><td>${r.outcome}</td><td>$${r.sale.toFixed(2)}</td><td>$${r.earned.toFixed(2)}</td></tr>`).join("");
-    }
-    function exportCSV() {
-      const all = get(); if (!all.length) return alert("No records yet.");
-      const h = Object.keys(all);
-      const csv = [h.join(",")].concat(all.map(r => h.map(k => `"${String(r[k]).replace(/"/g,'""')}"`).join(","))).join("\n");
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(new Blob([csv], {type:"text/csv"}));
-      a.download = "korerussbiz_cs_" + new Date().toISOString().slice(0,10) + ".csv";
-      a.click();
-    }
+    let dec="ACCEPTED",t0=null,iv=null;
+    function gate(c){dec=c;if(c==="ACCEPTED"){t0=Date.now();clearInterval(iv);iv=setInterval(()=>{const s=Math.floor((Date.now()-t0)/1000);document.getElementById("timer").innerText="Active: "+Math.floor(s/60)+"m "+(s%60)+"s";},1000);}else{document.getElementById("outcome").value="Declined";save();}}
+    const get=()=>JSON.parse(localStorage.getItem("kbiz_cs_v2")||"[]");
+    function save(){clearInterval(iv);const sec=t0?Math.floor((Date.now()-t0)/1000):0;t0=null;document.getElementById("timer").innerText="";const all=get();all.unshift({time:new Date().toISOString().replace("T"," ").slice(0,19),company:document.getElementById("company").value,channel:document.getElementById("direction").value+" ("+dec+", "+sec+"s)",cust:(document.getElementById("custName").value||"Unknown")+" | "+(document.getElementById("custContact").value||"-"),outcome:document.getElementById("outcome").value,sale:parseFloat(document.getElementById("saleAmt").value)||0,earned:parseFloat(document.getElementById("commAmt").value)||0,notes:document.getElementById("notes").value||""});localStorage.setItem("kbiz_cs_v2",JSON.stringify(all));["custName","custContact","notes"].forEach(i=>document.getElementById(i).value="");["saleAmt","commAmt"].forEach(i=>document.getElementById(i).value="0");dec="ACCEPTED";render();}
+    function render(){const f=document.getElementById("fComp").value,all=get();let ts=0,te=0;all.forEach(r=>{ts+=r.sale;te+=r.earned;});document.getElementById("sCalls").innerText=all.length;document.getElementById("sSales").innerText="$"+ts.toFixed(2);document.getElementById("sEarned").innerText="$"+te.toFixed(2);const rows=f==="ALL"?all:all.filter(r=>r.company===f);document.getElementById("tbody").innerHTML=rows.map(r=>`<tr><td>${r.time}</td><td><b>${r.company}</b></td><td>${r.channel}</td><td>${r.cust}</td><td>${r.outcome}</td><td>$${r.sale.toFixed(2)}</td><td>$${r.earned.toFixed(2)}</td></tr>`).join("");}
+    function exportCSV(){const all=get();if(!all.length)return alert("No records yet.");const h=Object.keys(all);const csv=[h.join(",")].concat(all.map(r=>h.map(k=>`"${String(r[k]).replace(/"/g,'""')}"`).join(","))).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="korerussbiz_cs_"+new Date().toISOString().slice(0,10)+".csv";a.click();}
     render();
   </script>
 </body>

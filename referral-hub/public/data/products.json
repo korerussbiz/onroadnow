@@ -5,7 +5,7 @@
     "price": 10.5,
     "type": "direct",
     "image": "https://unsplash.com",
-    "payment_link": "https://wa.me.",
+    "payment_link": "https://wa.me",
     "note": "Real Price: ~J$1,100\u2013J$1,350 + J$400 MoBay Runner Fee | Info: tripadvisor.com",
     "store_url": "/go/scotchies"
   },
@@ -15,7 +15,7 @@
     "price": 6.5,
     "type": "direct",
     "image": "https://unsplash.com",
-    "payment_link": "https://wa.me.",
+    "payment_link": "https://wa.me",
     "note": "Real Price: ~J$750 + J$350 Runner Fee | Official: juicipatties.com",
     "store_url": "/go/juici"
   },
@@ -25,7 +25,7 @@
     "price": 6.5,
     "type": "direct",
     "image": "https://unsplash.com",
-    "payment_link": "https://wa.me.",
+    "payment_link": "https://wa.me",
     "note": "Real Price: ~J$330\u2013J$750 + J$350 Runner Fee | Official: tasteejamaica.com",
     "store_url": "/go/tastee"
   },
@@ -35,7 +35,7 @@
     "price": 22.0,
     "type": "direct",
     "image": "https://unsplash.com",
-    "payment_link": "https://wa.me.",
+    "payment_link": "https://wa.me",
     "note": "Real Store: hilofoodstoresja.com | J$500 Personal Shopper Fee",
     "store_url": "/go/hilo"
   },
@@ -45,7 +45,7 @@
     "price": 18.0,
     "type": "direct",
     "image": "https://unsplash.com",
-    "payment_link": "https://wa.me.",
+    "payment_link": "https://wa.me",
     "note": "Real Store: fontanapharmacy.com | J$500 MoBay Courier Fee",
     "store_url": "/go/fontana"
   },
@@ -55,7 +55,7 @@
     "price": 11.0,
     "type": "direct",
     "image": "https://unsplash.com",
-    "payment_link": "https://wa.me.",
+    "payment_link": "https://wa.me",
     "note": "Real Market Prices: ~J$1,400 + J$400 Runner Fee",
     "store_url": "/go/food"
   },

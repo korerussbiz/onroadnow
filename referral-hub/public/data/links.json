@@ -32,7 +32,7 @@
         {
           "id": "vendor-submit-deal",
           "name": "Post Your Food or Produce Prices (MoBay)",
-          "url": "https://wa.me18760000000?text=Hi%20KorerussBiz%2C%20I%20have%20food%2Fproduce%20prices%20to%20list%20on%20OnRoadNow",
+          "url": "https://wa.me?text=Hi%20KorerussBiz%2C%20I%20have%20food%2Fproduce%20prices%20to%20list%20on%20OnRoadNow",
           "note": "Vendors: Tap to send today's tomato & veggie prices from your phone",
           "risk": "none",
           "published": true
@@ -241,7 +241,7 @@
         {
           "id": "paypal",
           "name": "PayPal",
-          "url": "https://paypal.me/4.99",
+          "url": "https://paypal.me",
           "note": "Buy a track",
           "risk": "none",
           "published": true

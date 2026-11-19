@@ -188,7 +188,7 @@
         {
           "id": "paypal",
           "name": "PayPal",
-          "url": "https://paypal.me/4.99",
+          "url": "https://paypal.me",
           "note": "Buy a track",
           "risk": "none",
           "published": true
