@@ -1,0 +1,254 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Share the Job Board — KorerussBiz</title>
+<meta name="description" content="Share the remote telemarketing job board with anyone who needs work. Ready-to-paste messages for WhatsApp, X, Reddit, Facebook, LinkedIn, Telegram, and email.">
+<link rel="canonical" href="https://onroadnow.pages.dev/telemarketing/share/">
+<link rel="stylesheet" href="/layout.css">
+<style>
+.share-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin:1.5rem 0}
+.share-card{background:#fff;border:1px solid #e4e2dc;border-radius:12px;padding:1rem}
+.share-card h3{margin:0 0 .4rem;font-size:.95em;color:#1f1f1f}
+.share-card .msg{background:#f7f7f5;border-radius:8px;padding:.7rem;font-size:.85em;color:#333;white-space:pre-wrap;font-family:ui-monospace,monospace;line-height:1.5;margin:.5rem 0;max-height:180px;overflow-y:auto}
+.copy-btn{padding:.45rem .9rem;background:#ff5a3c;color:#fff;border:none;border-radius:6px;font-weight:600;font-size:.82em;cursor:pointer;margin-right:.3rem}
+.copy-btn:hover{background:#d63f22}
+.copy-btn.copied{background:#00a88f}
+.platform-link{display:inline-block;padding:.4rem .8rem;border:1px solid #e4e2dc;border-radius:6px;color:#ff5a3c;text-decoration:none;font-size:.82em;font-weight:600;margin:.2rem .2rem .2rem 0}
+.platform-link:hover{border-color:#ff5a3c;background:#fff5f2}
+.qr-box{text-align:center;padding:1rem;background:#fff;border:1px solid #e4e2dc;border-radius:12px;margin:1.5rem 0}
+.qr-box img{width:180px;height:180px;border-radius:8px}
+.url-box{background:#f7f7f5;border-radius:8px;padding:.7rem;font-family:monospace;font-size:.85em;word-break:break-all;color:#333;margin:.5rem 0}
+</style>
+</head><body>
+<div class="app">
+<aside class="sidebar">
+  <a href="/" class="brand">⚡ KorerussBiz</a>
+  <h3>Explore</h3>
+  <a href="/" class="nav-item"><span class="emoji">🏠</span>Home</a>
+  <a href="/crypto/" class="nav-item"><span class="emoji">₿</span>Crypto</a>
+  <a href="/music/" class="nav-item"><span class="emoji">🎵</span>Music</a>
+  <a href="/shop/" class="nav-item"><span class="emoji">🛍️</span>Shop</a>
+  <a href="/signals/" class="nav-item"><span class="emoji">📈</span>Signals</a>
+  <h3>Contact</h3>
+  <a href="/support/" class="nav-item"><span class="emoji">💬</span>Support</a>
+  <a href="/customer-service/" class="nav-item"><span class="emoji">✉️</span>Customer Service</a>
+  <a href="/telemarketing/" class="nav-item"><span class="emoji">📞</span>Telemarketing Jobs</a>
+  <a href="/telemarketing/share/" class="nav-item active"><span class="emoji">📣</span>Share the Board</a>
+  <h3>More</h3>
+  <a href="/join/" class="nav-item"><span class="emoji">🔗</span>Join</a>
+  <a href="/ai/" class="nav-item"><span class="emoji">🤖</span>AI Search</a>
+  <a href="/legacy/" class="nav-item"><span class="emoji">📁</span>Legacy</a>
+  <div class="footer-links">
+    <a href="/disclaimer/">Disclaimer</a>
+    <a href="/calculator.html">Fee calculator</a>
+    <a href="/start/">Start here</a>
+  </div>
+</aside>
+<main class="content">
+<h1>📣 Share the job board</h1>
+<p class="lead">Send the board to anyone who needs remote work. Each link below has its own tracking tag so you can see which channel brought visitors.</p>
+
+<div class="disclosure">
+<strong>What happens when you share:</strong> the person lands on the job board, sees jobs that are hiring now, and may sign up for one of the affiliate job boards (FlexJobs, OnlineJobs.ph, etc.). If they do, the site earns a commission — at no cost to them and no cost to you. You do not need to track anything yourself.
+</div>
+
+<h2 style="margin-top:2rem">Your tracked links</h2>
+<p style="color:#6b6b6b;font-size:.9em">Use the link that matches the channel. The <code>utm_source</code> tag tells the analytics which channel sent each visitor.</p>
+
+<div id="links" style="margin:1rem 0"></div>
+
+<h2 style="margin-top:2rem">QR code (for offline sharing)</h2>
+<div class="qr-box">
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https%3A%2F%2Fonroadnow.pages.dev%2Ftelemarketing%2F%3Futm_source%3Dqr" alt="QR code to job board">
+  <p style="font-size:.85em;color:#6b6b6b;margin:.6rem 0 0">Print this or show it on your phone. Scans go to the job board with a <code>qr</code> tracking tag.</p>
+</div>
+
+<h2 style="margin-top:2rem">Ready-to-paste messages</h2>
+<p style="color:#6b6b6b;font-size:.9em">Copy the message, paste it into the platform. Each one is written for that platform's rules and norms.</p>
+
+<div class="share-grid">
+
+  <div class="share-card">
+    <h3>💬 WhatsApp (personal)</h3>
+    <div class="msg" id="msg-whatsapp">Hey [name] — I put together a page of remote telemarketing jobs that are actually hiring right now, with the pay rates listed. Some are weekly pay.
+
+Bookmark it if you or anyone you know is looking:
+https://onroadnow.pages.dev/telemarketing/?utm_source=whatsapp&utm_medium=share&utm_campaign=job-board
+
+No pressure — just sharing because a few of the listings are paying $15–20/hr.</div>
+    <button class="copy-btn" onclick="copyMsg('msg-whatsapp',this)">Copy message</button>
+    <a class="platform-link" href="https://wa.me/?text=Hey%20%E2%80%94%20I%20put%20together%20a%20page%20of%20remote%20telemarketing%20jobs%20that%20are%20actually%20hiring%20right%20now%2C%20with%20the%20pay%20rates%20listed.%20Some%20are%20weekly%20pay.%20https%3A%2F%2Fonroadnow.pages.dev%2Ftelemarketing%2F%3Futm_source%3Dwhatsapp" target="_blank" rel="noopener">Open WhatsApp</a>
+  </div>
+
+  <div class="share-card">
+    <h3>𝕏 X / Twitter</h3>
+    <div class="msg" id="msg-x">Remote telemarketing jobs that are actually hiring:
+
+• HireSwiftlee — $7–9/hr + $100/sale (weekly pay)
+• AdEx — $4/hr + $15/show
+• Rite Reno — $15/hr + $200/signed job
+• Terac — $20/hr
+
+Full board with pay rates and application links:
+https://onroadnow.pages.dev/telemarketing/?utm_source=x&utm_medium=social&utm_campaign=job-board</div>
+    <button class="copy-btn" onclick="copyMsg('msg-x',this)">Copy message</button>
+    <a class="platform-link" href="https://twitter.com/intent/tweet?text=Remote%20telemarketing%20jobs%20that%20are%20actually%20hiring%20%E2%80%94%20full%20board%20with%20pay%20rates%3A%20https%3A%2F%2Fonroadnow.pages.dev%2Ftelemarketing%2F%3Futm_source%3Dx" target="_blank" rel="noopener">Open X</a>
+  </div>
+
+  <div class="share-card">
+    <h3>👽 Reddit</h3>
+    <div class="msg" id="msg-reddit">Title: Remote telemarketing/appointment-setting jobs with pay rates listed (weekly pay for most)
+
+Body:
+I keep a small board of remote calling jobs that are currently hiring. Verified the pay rates on each listing this month:
+
+- HireSwiftlee — $7–9/hr base + $100 per signed sale, paid every Friday via Wise
+- AdEx — $4/hr + $15 per booked show, ~20 hrs/week
+- Rite Reno — $15/hr + $10/estimate + $200/signed job
+- Terac — $20/hr, flexible hours
+
+Full list with application links: https://onroadnow.pages.dev/telemarketing/?utm_source=reddit&utm_medium=social&utm_campaign=job-board
+
+Some of the links on that page are affiliate links — that's how the board stays free to run. No cost to you.</div>
+    <button class="copy-btn" onclick="copyMsg('msg-reddit',this)">Copy message</button>
+    <a class="platform-link" href="https://www.reddit.com/submit?url=https%3A%2F%2Fonroadnow.pages.dev%2Ftelemarketing%2F%3Futm_source%3Dreddit&title=Remote%20telemarketing%20jobs%20with%20pay%20rates%20listed" target="_blank" rel="noopener">Open Reddit</a>
+  </div>
+
+  <div class="share-card">
+    <h3>👥 Facebook Groups</h3>
+    <div class="msg" id="msg-facebook">For anyone looking for remote work right now — I put together a list of telemarketing and appointment-setting jobs that are actually hiring, with the pay rates listed.
+
+Most pay weekly. Ranges from $4/hr + per-show bonuses up to $20/hr.
+
+https://onroadnow.pages.dev/telemarketing/?utm_source=facebook&utm_medium=social&utm_campaign=job-board
+
+(Check your group rules before posting — some don't allow job links.)</div>
+    <button class="copy-btn" onclick="copyMsg('msg-facebook',this)">Copy message</button>
+    <a class="platform-link" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fonroadnow.pages.dev%2Ftelemarketing%2F%3Futm_source%3Dfacebook" target="_blank" rel="noopener">Open Facebook</a>
+  </div>
+
+  <div class="share-card">
+    <h3>💼 LinkedIn</h3>
+    <div class="msg" id="msg-linkedin">For anyone in my network looking for remote work or side income:
+
+I've been keeping a board of telemarketing and appointment-setting jobs that are currently hiring, with pay rates listed on each one. Most pay weekly. Rates range from $4/hr + bonuses up to $20/hr for experienced callers.
+
+Full board:
+https://onroadnow.pages.dev/telemarketing/?utm_source=linkedin&utm_medium=social&utm_campaign=job-board
+
+Happy to answer questions if anyone wants more detail on any of the listings.</div>
+    <button class="copy-btn" onclick="copyMsg('msg-linkedin',this)">Copy message</button>
+    <a class="platform-link" href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fonroadnow.pages.dev%2Ftelemarketing%2F%3Futm_source%3Dlinkedin" target="_blank" rel="noopener">Open LinkedIn</a>
+  </div>
+
+  <div class="share-card">
+    <h3>📱 Telegram</h3>
+    <div class="msg" id="msg-telegram">Remote telemarketing jobs hiring now — with pay rates:
+
+HireSwiftlee $7–9/hr + $100/sale
+AdEx $4/hr + $15/show
+Rite Reno $15/hr + $200/signed
+Terac $20/hr
+
+Full board: https://onroadnow.pages.dev/telemarketing/?utm_source=telegram&utm_medium=social&utm_campaign=job-board</div>
+    <button class="copy-btn" onclick="copyMsg('msg-telegram',this)">Copy message</button>
+    <a class="platform-link" href="https://t.me/share/url?url=https%3A%2F%2Fonroadnow.pages.dev%2Ftelemarketing%2F%3Futm_source%3Dtelegram&text=Remote%20telemarketing%20jobs%20hiring%20now" target="_blank" rel="noopener">Open Telegram</a>
+  </div>
+
+  <div class="share-card">
+    <h3>✉️ Email</h3>
+    <div class="msg" id="msg-email">Subject: Remote telemarketing jobs — pay rates listed
+
+Hi [name],
+
+I've been keeping a board of remote telemarketing and appointment-setting jobs that are currently hiring, with the pay rate listed on each one. Most pay weekly.
+
+A few examples:
+- HireSwiftlee: $7–9/hr + $100 per signed sale (paid every Friday)
+- Terac: $20/hr, flexible hours
+- Rite Reno: $15/hr + bonuses
+
+Full board with application links:
+https://onroadnow.pages.dev/telemarketing/?utm_source=email&utm_medium=share&utm_campaign=job-board
+
+No pressure — just thought it might be useful if you or someone you know is looking.
+
+[your name]</div>
+    <button class="copy-btn" onclick="copyMsg('msg-email',this)">Copy message</button>
+    <a class="platform-link" href="mailto:?subject=Remote%20telemarketing%20jobs%20%E2%80%94%20pay%20rates%20listed&body=Remote%20telemarketing%20jobs%20hiring%20now%3A%20https%3A%2F%2Fonroadnow.pages.dev%2Ftelemarketing%2F%3Futm_source%3Demail">Open email</a>
+  </div>
+
+  <div class="share-card">
+    <h3>💬 Discord</h3>
+    <div class="msg" id="msg-discord">For anyone in the server looking for remote work — I keep a board of telemarketing/appointment-setting jobs that are currently hiring, with pay rates listed.
+
+Most pay weekly. $4/hr + bonuses up to $20/hr.
+
+https://onroadnow.pages.dev/telemarketing/?utm_source=discord&utm_medium=social&utm_campaign=job-board
+
+(mods — remove if not allowed, no hard feelings)</div>
+    <button class="copy-btn" onclick="copyMsg('msg-discord',this)">Copy message</button>
+  </div>
+
+</div>
+
+<h2 style="margin-top:2rem">Where to post</h2>
+<table style="width:100%;border-collapse:collapse;margin:1rem 0;font-size:.9em">
+  <tr style="background:#f5e9d9"><th style="padding:.6rem;text-align:left;border:1px solid #e4e2dc">Platform</th><th style="padding:.6rem;text-align:left;border:1px solid #e4e2dc">Post here</th><th style="padding:.6rem;text-align:left;border:1px solid #e4e2dc">Rules</th></tr>
+  <tr><td style="padding:.6rem;border:1px solid #e4e2dc">Reddit</td><td style="padding:.6rem;border:1px solid #e4e2dc">r/WorkOnline, r/RemoteJobs, r/beermoney, r/forhire</td><td style="padding:.6rem;border:1px solid #e4e2dc">Check pinned rules; most allow job links with disclosure</td></tr>
+  <tr><td style="padding:.6rem;border:1px solid #e4e2dc">Facebook</td><td style="padding:.6rem;border:1px solid #e4e2dc">Job search / remote work groups</td><td style="padding:.6rem;border:1px solid #e4e2dc">Many groups ban external links — read rules first</td></tr>
+  <tr><td style="padding:.6rem;border:1px solid #e4e2dc">WhatsApp</td><td style="padding:.6rem;border:1px solid #e4e2dc">Individual contacts, not groups</td><td style="padding:.6rem;border:1px solid #e4e2dc">Never blast groups — looks like spam</td></tr>
+  <tr><td style="padding:.6rem;border:1px solid #e4e2dc">LinkedIn</td><td style="padding:.6rem;border:1px solid #e4e2dc">Your own feed, not DMs</td><td style="padding:.6rem;border:1px solid #e4e2dc">No unsolicited DMs — connection-request abuse</td></tr>
+  <tr><td style="padding:.6rem;border:1px solid #e4e2dc">Telegram</td><td style="padding:.6rem;border:1px solid #e4e2dc">Job channels that allow it</td><td style="padding:.6rem;border:1px solid #e4e2dc">Check channel rules; ask admin first</td></tr>
+</table>
+
+<div class="disclosure" style="margin-top:2rem">
+<strong>Honest note:</strong> the money comes from the affiliate programs on the job board page — FlexJobs, OnlineJobs.ph, RemoteAtlas, Marketcall, eLocal, RingPartner. When someone you refer visits and signs up for one of those, the site earns a commission. There is no payment for just sharing, and no guarantee anyone will sign up. The jobs themselves are listed free with no commission.
+</div>
+
+<p style="margin:2rem 0"><a href="/telemarketing/" style="color:#ff5a3c">← back to the job board</a></p>
+</main>
+</div>
+<script>
+(function () {
+  var links = [
+    { label: "WhatsApp", url: "https://onroadnow.pages.dev/telemarketing/?utm_source=whatsapp&utm_medium=share&utm_campaign=job-board" },
+    { label: "X / Twitter", url: "https://onroadnow.pages.dev/telemarketing/?utm_source=x&utm_medium=social&utm_campaign=job-board" },
+    { label: "Reddit", url: "https://onroadnow.pages.dev/telemarketing/?utm_source=reddit&utm_medium=social&utm_campaign=job-board" },
+    { label: "Facebook", url: "https://onroadnow.pages.dev/telemarketing/?utm_source=facebook&utm_medium=social&utm_campaign=job-board" },
+    { label: "LinkedIn", url: "https://onroadnow.pages.dev/telemarketing/?utm_source=linkedin&utm_medium=social&utm_campaign=job-board" },
+    { label: "Telegram", url: "https://onroadnow.pages.dev/telemarketing/?utm_source=telegram&utm_medium=social&utm_campaign=job-board" },
+    { label: "Email", url: "https://onroadnow.pages.dev/telemarketing/?utm_source=email&utm_medium=share&utm_campaign=job-board" },
+    { label: "Discord", url: "https://onroadnow.pages.dev/telemarketing/?utm_source=discord&utm_medium=social&utm_campaign=job-board" }
+  ];
+  var host = document.getElementById("links");
+  var html = "";
+  links.forEach(function (l) {
+    html += '<div style="background:#fff;border:1px solid #e4e2dc;border-radius:10px;padding:.7rem;margin:.4rem 0">' +
+            '<strong style="font-size:.9em">' + l.label + '</strong>' +
+            '<div class="url-box">' + l.url + '</div>' +
+            '<button class="copy-btn" onclick="copyUrl(\'' + l.url + '\', this)">Copy link</button>' +
+            '</div>';
+  });
+  host.innerHTML = html;
+})();
+
+function copyUrl(text, btn) {
+  navigator.clipboard.writeText(text).then(function () {
+    var orig = btn.textContent;
+    btn.textContent = "Copied!";
+    btn.classList.add("copied");
+    setTimeout(function () { btn.textContent = orig; btn.classList.remove("copied"); }, 1500);
+  });
+}
+
+function copyMsg(id, btn) {
+  var text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(function () {
+    var orig = btn.textContent;
+    btn.textContent = "Copied!";
+    btn.classList.add("copied");
+    setTimeout(function () { btn.textContent = orig; btn.classList.remove("copied"); }, 1500);
+  });
+}
+</script>
+</body></html>
