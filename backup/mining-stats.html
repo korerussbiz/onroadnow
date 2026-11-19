@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mining Stats – Real Earnings</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", "Segoe UI", sans-serif;
+        background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+        color: #e2e8f0;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+        min-height: 100vh;
+      }
+      .container {
+        max-width: 1000px;
+        margin: auto;
+      }
+      .nav {
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      }
+      .nav a {
+        color: #60a5fa;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.3rem 0.8rem;
+        border-radius: 0.5rem;
+        transition: 0.2s;
+      }
+      .nav a:hover {
+        color: #facc15;
+        background: #1e293b;
+      }
+      .card {
+        background: rgba(30, 41, 59, 0.9);
+        backdrop-filter: blur(5px);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 1px solid #334155;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      }
+      h1 {
+        font-size: 2.2rem;
+        margin: 0 0 0.3rem 0;
+        color: #facc15;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+      }
+      .stat-item {
+        background: #0f172a;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        text-align: center;
+      }
+      .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #facc15;
+      }
+      .stat-label {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .wallet-display {
+        font-family: monospace;
+        word-break: break-all;
+        background: #0f172a;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 0.8rem;
+        margin: 0.5rem 0;
+      }
+      .btn {
+        background: #3b82f6;
+        border: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 2rem;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .btn:hover {
+        box-shadow: 0 0 15px #3b82f6;
+      }
+      .log {
+        background: #0f172a;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        max-height: 150px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+      }
+      @media (max-width: 600px) {
+        .stats-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+<script async src="https://onroadnow-ggpe.vercel.app/crypto/crypto/pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2772533792093956" crossorigin="anonymous"></script>
+  </head>
+  <body>
+<nav style="background:#151922;border-bottom:1px solid #262c3a;padding:.75rem 1rem;display:flex;flex-wrap:wrap;gap:1rem;font-family:system-ui,sans-serif;font-size:.9rem">
+  <a href="/" style="color:#fff;font-weight:700;text-decoration:none">KorerussBiz Hub</a>
+  <a href="/market/" style="color:#60a5fa;text-decoration:none">MoBay Market</a>
+  <a href="/calculator.html" style="color:#60a5fa;text-decoration:none">Global Calculator</a>
+  <a href="/customer-service/" style="color:#34d399;font-weight:700;text-decoration:none">Customer Service</a>
+  <a href="https://paypal.me" target="_blank" style="color:#fbbf24;text-decoration:none">PayPal.Me</a>
+</nav>
+<div style="display:flex; gap:10px; padding:10px; background:#1a1a1a;"><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/koreruss-music.vercel.app" style="color:#f7931a;">Music</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/korerussbiz-signals.vercel.app" style="color:#f7931a;">Signals</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/onroadnow.vercel.app" style="color:#f7931a;">OnRoad</a></div>
+    <div class="container">
+      <div class="nav">
+        <a href="/">🏠 Home</a>
+        <a href="/micro-login">🔐 Login</a>
+        <a href="/micro-dashboard">📊 Dashboard</a>
+        <a
+          href="/xmr-miner"
+          style="color: #60a5fa; text-decoration: none; font-weight: 600"
+          >⛏️ XMR Mining</a
+        >
+        <a href="/mining">⛏️ Mining</a>
+        <a href="/mining-stats">📈 Stats</a>
+      </div>
+
+      <div class="card">
+        <h1>📊 Real Mining Statistics</h1>
+        <p>Live data from the pool – updated every 30 seconds.</p>
+        <div class="wallet-display">
+          <span style="color: #94a3b8">Wallet:</span>
+          <span style="color: #facc15"
+            >9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2</span
+          >
+        </div>
+
+        <div id="statsContainer" class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value" id="hashrate">–</div>
+            <div class="stat-label">Hashrate (H/s)</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="unpaid">–</div>
+            <div class="stat-label">Unpaid Balance</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="value">–</div>
+            <div class="stat-label">Value (USD)</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="shares">–</div>
+            <div class="stat-label">Total Shares</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 1rem; display: flex; gap: 1rem">
+          <button id="refreshBtn" class="btn">🔄 Refresh Now</button>
+          <span
+            id="lastUpdate"
+            style="color: #94a3b8; font-size: 0.9rem; align-self: center"
+            >Last update: –</span
+          >
+        </div>
+
+        <div id="trades" class="log">Loading stats...</div>
+      </div>
+    </div>
+
+    <script>
+      async function fetchStats() {
+        const logDiv = document.getElementById("log");
+        const lastUpdateSpan = document.getElementById("lastUpdate");
+        try {
+          const res = await fetch("/api/mining/stats", {
+            credentials: "include",
+          });
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+
+          document.getElementById("hashrate").textContent =
+            data.hashrate.toLocaleString();
+          document.getElementById("unpaid").textContent =
+            data.unpaidBalance.toFixed(6) + " XMR";
+          document.getElementById("value").textContent =
+            "$" + data.valueUSD.toFixed(2);
+          document.getElementById("shares").textContent =
+            data.totalHashes.toLocaleString();
+
+          const now = new Date();
+          lastUpdateSpan.textContent =
+            "Last update: " + now.toLocaleTimeString();
+          logDiv.innerHTML = "✅ Stats updated at " + now.toLocaleTimeString();
+        } catch (err) {
+          logDiv.innerHTML = "❌ " + err.message;
+        }
+      }
+
+      document
+        .getElementById("refreshBtn")
+        .addEventListener("click", fetchStats);
+      fetchStats();
+      setInterval(fetchStats, 30000);
+    </script>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0;"><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/wa.me" target="_blank" style="background:#22c55e;color:#052e16;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💬 WhatsApp</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/t.me" target="_blank" style="background:#38bdf8;color:#082f49;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✈️ Telegram</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/m.me" target="_blank" style="background:#818cf8;color:#1e1b4b;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💙 Messenger</a><a href="mailto:korerussbiz@gmail.com" style="background:#f7931a;color:#000;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✉️ korerussbiz@gmail.com</a></div>
+
+<footer style="margin-top:2rem;padding:1.25rem;border-top:1px solid #333;font-family:sans-serif;font-size:0.9rem;">
+  <p><strong>Support &amp; Connect with KorerussBiz:</strong></p>
+  <p>
+    <a href="https://pages.dev" target="_blank" rel="noopener">Explore Deals &amp; Tools</a> &bull;
+    <a href="https://paypal.me" target="_blank" rel="noopener">Support via PayPal (USD)</a>
+  </p>
+  <p><strong>Crypto (ETH / USDC / USDT):</strong> <code>0xc2a49710d26e023f129c429f6494f2db04809464</code></p>
+  <p>
+    <a href="https://tiktok.com" target="_blank">TikTok</a> |
+    <a href="https://instagram.com" target="_blank">Instagram</a> |
+    <a href="https://youtube.com" target="_blank">YouTube</a> |
+    <a href="https://x.com" target="_blank">X</a> |
+    <a href="https://facebook.com" target="_blank">Facebook</a> |
+    <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+  </p>
+</footer>
+
+
+<div id="geo-deals-container"></div>
+<script src="/geo-deals.js"></script>
+
+<script src="/assets/site-shell.js"></script>
+</body>
+</html>

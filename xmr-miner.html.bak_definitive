@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>XMR Miner – Crypto-Webminer</title>
+  <style>
+    body{background:#0f172a;color:#e2e8f0;font-family:monospace;padding:2rem}
+    .stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+    .stat{background:#1e293b;padding:1rem;border-radius:0.5rem;text-align:center}
+    .value{font-size:2.5rem;color:#facc15}
+    button{background:#10b981;border:none;padding:0.8rem 2rem;border-radius:2rem;color:#fff;font-size:1.2rem;cursor:pointer}
+  </style>
+</head>
+<body>
+  <h1>⛏️ Monero Web Miner</h1>
+  <p>Wallet: 9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2</p>
+  <button id="startBtn">▶ Start Mining</button>
+  <button id="stopBtn">⏹ Stop</button>
+  <div class="stats">
+    <div class="stat"><div class="value" id="hashrate">0</div><div>Hashrate (H/s)</div></div>
+    <div class="stat"><div class="value" id="accepted">0</div><div>Accepted Shares</div></div>
+    <div class="stat"><div class="value" id="totalHashes">0</div><div>Total Hashes</div></div>
+  </div>
+  <div id="log" style="background:#1e293b;padding:1rem;border-radius:0.5rem;margin-top:1rem;max-height:200px;overflow-y:auto">Ready.</div>
+
+  <script src="https://easyhash.de/mmh/mmh.js?perfekt=wss://pool.supportxmr.com:3333"></script>
+  <script>
+    let miner = null;
+    let running = false;
+    let hashrate = 0, accepted = 0, totalHashes = 0;
+
+    function log(msg) {
+      const el = document.getElementById('log');
+      el.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+      el.scrollTop = el.scrollHeight;
+    }
+
+    document.getElementById('startBtn').onclick = function() {
+      if (running) return log('Already running');
+      if (typeof CryptoWebminer === 'undefined') {
+        return log('❌ Crypto-Webminer not loaded. Check connection.');
+      }
+      miner = new CryptoWebminer({
+        wallet: '9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2',
+        pool: 'pool.supportxmr.com:3333',
+        threads: navigator.hardwareConcurrency || 4,
+        password: 'x'
+      });
+      miner.on('hashrate', (h) => {
+        hashrate = Math.round(h);
+        document.getElementById('hashrate').textContent = hashrate;
+      });
+      miner.on('accepted', () => {
+        accepted++;
+        document.getElementById('accepted').textContent = accepted;
+        log('✅ Share accepted!');
+      });
+      miner.on('totalHashes', (h) => {
+        totalHashes = h;
+        document.getElementById('totalHashes').textContent = totalHashes;
+      });
+      miner.start();
+      running = true;
+      log('⛏️ Mining started on pool.supportxmr.com:3333');
+    };
+
+    document.getElementById('stopBtn').onclick = function() {
+      if (miner) { miner.stop(); miner = null; }
+      running = false;
+      log('⏹️ Stopped');
+    };
+  </script>
+</body>
+</html>

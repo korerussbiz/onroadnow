@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XMR Mining Dashboard</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
+    .container{max-width:900px;margin:auto}
+    .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}
+    .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
+    .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
+    .nav a:hover{color:#facc15}
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem}
+    .stat-item{background:#0f172a;padding:1rem;border-radius:0.5rem;text-align:center}
+    .stat-value{font-size:2.5rem;color:#facc15}
+    .stat-label{color:#94a3b8;font-size:1rem}
+    .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:200px;overflow-y:auto;font-family:monospace;font-size:1rem;margin-top:1rem}
+    .btn{background:#3b82f6;border:none;padding:0.6rem 1.2rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;margin:0.3rem}
+    .btn-success{background:#10b981}
+    .btn-danger{background:#ef4444}
+    .btn-warning{background:#f59e0b}
+    .warning{background:#1e293b;border-left:4px solid #f59e0b;padding:0.8rem;margin:0.5rem 0;border-radius:0.5rem}
+    .consent-banner{background:#1e293b;border:2px solid #f59e0b;padding:1rem;border-radius:1rem;margin:1rem 0}
+    .flex{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/micro-login">🔐 Login</a>
+    <a href="/micro-dashboard">📊 Dashboard</a>
+    <a href="/xmr-miner">⛏️ XMR Mining</a>
+  </div>
+  <div class="card">
+    <h1>⛏️ Monero (XMR) Mining Dashboard</h1>
+    <p>Control your native miner and view live stats from SupportXMR.</p>
+
+    <div class="consent-banner" id="consentBanner">
+      <p><strong>⚠️ CPU Mining Consent</strong></p>
+      <p>This page controls a native miner that uses your device's CPU to mine Monero (XMR).</p>
+      <p><small>By clicking "I Consent", you agree to allow mining on this device. You can stop at any time.</small></p>
+      <div class="flex">
+        <button id="consentYes" class="btn btn-success">✅ I Consent</button>
+        <button id="consentNo" class="btn btn-danger">❌ No Thanks</button>
+      </div>
+    </div>
+
+    <div class="warning">
+      ⚠️ <strong>Wallet:</strong> 9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2
+    </div>
+
+    <div class="flex">
+      <button id="startBtn" class="btn btn-success">▶ Start Miner</button>
+      <button id="stopBtn" class="btn btn-danger">⏹ Stop</button>
+      <button id="statusBtn" class="btn btn-warning">🔄 Check Status</button>
+      <button id="refreshBtn" class="btn">↻ Refresh Stats</button>
+    </div>
+
+    <div id="statusDisplay" style="margin:0.5rem 0;">Status: <span id="minerStatus">Stopped</span></div>
+
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-value" id="hashrate">0</div><div class="stat-label">Hashrate (H/s)</div></div>
+      <div class="stat-item"><div class="stat-value" id="balance">0.000000</div><div class="stat-label">Unpaid Balance (XMR)</div></div>
+      <div class="stat-item"><div class="stat-value" id="value">$0.00</div><div class="stat-label">Value (USD)</div></div>
+    </div>
+    <div class="stats-grid" style="margin-top:1rem;">
+      <div class="stat-item"><div class="stat-value" id="shares">0</div><div class="stat-label">Valid Shares</div></div>
+      <div class="stat-item"><div class="stat-value" id="paid">0.000000</div><div class="stat-label">Total Paid (XMR)</div></div>
+      <div class="stat-item"><div class="stat-value" id="lastShare">—</div><div class="stat-label">Last Share</div></div>
+    </div>
+
+    <div id="log" class="log">Ready. Click Start to begin mining (consent required).</div>
+  </div>
+</div>
+<script>
+  let consentGiven = false;
+  let refreshInterval = null;
+
+  function checkConsent() {
+    if (localStorage.getItem('xmr_miner_consent') === 'true') {
+      consentGiven = true;
+      document.getElementById('consentBanner').style.display = 'none';
+    }
+  }
+  document.getElementById('consentYes').addEventListener('click', function() {
+    localStorage.setItem('xmr_miner_consent', 'true');
+    consentGiven = true;
+    document.getElementById('consentBanner').style.display = 'none';
+    addLog('✅ Consent given. You can now start mining.');
+  });
+  document.getElementById('consentNo').addEventListener('click', function() {
+    document.getElementById('consentBanner').style.display = 'none';
+    addLog('❌ Mining disabled. Reload to change consent.');
+  });
+
+  function addLog(msg, isError = false) {
+    const logDiv = document.getElementById('log');
+    const p = document.createElement('div');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    if (isError) p.style.color = '#ef4444';
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  async function apiCall(endpoint, options = {}) {
+    try {
+      const res = await fetch(`/api/${endpoint}`, { ...options, credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+      return res.json();
+    } catch (err) {
+      return { error: err.message };
+    }
+  }
+
+  async function fetchStats() {
+    const data = await apiCall('mining/stats');
+    if (data.error) {
+      addLog('❌ Failed to fetch stats: ' + data.error, true);
+      return;
+    }
+    document.getElementById('hashrate').textContent = data.hashrate.toLocaleString();
+    document.getElementById('balance').textContent = data.balance.toFixed(6);
+    document.getElementById('value').textContent = '$' + data.valueUSD.toFixed(2);
+    document.getElementById('shares').textContent = data.validShares || 0;
+    document.getElementById('paid').textContent = (data.paid || 0).toFixed(6);
+    document.getElementById('lastShare').textContent = data.lastShare ? new Date(data.lastShare).toLocaleString() : '—';
+  }
+
+  async function startMiner() {
+    if (!consentGiven) {
+      addLog('❌ Consent required. Please accept the consent banner.', true);
+      return;
+    }
+    const data = await apiCall('miner/start', { method: 'POST' });
+    if (data.error) {
+      addLog('❌ Failed to start miner: ' + data.error, true);
+    } else {
+      addLog('✅ ' + (data.message || 'Miner started.'));
+      document.getElementById('minerStatus').textContent = 'Running';
+      document.getElementById('minerStatus').style.color = '#10b981';
+    }
+  }
+
+  async function stopMiner() {
+    const data = await apiCall('miner/stop', { method: 'POST' });
+    if (data.error) {
+      addLog('❌ Failed to stop miner: ' + data.error, true);
+    } else {
+      addLog('✅ ' + (data.message || 'Miner stopped.'));
+      document.getElementById('minerStatus').textContent = 'Stopped';
+      document.getElementById('minerStatus').style.color = '#ef4444';
+    }
+  }
+
+  async function checkMinerStatus() {
+    const data = await apiCall('miner/status');
+    if (data.error) {
+      addLog('❌ Failed to check status: ' + data.error, true);
+    } else {
+      const status = data.running ? 'Running' : 'Stopped';
+      document.getElementById('minerStatus').textContent = status;
+      document.getElementById('minerStatus').style.color = data.running ? '#10b981' : '#ef4444';
+      addLog('🔄 Status: ' + status);
+    }
+  }
+
+  document.getElementById('startBtn').addEventListener('click', startMiner);
+  document.getElementById('stopBtn').addEventListener('click', stopMiner);
+  document.getElementById('statusBtn').addEventListener('click', checkMinerStatus);
+  document.getElementById('refreshBtn').addEventListener('click', fetchStats);
+
+  function startAutoRefresh() {
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshInterval = setInterval(fetchStats, 15000);
+  }
+
+  checkConsent();
+  fetchStats();
+  checkMinerStatus();
+  startAutoRefresh();
+</script>
+</body>
+</html>

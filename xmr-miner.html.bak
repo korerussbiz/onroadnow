@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>XMR Mining Dashboard</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0;padding:1.5rem;font-size:1.2rem}
+    .container{max-width:900px;margin:auto}
+    .card{background:#1e293b;border-radius:1.5rem;padding:2rem;margin-bottom:2rem}
+    .nav{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem;font-size:1.2rem}
+    .nav a{color:#60a5fa;text-decoration:none;font-weight:600}
+    .nav a:hover{color:#facc15}
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+    .stat-item{background:#0f172a;padding:1rem;border-radius:0.5rem;text-align:center}
+    .stat-value{font-size:2.5rem;color:#facc15}
+    .stat-label{color:#94a3b8;font-size:1rem}
+    .log{background:#0f172a;padding:0.5rem;border-radius:0.5rem;max-height:200px;overflow-y:auto;font-family:monospace;font-size:1rem;margin-top:1rem}
+    .btn{background:#3b82f6;border:none;padding:0.6rem 1.2rem;border-radius:2rem;color:#fff;font-weight:600;cursor:pointer;margin:0.3rem}
+    .btn-success{background:#10b981}
+    .btn-danger{background:#ef4444}
+    .warning{background:#1e293b;border-left:4px solid #f59e0b;padding:0.8rem;margin:0.5rem 0;border-radius:0.5rem}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="nav">
+    <a href="/">🏠 Home</a>
+    <a href="/micro-login">🔐 Login</a>
+    <a href="/micro-dashboard">📊 Dashboard</a>
+    <a href="/xmr-miner">⛏️ XMR Dashboard</a>
+    <a href="/mining-dashboard">📈 Mining Stats</a>
+  </div>
+  <div class="card">
+    <h1>⛏️ Monero Mining Dashboard</h1>
+    <p>Live stats from SupportXMR pool for your wallet.</p>
+    <div class="warning">
+      ⚠️ <strong>Wallet:</strong> 9vXyKbMr85Yaus38RQnjLjfxPWbCJVESbTmRH6JCWVE2
+    </div>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value" id="hashrate">0</div>
+        <div class="stat-label">Hashrate (H/s)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="balance">0.000000</div>
+        <div class="stat-label">Unpaid Balance (XMR)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="value">$0.00</div>
+        <div class="stat-label">Value (USD)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="lastShare">—</div>
+        <div class="stat-label">Last Share</div>
+      </div>
+    </div>
+    <div style="margin-top:1.5rem;">
+      <button id="refreshBtn" class="btn btn-success">🔄 Refresh Stats</button>
+      <button id="startNativeBtn" class="btn">▶ Start Native Miner</button>
+      <button id="stopNativeBtn" class="btn btn-danger">⏹ Stop Native Miner</button>
+    </div>
+    <div id="log" class="log">Loading stats...</div>
+  </div>
+</div>
+<script>
+  // ---------- Fetch stats from our backend ----------
+  async function fetchStats() {
+    try {
+      const res = await fetch('/api/mining/stats', { credentials: 'include' });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      document.getElementById('hashrate').textContent = data.hashrate.toLocaleString();
+      document.getElementById('balance').textContent = data.balance.toFixed(6);
+      document.getElementById('value').textContent = '$' + data.valueUSD.toFixed(2);
+      const lastShare = data.lastShare ? new Date(data.lastShare * 1000).toLocaleString() : '—';
+      document.getElementById('lastShare').textContent = lastShare;
+    } catch (err) {
+      document.getElementById('log').innerHTML = '❌ Failed to fetch stats: ' + err.message;
+    }
+  }
+
+  // ---------- Native miner controls ----------
+  async function startNativeMiner() {
+    try {
+      const res = await fetch('/api/miner/start', { method: 'POST', credentials: 'include' });
+      const data = await res.json();
+      document.getElementById('log').innerHTML = '✅ ' + (data.message || 'Miner started.');
+    } catch (err) {
+      document.getElementById('log').innerHTML = '❌ Failed to start miner: ' + err.message;
+    }
+  }
+
+  async function stopNativeMiner() {
+    try {
+      const res = await fetch('/api/miner/stop', { method: 'POST', credentials: 'include' });
+      const data = await res.json();
+      document.getElementById('log').innerHTML = '✅ ' + (data.message || 'Miner stopped.');
+    } catch (err) {
+      document.getElementById('log').innerHTML = '❌ Failed to stop miner: ' + err.message;
+    }
+  }
+
+  // ---------- Event listeners ----------
+  document.getElementById('refreshBtn').addEventListener('click', fetchStats);
+  document.getElementById('startNativeBtn').addEventListener('click', startNativeMiner);
+  document.getElementById('stopNativeBtn').addEventListener('click', stopNativeMiner);
+
+  // ---------- Auto-refresh every 30 seconds ----------
+  fetchStats();
+  setInterval(fetchStats, 30000);
+</script>
+</body>
+</html>

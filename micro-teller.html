@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>🧾 Cash Teller</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1.5rem;
+        font-size: 1.2rem;
+      }
+      .container {
+        max-width: 1000px;
+        margin: auto;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+      .nav {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+        background: #0f172a;
+        padding: 0.8rem;
+        border-radius: 1rem;
+      }
+      .nav a {
+        color: #60a5fa;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.4rem 0.8rem;
+      }
+      .nav a:hover {
+        color: #facc15;
+      }
+      .btn {
+        background: #3b82f6;
+        padding: 0.6rem 1.5rem;
+        border-radius: 2rem;
+        color: #fff;
+        text-decoration: none;
+        display: inline-block;
+        border: none;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #2563eb;
+      }
+      .btn-buy {
+        background: #10b981;
+      }
+      .log {
+        background: #0f172a;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: monospace;
+        margin-top: 1rem;
+      }
+      .flex {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      input {
+        background: #0f172a;
+        border: 1px solid #334155;
+        color: #fff;
+        padding: 0.6rem;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+      }
+    </style>
+<script async src="https://onroadnow-ggpe.vercel.app/crypto/crypto/pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2772533792093956" crossorigin="anonymous"></script>
+  </head>
+  <body>
+<nav style="background:#151922;border-bottom:1px solid #262c3a;padding:.75rem 1rem;display:flex;flex-wrap:wrap;gap:1rem;font-family:system-ui,sans-serif;font-size:.9rem">
+  <a href="/" style="color:#fff;font-weight:700;text-decoration:none">KorerussBiz Hub</a>
+  <a href="/market/" style="color:#60a5fa;text-decoration:none">MoBay Market</a>
+  <a href="/calculator.html" style="color:#60a5fa;text-decoration:none">Global Calculator</a>
+  <a href="/customer-service/" style="color:#34d399;font-weight:700;text-decoration:none">Customer Service</a>
+  <a href="https://paypal.me" target="_blank" style="color:#fbbf24;text-decoration:none">PayPal.Me</a>
+</nav>
+<div style="display:flex; gap:10px; padding:10px; background:#1a1a1a;"><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/koreruss-music.vercel.app" style="color:#f7931a;">Music</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/korerussbiz-signals.vercel.app" style="color:#f7931a;">Signals</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/onroadnow.vercel.app" style="color:#f7931a;">OnRoad</a></div>
+    <div class="container">
+      <div class="nav">
+        <a href="/">🏠 Home</a><a href="/trading">📊 Trading</a
+        ><a href="/portfolio">💼 Portfolio</a><a href="/mining">⛏️ Mining</a
+        ><a href="/history">📜 History</a><a href="/roundup">🪙 Round‑Up</a
+        ><a href="/receipt-invest">🧾 Receipt</a
+        ><a href="/referral">👥 Referral</a><a href="/xmr-miner">⛏️ XMR</a
+        ><a href="/micro-teller">🧾 Teller</a>
+      </div>
+      <div class="card">
+        <h1>🧾 Cash Teller</h1>
+        <p>
+          Enter a purchase amount to generate a receipt with spare change
+          investment.
+        </p>
+        <div class="flex">
+          <input
+            type="number"
+            id="tellerAmount"
+            placeholder="Amount (USD)"
+            step="0.01"
+          /><input
+            type="text"
+            id="tellerName"
+            placeholder="Customer name"
+          /><button class="btn btn-buy" onclick="generateReceipt()">
+            Generate Receipt
+          </button>
+        </div>
+        <div id="tellerLog" class="log">Ready.</div>
+        <script>
+          async function generateReceipt() {
+            const amount = parseFloat(
+              document.getElementById("tellerAmount").value,
+            );
+            const name = document.getElementById("tellerName").value || "Guest";
+            if (isNaN(amount) || amount <= 0)
+              return alert("Enter valid amount");
+            const rounded = Math.ceil(amount);
+            const roundup = rounded - amount;
+            document.getElementById("tellerLog").innerHTML =
+              `🧾 Receipt for ${name}: $${amount} → round‑up $${roundup.toFixed(2)} invested.`;
+          }
+        </script>
+      </div>
+    </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0;"><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/wa.me" target="_blank" style="background:#22c55e;color:#052e16;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💬 WhatsApp</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/t.me" target="_blank" style="background:#38bdf8;color:#082f49;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✈️ Telegram</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/m.me" target="_blank" style="background:#818cf8;color:#1e1b4b;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💙 Messenger</a><a href="mailto:korerussbiz@gmail.com" style="background:#f7931a;color:#000;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✉️ korerussbiz@gmail.com</a></div>
+
+<footer style="margin-top:2rem;padding:1.25rem;border-top:1px solid #333;font-family:sans-serif;font-size:0.9rem;">
+  <p><strong>Support &amp; Connect with KorerussBiz:</strong></p>
+  <p>
+    <a href="https://pages.dev" target="_blank" rel="noopener">Explore Deals &amp; Tools</a> &bull;
+    <a href="https://paypal.me" target="_blank" rel="noopener">Support via PayPal (USD)</a>
+  </p>
+  <p><strong>Crypto (ETH / USDC / USDT):</strong> <code>0xc2a49710d26e023f129c429f6494f2db04809464</code></p>
+  <p>
+    <a href="https://tiktok.com" target="_blank">TikTok</a> |
+    <a href="https://instagram.com" target="_blank">Instagram</a> |
+    <a href="https://youtube.com" target="_blank">YouTube</a> |
+    <a href="https://x.com" target="_blank">X</a> |
+    <a href="https://facebook.com" target="_blank">Facebook</a> |
+    <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+  </p>
+</footer>
+
+
+<div id="geo-deals-container"></div>
+<script src="/geo-deals.js"></script>
+
+<script src="/assets/site-shell.js"></script>
+</body>
+</html>
