@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-adsense-account" content="ca-pub-2772533792093956" />
   <title>OnRoadNow Food, Delivery & Global Deals</title>
-  <script async src="https://googlesyndication.com" crossorigin="anonymous"></script>
+  <script async src="https://onroadnow-ggpe.vercel.app/crypto/crypto/googlesyndication.com" crossorigin="anonymous"></script>
   <style>
     body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; background: #0f172a; color: #f8fafc; }
     h1, h2 { color: #f7931a; margin-top: 0; }
@@ -28,7 +28,7 @@
     <a href="/">🏠 Home</a>
     <a href="/food">🍔 Food & Deals</a>
     <a href="/auto-trader">🤖 Auto-Trader</a>
-    <a href="https://pages.dev">🎵 Music</a>
+    <a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/pages.dev">🎵 Music</a>
   </div>
 
   <h1>OnRoadNow Food, Vendor Scanner & Cashback Deals</h1>
@@ -82,23 +82,23 @@
         category: "Local Hot Food",
         title: "Jamaican Jerk Chicken & Festival Platter",
         price: "J$1,800 / $12 USD",
-        img: "https://unsplash.com",
-        link: "https://wa.me",
+        img: "https://onroadnow-ggpe.vercel.app/crypto/crypto/unsplash.com",
+        link: "https://onroadnow-ggpe.vercel.app/crypto/crypto/wa.me",
         cta: "Order via WhatsApp"
       },
       {
         category: "Fresh Produce",
         title: "Tropical Farm Fruit & Grocery Box",
         price: "J$3,500 / $25 USD",
-        img: "https://unsplash.com",
-        link: "https://wa.me",
+        img: "https://onroadnow-ggpe.vercel.app/crypto/crypto/unsplash.com",
+        link: "https://onroadnow-ggpe.vercel.app/crypto/crypto/wa.me",
         cta: "Order Delivery"
       },
       {
         category: "Food Delivery Bonus",
         title: "DoorDash Food Delivery & Discounts",
         price: "Referral Bonus",
-        img: "https://unsplash.com",
+        img: "https://onroadnow-ggpe.vercel.app/crypto/crypto/unsplash.com",
         link: "/go/doordash",
         cta: "Claim Food Deal"
       },
@@ -106,7 +106,7 @@
         category: "Rides & Delivery",
         title: "Uber Rides & Express Eats",
         price: "Invite Bonus",
-        img: "https://unsplash.com",
+        img: "https://onroadnow-ggpe.vercel.app/crypto/crypto/unsplash.com",
         link: "/go/uber",
         cta: "Get Uber Bonus"
       },
@@ -114,7 +114,7 @@
         category: "Shopping Cashback",
         title: "Rakuten $30 Cashback on Groceries & Tech",
         price: "$30 Signup Bonus",
-        img: "https://unsplash.com",
+        img: "https://onroadnow-ggpe.vercel.app/crypto/crypto/unsplash.com",
         link: "/go/rakuten",
         cta: "Claim $30 Bonus"
       },
@@ -122,7 +122,7 @@
         category: "Crypto Rewards",
         title: "Binance & FreeBitcoin Instant Rewards",
         price: "Earn Crypto",
-        img: "https://unsplash.com",
+        img: "https://onroadnow-ggpe.vercel.app/crypto/crypto/unsplash.com",
         link: "/go/binance",
         cta: "Start Earning"
       }
@@ -133,7 +133,7 @@
       const all = [...saved, ...starterGoods];
       document.getElementById("productGrid").innerHTML = all.map(item => `
         <div class="card">
-          <img src="${item.img}" alt="${item.title}" onerror="this.src='https://unsplash.com'" />
+          <img src="${item.img}" alt="${item.title}" onerror="this.src='https://onroadnow-ggpe.vercel.app/crypto/crypto/unsplash.com'" />
           <div class="card-body">
             <span class="tag">${item.category}</span>
             <h3 style="margin:6px 0;">${item.title}</h3>
@@ -148,7 +148,7 @@
       const vendor = document.getElementById("vName").value.trim();
       const title = document.getElementById("iName").value.trim();
       const price = document.getElementById("iPrice").value.trim();
-      const img = document.getElementById("iImg").value.trim() || "https://unsplash.com";
+      const img = document.getElementById("iImg").value.trim() || "https://onroadnow-ggpe.vercel.app/crypto/crypto/unsplash.com";
       const contact = document.getElementById("vPhone").value.trim() || "18768090958";
 
       if (!title || !price) return alert("Enter item name and price.");
@@ -156,7 +156,7 @@
       let link = contact;
       if (!contact.startsWith("http")) {
         const msg = encodeURIComponent(`Hi ${vendor || "OnRoadNow"}, I want to order: ${title} (${price})`);
-        link = `https://wa.me{contact.replace(/\D/g, "")}?text=${msg}`;
+        link = `https://onroadnow-ggpe.vercel.app/crypto/crypto/wa.me{contact.replace(/\D/g, "")}?text=${msg}`;
       }
 
       const saved = JSON.parse(localStorage.getItem("custom_goods") || "[]");
@@ -167,6 +167,24 @@
 
     loadProducts();
   </script>
-<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0;"><a href="https://wa.me" target="_blank" style="background:#22c55e;color:#052e16;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💬 WhatsApp</a><a href="https://t.me" target="_blank" style="background:#38bdf8;color:#082f49;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✈️ Telegram</a><a href="https://m.me" target="_blank" style="background:#818cf8;color:#1e1b4b;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💙 Messenger</a><a href="mailto:korerussbiz@gmail.com" style="background:#f7931a;color:#000;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✉️ korerussbiz@gmail.com</a></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0;"><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/wa.me" target="_blank" style="background:#22c55e;color:#052e16;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💬 WhatsApp</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/t.me" target="_blank" style="background:#38bdf8;color:#082f49;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✈️ Telegram</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/m.me" target="_blank" style="background:#818cf8;color:#1e1b4b;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💙 Messenger</a><a href="mailto:korerussbiz@gmail.com" style="background:#f7931a;color:#000;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✉️ korerussbiz@gmail.com</a></div>
+
+<footer style="margin-top:2rem;padding:1.25rem;border-top:1px solid #333;font-family:sans-serif;font-size:0.9rem;">
+  <p><strong>Support &amp; Connect with KorerussBiz:</strong></p>
+  <p>
+    <a href="https://pages.dev" target="_blank" rel="noopener">Explore Deals &amp; Tools</a> &bull;
+    <a href="https://paypal.me" target="_blank" rel="noopener">Support via PayPal (USD)</a>
+  </p>
+  <p><strong>Crypto (ETH / USDC / USDT):</strong> <code>0xc2a49710d26e023f129c429f6494f2db04809464</code></p>
+  <p>
+    <a href="https://tiktok.com" target="_blank">TikTok</a> |
+    <a href="https://instagram.com" target="_blank">Instagram</a> |
+    <a href="https://youtube.com" target="_blank">YouTube</a> |
+    <a href="https://x.com" target="_blank">X</a> |
+    <a href="https://facebook.com" target="_blank">Facebook</a> |
+    <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+  </p>
+</footer>
+
 </body>
 </html>

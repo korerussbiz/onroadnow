@@ -21,3 +21,11 @@ Some are referrals; I may earn a commission. Crypto/cloud-mining is high-risk. N
 
 ## NEVER USE
 "double your earnings" / "guaranteed passive income" / "free money" / "instant payout" / "risk-free" / specific return claims
+
+
+---
+### Support & Connect with KorerussBiz
+* **Explore Deals & Tools:** [https://pages.dev](https://pages.dev)
+* **Support via PayPal (USD):** [https://paypal.me](https://paypal.me)
+* **Crypto Tip (ETH / USDC / USDT):** `0xc2a49710d26e023f129c429f6494f2db04809464`
+* **Follow:** [TikTok](https://tiktok.com) | [Instagram](https://instagram.com) | [YouTube](https://youtube.com) | [X](https://x.com) | [Facebook](https://facebook.com) | [LinkedIn](https://linkedin.com)

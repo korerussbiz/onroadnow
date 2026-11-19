@@ -12,7 +12,7 @@ const SOLANA_RPC =
 const WALLETCONNECT_PROJECT_ID = process.env.WALLETCONNECT_PROJECT_ID || "demo";
 const ALPHA_VANTAGE_KEY = process.env.ALPHA_VANTAGE_KEY || "";
 const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || "";
-const DEPOSIT_URL = process.env.DEPOSIT_URL || "https://paypal.me/yourhandle";
+const DEPOSIT_URL = process.env.DEPOSIT_URL || "https://paypal.me";
 
 // In-memory storage
 let users = [];
