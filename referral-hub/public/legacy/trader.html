@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>OnRoadNow Micro Trader</title>
+    <style>
+      body {
+        font-family: Arial;
+        margin: 2rem;
+        background: #0f172a;
+        color: #eee;
+      }
+      .card {
+        background: #1e293b;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+      }
+      button {
+        background: #3b82f6;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        color: white;
+        cursor: pointer;
+        margin: 0.2rem;
+      }
+      .buy {
+        background: #10b981;
+      }
+      .sell {
+        background: #ef4444;
+      }
+      input {
+        padding: 0.5rem;
+        border-radius: 1rem;
+        border: none;
+        margin: 0.5rem 0;
+      }
+      .log {
+        background: #0f172a;
+        padding: 1rem;
+        border-radius: 1rem;
+        max-height: 300px;
+        overflow-y: auto;
+        font-family: monospace;
+      }
+    </style>
+    <script src="https://onroadnow-ggpe.vercel.app/crypto/crypto/cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script async src="https://onroadnow-ggpe.vercel.app/crypto/crypto/pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2772533792093956" crossorigin="anonymous"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="canonical" href="https://onroadnow.pages.dev/legacy/trader.html">
+<link rel="stylesheet" href="/theme.css">
+</head>
+  <body>
+<header class="site-header"><div class="nav-inner">
+<a href="/" class="logo">⚡ KorerussBiz</a>
+<nav class="main-nav"><a href="/crypto/">Crypto</a><a href="/music/">Music</a><a href="/shop/">Shop</a><a href="/signals/">Signals</a><a href="/support/">Support</a><a href="/join/" class="nav-cta">Join</a></nav>
+</div></header>
+<div style="background:#f5e9d9;border-bottom:1px solid #e4e2dc;padding:.5rem 1rem;text-align:center;font-size:.85em;color:#6b6b6b">
+📁 Archived page from an earlier version of KorerussBiz · <a href="/legacy/" style="color:#ff5a3c">View all archived pages</a> · <a href="/" style="color:#ff5a3c">Return to main site</a>
+</div>
+
+<nav style="background:#151922;border-bottom:1px solid #262c3a;padding:.75rem 1rem;display:flex;flex-wrap:wrap;gap:1rem;font-family:system-ui,sans-serif;font-size:.9rem">
+  <a href="/" style="color:#fff;font-weight:700;text-decoration:none">KorerussBiz Hub</a>
+  <a href="/market/" style="color:#60a5fa;text-decoration:none">MoBay Market</a>
+  <a href="/calculator.html" style="color:#60a5fa;text-decoration:none">Global Calculator</a>
+  <a href="/customer-service/" style="color:#34d399;font-weight:700;text-decoration:none">Customer Service</a>
+  <a href="https://paypal.me" target="_blank" style="color:#fbbf24;text-decoration:none">PayPal.Me</a>
+</nav>
+<div style="display:flex; gap:10px; padding:10px; background:#1a1a1a;"><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/koreruss-music.vercel.app" style="color:#f7931a;">Music</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/korerussbiz-signals.vercel.app" style="color:#f7931a;">Signals</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/onroadnow.vercel.app" style="color:#f7931a;">OnRoad</a></div>
+    <div
+      style="
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      "
+    >
+      <a
+        href="/micro-login"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >🔐 Login</a
+      >
+      <a
+        href="/micro-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📊 Dashboard</a
+      >
+      <a
+        href="/xmr-miner"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >⛏️ XMR Miner</a
+      >
+      <a
+        href="/mining-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📈 Mining Stats</a
+      >
+      <a
+        href="/micro-teller"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >🧾 Teller</a
+      >
+      <a
+        href="/micro-trade"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📈 Trade</a
+      >
+    </div>
+    <h1>📈 OnRoadNow Micro Trading Bot</h1>
+    <div class="card">
+      <h3>Market Data</h3>
+      <select id="pairSelect">
+        <option value="BTC">BTC/USD</option>
+        <option value="ETH">ETH/USD</option>
+        <option value="SOL">SOL/USD</option>
+      </select>
+      <div id="price" style="font-size: 2rem; margin: 1rem 0">— USD</div>
+      <canvas id="priceChart" width="400" height="200"></canvas>
+    </div>
+    <div class="card">
+      <h3>Virtual Wallet</h3>
+      <div>USD: <span id="usdBalance">10000.00</span></div>
+      <div id="cryptoBalance">BTC: 0.0000</div>
+      <input type="number" id="amount" placeholder="Amount (USD)" step="any" />
+      <button id="buyBtn" class="buy">Buy</button>
+      <button id="sellBtn" class="sell">Sell</button>
+    </div>
+    <div class="card">
+      <h3>Transaction Log</h3>
+      <div id="log" class="log">Ready.</div>
+    </div>
+    <script>
+      let wallet = { USD: 10000, BTC: 0, ETH: 0, SOL: 0 };
+      let currentPair = "BTC";
+      let currentPrice = 0;
+      let priceHistory = [];
+      let chart = null;
+
+      const logDiv = document.getElementById("log");
+      function addLog(msg) {
+        const p = document.createElement("div");
+        p.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        logDiv.appendChild(p);
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+
+      async function fetchPrice() {
+        const symbol = encodeURIComponent(currentPair);
+        const id = { BTC: "bitcoin", ETH: "ethereum", SOL: "solana" }[
+          currentPair
+        ];
+        try {
+          const res = await fetch(
+            `https://onroadnow-ggpe.vercel.app/crypto/crypto/api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`,
+          );
+          const data = await res.json();
+          currentPrice = data[id]?.usd;
+          if (currentPrice) {
+            document.getElementById("price").innerText = `${currentPrice} USD`;
+            priceHistory.push(currentPrice);
+            if (priceHistory.length > 30) priceHistory.shift();
+            if (chart) {
+              chart.data.datasets[0].data = priceHistory;
+              chart.update();
+            } else {
+              const ctx = document
+                .getElementById("priceChart")
+                .getContext("2d");
+              chart = new Chart(ctx, {
+                type: "line",
+                data: {
+                  labels: priceHistory.map((_, i) => i),
+                  datasets: [
+                    {
+                      label: `${currentPair}/USD`,
+                      data: priceHistory,
+                      borderColor: "#facc15",
+                    },
+                  ],
+                },
+              });
+            }
+          }
+        } catch (e) {
+          addLog(`Price fetch error: ${e.message}`);
+        }
+      }
+
+      function updateUI() {
+        document.getElementById("usdBalance").innerText = wallet.USD.toFixed(2);
+        if (currentPair === "BTC")
+          document.getElementById("cryptoBalance").innerHTML =
+            `BTC: ${wallet.BTC.toFixed(8)}`;
+        else if (currentPair === "ETH")
+          document.getElementById("cryptoBalance").innerHTML =
+            `ETH: ${wallet.ETH.toFixed(6)}`;
+        else
+          document.getElementById("cryptoBalance").innerHTML =
+            `SOL: ${wallet.SOL.toFixed(4)}`;
+      }
+
+      async function trade(type) {
+        if (!currentPrice) {
+          addLog("Price not loaded");
+          return;
+        }
+        let amountUSD = parseFloat(document.getElementById("amount").value);
+        if (isNaN(amountUSD) || amountUSD <= 0) {
+          addLog("Invalid amount");
+          return;
+        }
+        let cryptoAmount = amountUSD / currentPrice;
+        let minCrypto = { BTC: 0.0001, ETH: 0.001, SOL: 0.01 }[currentPair];
+        if (cryptoAmount < minCrypto) {
+          addLog(`Min trade: ${minCrypto} ${currentPair}`);
+          return;
+        }
+        if (type === "buy") {
+          if (wallet.USD < amountUSD) {
+            addLog("Insufficient USD");
+            return;
+          }
+          wallet.USD -= amountUSD;
+          if (currentPair === "BTC") wallet.BTC += cryptoAmount;
+          else if (currentPair === "ETH") wallet.ETH += cryptoAmount;
+          else wallet.SOL += cryptoAmount;
+          addLog(
+            `Bought ${cryptoAmount.toFixed(8)} ${currentPair} for $${amountUSD.toFixed(2)}`,
+          );
+        } else {
+          let balance = { BTC: wallet.BTC, ETH: wallet.ETH, SOL: wallet.SOL }[
+            currentPair
+          ];
+          if (balance < cryptoAmount) {
+            addLog(`Insufficient ${currentPair}`);
+            return;
+          }
+          if (currentPair === "BTC") wallet.BTC -= cryptoAmount;
+          else if (currentPair === "ETH") wallet.ETH -= cryptoAmount;
+          else wallet.SOL -= cryptoAmount;
+          wallet.USD += amountUSD;
+          addLog(
+            `Sold ${cryptoAmount.toFixed(8)} ${currentPair} for $${amountUSD.toFixed(2)}`,
+          );
+        }
+        updateUI();
+        document.getElementById("amount").value = "";
+      }
+
+      document.getElementById("pairSelect").addEventListener("change", (e) => {
+        currentPair = e.target.value;
+        priceHistory = [];
+        if (chart) {
+          chart.destroy();
+          chart = null;
+        }
+        fetchPrice();
+        updateUI();
+        addLog(`Switched to ${currentPair}/USD`);
+      });
+      document.getElementById("buyBtn").onclick = () => trade("buy");
+      document.getElementById("sellBtn").onclick = () => trade("sell");
+
+      fetchPrice();
+      setInterval(fetchPrice, 5000);
+      updateUI();
+      addLog("Bot started. Use Buy/Sell to simulate trades.");
+    </script>
+    <button
+      id="depositBtn"
+      class="btn"
+      style="background: #f7931a; font-size: 1.2rem; padding: 0.8rem 2rem"
+    >
+      💰 Deposit
+    </button>
+    <script>
+      document
+        .getElementById("depositBtn")
+        ?.addEventListener("click", async function () {
+          const res = await fetch("/api/deposit", { credentials: "include" });
+          const data = await res.json();
+          if (data.url) window.open(data.url, "_blank");
+          else alert("Deposit URL not set.");
+        });
+    </script>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0;"><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/wa.me" target="_blank" style="background:#22c55e;color:#052e16;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💬 WhatsApp</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/t.me" target="_blank" style="background:#38bdf8;color:#082f49;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✈️ Telegram</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/m.me" target="_blank" style="background:#818cf8;color:#1e1b4b;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💙 Messenger</a><a href="mailto:korerussbiz@gmail.com" style="background:#f7931a;color:#000;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✉️ korerussbiz@gmail.com</a></div>
+
+<footer style="margin-top:2rem;padding:1.25rem;border-top:1px solid #333;font-family:sans-serif;font-size:0.9rem;">
+  <p><strong>Support &amp; Connect with KorerussBiz:</strong></p>
+  <p>
+    <a href="https://pages.dev" target="_blank" rel="noopener">Explore Deals &amp; Tools</a> &bull;
+    <a href="https://paypal.me" target="_blank" rel="noopener">Support via PayPal (USD)</a>
+  </p>
+  <p><strong>Crypto (ETH / USDC / USDT):</strong> <code>0xc2a49710d26e023f129c429f6494f2db04809464</code></p>
+  <p>
+    <a href="https://tiktok.com" target="_blank">TikTok</a> |
+    <a href="https://instagram.com" target="_blank">Instagram</a> |
+    <a href="https://youtube.com" target="_blank">YouTube</a> |
+    <a href="https://x.com" target="_blank">X</a> |
+    <a href="https://facebook.com" target="_blank">Facebook</a> |
+    <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+  </p>
+</footer>
+
+
+<div id="geo-deals-container"></div>
+<script src="/geo-deals.js"></script>
+
+<script src="/assets/site-shell.js"></script>
+
+<div style="max-width:160px;margin:1.5rem auto;text-align:center">
+<script data-cfasync="false" type="text/javascript">
+  atOptions = {"key":"e13300f1ce92251ca254f5333f95afce","format":"iframe","height":300,"width":160,"params":{}};
+</script>
+<script data-cfasync="false" type="text/javascript" src="https://www.highrevenueformat.com/e13300f1ce92251ca254f5333f95afce/invoke.js"></script>
+</div>
+
+</body>
+</html>

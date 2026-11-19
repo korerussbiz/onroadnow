@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OnRoadNow – Auto Claim Bot</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Inter", sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 1rem;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .btn {
+        background: #3b82f6;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 2rem;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+      }
+      .btn-danger {
+        background: #ef4444;
+      }
+      .btn-success {
+        background: #10b981;
+      }
+      select,
+      input {
+        background: #0f172a;
+        border: 1px solid #334155;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+      }
+      .log {
+        background: #0f172a;
+        border-radius: 1rem;
+        padding: 1rem;
+        max-height: 400px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 0.8rem;
+        margin-top: 1rem;
+      }
+      .log p {
+        margin: 0.2rem 0;
+        border-left: 2px solid #3b82f6;
+        padding-left: 0.5rem;
+      }
+      .flex {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .nav a {
+        color: #94a3b8;
+        text-decoration: none;
+        margin-right: 1rem;
+      }
+    </style>
+<script async src="https://onroadnow-ggpe.vercel.app/crypto/crypto/pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2772533792093956" crossorigin="anonymous"></script>
+  <link rel="canonical" href="https://onroadnow.pages.dev/legacy/claim-bot.html">
+<link rel="stylesheet" href="/theme.css">
+</head>
+  <body>
+<header class="site-header"><div class="nav-inner">
+<a href="/" class="logo">⚡ KorerussBiz</a>
+<nav class="main-nav"><a href="/crypto/">Crypto</a><a href="/music/">Music</a><a href="/shop/">Shop</a><a href="/signals/">Signals</a><a href="/support/">Support</a><a href="/join/" class="nav-cta">Join</a></nav>
+</div></header>
+<div style="background:#f5e9d9;border-bottom:1px solid #e4e2dc;padding:.5rem 1rem;text-align:center;font-size:.85em;color:#6b6b6b">
+📁 Archived page from an earlier version of KorerussBiz · <a href="/legacy/" style="color:#ff5a3c">View all archived pages</a> · <a href="/" style="color:#ff5a3c">Return to main site</a>
+</div>
+
+<nav style="background:#151922;border-bottom:1px solid #262c3a;padding:.75rem 1rem;display:flex;flex-wrap:wrap;gap:1rem;font-family:system-ui,sans-serif;font-size:.9rem">
+  <a href="/" style="color:#fff;font-weight:700;text-decoration:none">KorerussBiz Hub</a>
+  <a href="/market/" style="color:#60a5fa;text-decoration:none">MoBay Market</a>
+  <a href="/calculator.html" style="color:#60a5fa;text-decoration:none">Global Calculator</a>
+  <a href="/customer-service/" style="color:#34d399;font-weight:700;text-decoration:none">Customer Service</a>
+  <a href="https://paypal.me" target="_blank" style="color:#fbbf24;text-decoration:none">PayPal.Me</a>
+</nav>
+<div style="display:flex; gap:10px; padding:10px; background:#1a1a1a;"><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/koreruss-music.vercel.app" style="color:#f7931a;">Music</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/korerussbiz-signals.vercel.app" style="color:#f7931a;">Signals</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/onroadnow.vercel.app" style="color:#f7931a;">OnRoad</a></div>
+    <div
+      style="
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      "
+    >
+      <a
+        href="/micro-login"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >🔐 Login</a
+      >
+      <a
+        href="/micro-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📊 Dashboard</a
+      >
+      <a
+        href="/xmr-miner"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >⛏️ XMR Miner</a
+      >
+      <a
+        href="/mining-dashboard"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📈 Mining Stats</a
+      >
+      <a
+        href="/micro-teller"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >🧾 Teller</a
+      >
+      <a
+        href="/micro-trade"
+        style="color: #60a5fa; text-decoration: none; font-weight: 600"
+        >📈 Trade</a
+      >
+    </div>
+    <div class="container">
+      <div class="nav">
+        <a href="/">← Home</a> | <a href="/auto-trader">Auto‑Trader</a> |
+        <a href="/claim-bot">Claim Bot</a>
+      </div>
+      <div id="authMessage"></div>
+      <div id="claimContent" style="display: none">
+        <div class="card">
+          <h2>🤖 Auto Claim Bot</h2>
+          <p>
+            Automatically scans for claimable tokens (faucets, airdrops,
+            unclaimed rewards). Simulated claiming – each claim generates a
+            random amount, deducts a 3‑10% fee, and adds the rest to your profit
+            balance.
+          </p>
+          <div class="flex">
+            <select id="chainSelect">
+              <option value="ethereum">Ethereum</option>
+              <option value="bsc">Binance Smart Chain</option>
+              <option value="polygon">Polygon</option>
+              <option value="solana">Solana</option>
+            </select>
+            <button id="scanBtn" class="btn">
+              🔍 Scan for Claimable Tokens
+            </button>
+            <button id="claimAllBtn" class="btn btn-success">
+              💰 Claim All (Simulated)
+            </button>
+            <button id="stopBtn" class="btn btn-danger">⏹️ Stop</button>
+          </div>
+          <div class="log" id="logArea"></div>
+        </div>
+        <div class="card">
+          <h3>Your Stats</h3>
+          <div>Profit (after fees): <span id="userProfit">0.00</span> JMD</div>
+          <div>
+            Platform fees collected: <span id="ownerFees">0.00</span> JMD
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      let scanning = false;
+      let scanInterval = null;
+
+      async function apiCall(endpoint, options = {}) {
+        const res = await fetch(`/api/auto-trader/${endpoint}`, {
+          ...options,
+          credentials: "include",
+          headers: { "Content-Type": "application/json", ...options.headers },
+        });
+        return res.json();
+      }
+
+      function addLog(msg, isError = false) {
+        const logDiv = document.getElementById("logArea");
+        if (!logDiv) return;
+        const p = document.createElement("p");
+        p.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        if (isError) p.style.borderLeftColor = "#ef4444";
+        logDiv.appendChild(p);
+        logDiv.scrollTop = logDiv.scrollHeight;
+      }
+
+      async function refreshBalance() {
+        const state = await apiCall("status");
+        document.getElementById("userProfit").innerText = (
+          state.userProfit || 0
+        ).toFixed(2);
+        document.getElementById("ownerFees").innerText = (
+          state.ownerFees || 0
+        ).toFixed(2);
+      }
+
+      async function claimAmount(amount) {
+        if (!amount || amount <= 0) return;
+        const feePercent = 3 + Math.random() * 7;
+        const res = await apiCall("report-profit", {
+          method: "POST",
+          body: JSON.stringify({ profitJMD: amount, feePercent }),
+        });
+        if (res.error) addLog(`❌ Claim error: ${res.error}`, true);
+        else
+          addLog(
+            `✅ Claimed $${amount.toFixed(2)} → user gain $${res.userGain.toFixed(2)}, owner fee $${res.fee.toFixed(2)}`,
+          );
+        refreshBalance();
+      }
+
+      async function scanAndClaim() {
+        if (!scanning) return;
+        const chain = document.getElementById("chainSelect").value;
+        addLog(`🔍 Scanning ${chain} for claimable tokens...`);
+        // Simulate scanning – replace with real API calls later
+        await new Promise((r) => setTimeout(r, 2000));
+        const found = Math.random() > 0.7;
+        if (found) {
+          const amount = 1 + Math.random() * 20; // JMD equivalent
+          addLog(
+            `🎁 Found claimable amount: $${amount.toFixed(2)} on ${chain}`,
+          );
+          await claimAmount(amount);
+        } else {
+          addLog(`No claimable tokens found on ${chain} this round.`);
+        }
+      }
+
+      document.getElementById("scanBtn").addEventListener("click", () => {
+        if (scanning) {
+          addLog("Scan already running.");
+          return;
+        }
+        scanning = true;
+        addLog(
+          "Started continuous scanning (every 30 seconds). Click 'Stop' to end.",
+        );
+        scanInterval = setInterval(scanAndClaim, 30000);
+        scanAndClaim(); // immediate first scan
+      });
+
+      document
+        .getElementById("claimAllBtn")
+        .addEventListener("click", async () => {
+          addLog(
+            "Manual claim all triggered – simulating claim of random amount.",
+          );
+          const amount = 5 + Math.random() * 50;
+          await claimAmount(amount);
+        });
+
+      document.getElementById("stopBtn").addEventListener("click", () => {
+        if (scanInterval) {
+          clearInterval(scanInterval);
+          scanInterval = null;
+        }
+        scanning = false;
+        addLog("Stopped scanning.");
+      });
+
+      (async () => {
+        const me = await fetch("/api/me", { credentials: "include" }).then(
+          (r) => r.json(),
+        );
+        if (!me.id) {
+          document.getElementById("authMessage").innerHTML =
+            `<div class="card">🔐 You must <a href="/">log in</a> to use the Claim Bot.</div>`;
+          return;
+        }
+        document.getElementById("authMessage").innerHTML =
+          `<div class="card">✅ Logged in as <strong>${me.email}</strong></div>`;
+        document.getElementById("claimContent").style.display = "block";
+        refreshBalance();
+        addLog(
+          "Claim Bot ready. Press 'Scan for Claimable Tokens' to start automatic scanning (simulated).",
+        );
+      })();
+    </script>
+    <button
+      id="depositBtn"
+      class="btn"
+      style="background: #f7931a; font-size: 1.2rem; padding: 0.8rem 2rem"
+    >
+      💰 Deposit
+    </button>
+    <script>
+      document
+        .getElementById("depositBtn")
+        ?.addEventListener("click", async function () {
+          const res = await fetch("/api/deposit", { credentials: "include" });
+          const data = await res.json();
+          if (data.url) window.open(data.url, "_blank");
+          else alert("Deposit URL not set.");
+        });
+    </script>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0;"><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/wa.me" target="_blank" style="background:#22c55e;color:#052e16;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💬 WhatsApp</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/t.me" target="_blank" style="background:#38bdf8;color:#082f49;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✈️ Telegram</a><a href="https://onroadnow-ggpe.vercel.app/crypto/crypto/m.me" target="_blank" style="background:#818cf8;color:#1e1b4b;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">💙 Messenger</a><a href="mailto:korerussbiz@gmail.com" style="background:#f7931a;color:#000;padding:8px 14px;border-radius:8px;font-weight:800;text-decoration:none;">✉️ korerussbiz@gmail.com</a></div>
+
+<footer style="margin-top:2rem;padding:1.25rem;border-top:1px solid #333;font-family:sans-serif;font-size:0.9rem;">
+  <p><strong>Support &amp; Connect with KorerussBiz:</strong></p>
+  <p>
+    <a href="https://pages.dev" target="_blank" rel="noopener">Explore Deals &amp; Tools</a> &bull;
+    <a href="https://paypal.me" target="_blank" rel="noopener">Support via PayPal (USD)</a>
+  </p>
+  <p><strong>Crypto (ETH / USDC / USDT):</strong> <code>0xc2a49710d26e023f129c429f6494f2db04809464</code></p>
+  <p>
+    <a href="https://tiktok.com" target="_blank">TikTok</a> |
+    <a href="https://instagram.com" target="_blank">Instagram</a> |
+    <a href="https://youtube.com" target="_blank">YouTube</a> |
+    <a href="https://x.com" target="_blank">X</a> |
+    <a href="https://facebook.com" target="_blank">Facebook</a> |
+    <a href="https://linkedin.com" target="_blank">LinkedIn</a>
+  </p>
+</footer>
+
+
+<div id="geo-deals-container"></div>
+<script src="/geo-deals.js"></script>
+
+<script src="/assets/site-shell.js"></script>
+
+<div style="max-width:160px;margin:1.5rem auto;text-align:center">
+<script data-cfasync="false" type="text/javascript">
+  atOptions = {"key":"e13300f1ce92251ca254f5333f95afce","format":"iframe","height":300,"width":160,"params":{}};
+</script>
+<script data-cfasync="false" type="text/javascript" src="https://www.highrevenueformat.com/e13300f1ce92251ca254f5333f95afce/invoke.js"></script>
+</div>
+
+</body>
+</html>
