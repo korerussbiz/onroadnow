@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoBay Market & Live Link Board</title>
+  <style>
+    :root { --bg:#050811; --card:#0c1324; --border:#1e293b; --text:#f1f5f9; --muted:#94a3b8; --accent:#10b981; --gold:#f59e0b; --blue:#38bdf8; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+    a { color:var(--blue); text-decoration:none; }
+    .topbar { background:#080d1a; border-bottom:1px solid var(--border); padding:12px 16px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; position:sticky; top:0; z-index:50; }
+    .nav-links { display:flex; flex-wrap:wrap; gap:8px; font-size:12.5px; }
+    .nav-links a { color:#e2e8f0; background:#1e293b; padding:5px 10px; border-radius:6px; }
+    .wrap { max-width:1160px; margin:0 auto; padding:16px; }
+    .hero, .board { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:16px; }
+    .tabs, .share-bar { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .tab-btn, .share-pill { background:#1e293b; color:#e2e8f0; border:1px solid #334155; padding:6px 12px; border-radius:99px; cursor:pointer; font-size:12px; font-weight:600; }
+    .tab-btn.active { background:var(--accent); color:#052e16; border-color:var(--accent); }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:12px; }
+    .item-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px; }
+    .media-row { display:flex; gap:8px; align-items:center; }
+    .mini-img { width:110px; height:80px; object-fit:cover; border-radius:8px; border:1px solid #334155; flex-shrink:0; }
+    .mini-vid { width:100%; height:80px; border:1px solid #334155; border-radius:8px; background:#000; }
+    .badge { font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; background:#1e293b; color:var(--gold); }
+    .price-row { display:flex; justify-content:space-between; align-items:center; margin-top:auto; padding-top:8px; border-top:1px solid var(--border); }
+    .btn-pay { background:var(--accent); color:#052e16; padding:5px 10px; border-radius:6px; font-weight:700; font-size:12px; }
+    .post-form { display:grid; gap:8px; margin-bottom:14px; }
+    .post-form input, .post-form textarea, .post-form select, .comment-form input { width:100%; background:#050811; border:1px solid #334155; color:#fff; padding:8px; border-radius:7px; font-size:13px; }
+    .post-btn { background:var(--gold); color:#111827; border:none; padding:10px; border-radius:8px; font-weight:800; cursor:pointer; }
+    .post-item { background:#070c18; border:1px solid #1e293b; border-radius:10px; padding:11px; margin-bottom:10px; }
+    .comment-box { margin-top:8px; padding-left:10px; border-left:2px solid #334155; }
+    .comment-form { display:flex; gap:6px; margin-top:6px; }
+    .comment-form button { background:#334155; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <strong>⚡ MoBay Market & Open Link Board</strong>
+    <div class="nav-links">
+      <a href="/">🏠 Home</a>
+      <a href="/calculator.html">🧮 Calculator</a>
+      <a href="/customer-service/">📞 Jobs</a>
+      <a href="https://paypal.me" target="_blank">💳 PayPal.Me</a>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="hero">
+      <h1 style="margin:0 0 6px;font-size:20px;">🇯🇲 Montego Bay Produce, Canned Goods & Live Posting Board</h1>
+      <p style="margin:0;color:var(--muted);font-size:13px;">Fresh fruits, vegetables, canned goods & cooked meals with mini video windows — post your own links & products below.</p>
+      <div class="tabs">
+        <button class="tab-btn active" onclick="filterCat('all',this)">All</button>
+        <button class="tab-btn" onclick="filterCat('produce',this)">🍍 Fruits & Veg</button>
+        <button class="tab-btn" onclick="filterCat('canned',this)">🥫 Canned & Dry</button>
+        <button class="tab-btn" onclick="filterCat('cooked',this)">🍗 Cooked Food</button>
+        <button class="tab-btn" onclick="filterCat('goods',this)">🛍️ Goods</button>
+      </div>
+      <div class="share-bar">
+        <button class="share-pill" onclick="window.open('https://whatsapp.com)">📲 WhatsApp</button>
+        <button class="share-pill" onclick="window.open('https://t.me)">✈️ Telegram</button>
+        <button class="share-pill" onclick="navigator.clipboard.writeText(location.href);this.innerText='✅ Copied!'">📋 Copy Link</button>
+      </div>
+    </div>
+    <div class="grid" id="marketGrid"></div>
+    <div class="board" style="margin-top:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h2 style="margin:0;font-size:17px;">💬 Live Global Posting & Link Board</h2>
+        <span id="syncStatus" style="font-size:11px;color:#f59e0b;">● Connecting...</span>
+      </div>
+      <form class="post-form" onsubmit="addPost(event)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <input id="postAuthor" placeholder="Your Name / Shop" required />
+          <select id="postTag"><option>🍍 Fresh Produce</option><option>🥫 Canned & Dry Goods</option><option>🍗 Cooked Food</option><option>🛍️ Goods</option><option>🔗 Partner Link</option></select>
+        </div>
+        <textarea id="postText" rows="3" placeholder="Write your post and paste any clickable link (https://...)..." required></textarea>
+        <button type="submit" class="post-btn">📢 Publish Post & Link</button>
+      </form>
+      <div id="postsContainer"></div>
+    </div>
+    <div style="padding:12px;border-radius:10px;background:#080d1a;border:1px solid var(--border);font-size:12px;color:var(--muted);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;">
+      <span>💳 PayPal: <a href="https://paypal.me" target="_blank">paypal.me/KoreyRussell809</a></span>
+      <span>⚡ Crypto (USDC/USDT/ETH): <code>0xc2a49710d26e023f129c429f6494f2db04809464</code></span>
+    </div>
+  </div>
+  <script>
+    const SB_URL = "https://supabase.co";
+    const SB_KEY = "sb_publishable_6ZYYQrBtHqqGmTTuN5VyhQ_m2pTQXQv";
+    const ITEMS = [
+      {cat:"produce",tag:"Fresh Produce",title:"St. James Pineapples, Mangoes & Bananas",desc:"Farm-fresh Montego Bay hillside fruit bundle.",price:"JMD $1,800 (~$11.50)",pp:"https://paypal.me/11.50",img:"https://unsplash.com",yt:"https://youtube.com"},
+      {cat:"produce",tag:"Fresh Produce",title:"Callaloo, Scotch Bonnet, Scallion & Thyme",desc:"Freshly harvested Jamaican greens & natural seasonings.",price:"JMD $1,200 (~$7.75)",pp:"https://paypal.me/7.75",img:"https://unsplash.com",yt:"https://youtube.com"},
+      {cat:"canned",tag:"Canned & Dry Goods",title:"Grace & Lasco Canned Pantry Pack",desc:"Ackee, mackerel, corned beef & beans pantry staples.",price:"JMD $3,500 (~$22.50)",pp:"https://paypal.me/22.50",img:"https://unsplash.com",yt:"https://youtube.com"},
+      {cat:"canned",tag:"Canned & Dry Goods",title:"Bulk Rice, Flour, Coconut Milk & Oil Box",desc:"Family dry-goods & canned coconut milk grocery box.",price:"JMD $4,800 (~$30.50)",pp:"https://paypal.me/30.50",img:"https://unsplash.com",yt:"https://youtube.com"},
+      {cat:"cooked",tag:"Cooked Food",title:"Pimento Jerk Chicken & Festival Box",desc:"Charcoal jerk chicken with festival, rice & peas.",price:"JMD $1,650 (~$10.50)",pp:"https://paypal.me/10.50",img:"https://unsplash.com",yt:"https://youtube.com"},
+      {cat:"goods",tag:"Goods",title:"Solar Power Bank & Market Vendor Kit",desc:"Mobile charging gear & local vendor supplies.",price:"JMD $3,900 (~$25.00)",pp:"https://paypal.me/25",img:"https://unsplash.com",yt:"https://youtube.com"}
+    ];
+    function renderMarket(f="all"){
+      const list=f==="all"?ITEMS:ITEMS.filter(i=>i.cat===f);
+      document.getElementById("marketGrid").innerHTML=list.map(i=>`<div class="item-card"><div style="display:flex;justify-content:space-between;"><span class="badge">${i.tag}</span><span style="font-size:11px;color:#64748b;">MoBay, JM</span></div><h3 style="margin:0;font-size:14px;">${i.title}</h3><div class="media-row"><img class="mini-img" src="${i.img}" alt="${i.title}" loading="lazy"><iframe class="mini-vid" src="${i.yt}" loading="lazy" allowfullscreen></iframe></div><p style="margin:0;font-size:12px;color:#94a3b8;">${i.desc}</p><div class="price-row"><strong style="font-size:12px;color:#10b981;">${i.price}</strong><div style="display:flex;gap:5px;"><a class="btn-pay" href="${i.pp}" target="_blank">Order</a><a class="btn-pay" style="background:#1e293b;color:#38bdf8;" href="https://profitableratecpmnetwork.com" target="_blank">Deals</a></div></div></div>`).join("");
+    }
+    function filterCat(c,b){document.querySelectorAll(".tab-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");renderMarket(c);}
+    function linkify(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');}
+    const SEED=[{id:1,author:"KorerussBiz",tag:"🔗 Partner Link",time:"Live",text:"Post produce, canned goods or affiliate links free! Calculator: https://pages.dev",comments:[]}];
+    async function fetchPosts(){
+      try{const r=await fetch(`${SB_URL}/rest/v1/mobay_posts?select=*&order=id.desc`,{headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`}});if(r.ok){const d=await r.json();const s=document.getElementById("syncStatus");s.style.color="#10b981";s.innerText="● Global Cloud Sync Active";return d.length?d:SEED;}}catch(e){}
+      return SEED;
+    }
+    async function renderPosts(){
+      const posts=await fetchPosts();
+      document.getElementById("postsContainer").innerHTML=posts.map((p,i)=>`<div class="post-item"><div style="font-size:11px;color:#94a3b8;margin-bottom:4px;"><strong>${p.author}</strong> • <span class="badge">${p.tag}</span> • ${p.time||""}</div><div style="font-size:13px;white-space:pre-line;">${linkify(p.text)}</div><div class="comment-box">${(p.comments||[]).map(c=>`<div style="font-size:12px;color:#cbd5e1;margin:3px 0;">💬 <strong>${c.user}:</strong> ${linkify(c.msg)}</div>`).join("")}<form class="comment-form" onsubmit="addComment(event,${i},${p.id})"><input id="cu_${i}" placeholder="Name" style="max-width:95px;" required><input id="cm_${i}" placeholder="Comment or link..." required><button type="submit">Post</button></form></div></div>`).join("");
+    }
+    async function addPost(e){
+      e.preventDefault();
+      const entry={id:Date.now(),author:document.getElementById("postAuthor").value.trim(),tag:document.getElementById("postTag").value,time:new Date().toLocaleString(),text:document.getElementById("postText").value.trim(),comments:[]};
+      await fetch(`${SB_URL}/rest/v1/mobay_posts`,{method:"POST",headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,"Content-Type":"application/json"},body:JSON.stringify(entry)});
+      document.getElementById("postText").value="";renderPosts();
+    }
+    async function addComment(e,i,pid){
+      e.preventDefault();
+      const posts=await fetchPosts();
+      const comments=[...(posts[i].comments||[]),{user:document.getElementById(`cu_${i}`).value.trim(),msg:document.getElementById(`cm_${i}`).value.trim()}];
+      await fetch(`${SB_URL}/rest/v1/mobay_posts?id=eq.${pid}`,{method:"PATCH",headers:{apikey:SB_KEY,Authorization:`Bearer ${SB_KEY}`,"Content-Type":"application/json"},body:JSON.stringify({comments})});
+      renderPosts();
+    }
+    renderMarket();renderPosts();
+  </script>
+</body>
+</html>
