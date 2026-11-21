@@ -1,9 +1,10 @@
 {
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "destination": "https://onroadnow.pages.dev/$1",
-      "statusCode": 301
-    }
-  ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": null,
+  "installCommand": null,
+  "outputDirectory": "referral-hub/public",
+  "git": {
+    "deploymentEnabled": false
+  }
 }
