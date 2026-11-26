@@ -8,87 +8,85 @@
 
     <linearGradient id="holo" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#00e5ff">
-        <animate attributeName="stop-color"
-                 values="#00e5ff;#a855f7;#00e5ff" dur="6s" repeatCount="indefinite"/>
+        <animate attributeName="stop-color" values="#00e5ff;#a855f7;#00e5ff" dur="6s" repeatCount="indefinite"/>
       </stop>
       <stop offset="50%" stop-color="#a855f7">
-        <animate attributeName="stop-color"
-                 values="#a855f7;#00e5ff;#a855f7" dur="6s" repeatCount="indefinite"/>
+        <animate attributeName="stop-color" values="#a855f7;#00e5ff;#a855f7" dur="6s" repeatCount="indefinite"/>
       </stop>
       <stop offset="100%" stop-color="#00e5ff">
-        <animate attributeName="stop-color"
-                 values="#00e5ff;#7c3aed;#00e5ff" dur="6s" repeatCount="indefinite"/>
+        <animate attributeName="stop-color" values="#00e5ff;#7c3aed;#00e5ff" dur="6s" repeatCount="indefinite"/>
       </stop>
-    </linearGradient>
-
-    <linearGradient id="suit" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#0d0d12"/>
-      <stop offset="100%" stop-color="#000000"/>
     </linearGradient>
 
     <filter id="eyeGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feGaussianBlur stdDeviation="7" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-
-    <filter id="scan">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="n"/>
-      <feColorMatrix in="n" type="saturate" values="0" result="g"/>
-      <feComponentTransfer in="g" result="a">
-        <feFuncA type="linear" slope="0.04"/>
-      </feComponentTransfer>
-      <feComposite in="a" in2="SourceGraphic" operator="in"/>
     </filter>
   </defs>
 
-  <!-- Black field -->
   <rect width="1200" height="630" fill="url(#glow)"/>
 
-  <!-- Head silhouette: dark face, only eyes visible -->
-  <ellipse cx="600" cy="270" rx="118" ry="152" fill="#050507"/>
-  <path d="M 482 270 Q 482 190 600 180 Q 718 190 718 270
-           Q 718 350 600 430 Q 482 350 482 270 Z"
-        fill="#030305"/>
-
-  <!-- Suit shoulders -->
-  <path d="M 380 630 L 400 470 Q 500 415 600 412 Q 700 415 800 470 L 820 630 Z"
-        fill="url(#suit)"/>
-  <!-- Lapels -->
-  <path d="M 600 412 L 545 500 L 600 560 L 655 500 Z" fill="#08080c"/>
-  <path d="M 545 500 L 520 520 L 555 560 L 600 560 Z" fill="#0a0a10"/>
-  <path d="M 655 500 L 680 520 L 645 560 L 600 560 Z" fill="#0a0a10"/>
-
-  <!-- THE EYES — the only light in the image -->
-  <g filter="url(#eyeGlow)">
-    <ellipse cx="552" cy="252" rx="26" ry="12" fill="url(#holo)"/>
-    <ellipse cx="648" cy="252" rx="26" ry="12" fill="url(#holo)"/>
-    <!-- pupils: serious, forward stare -->
-    <circle cx="552" cy="252" r="5" fill="#000"/>
-    <circle cx="648" cy="252" r="5" fill="#000"/>
-    <!-- catchlight -->
-    <circle cx="556" cy="248" r="2" fill="#fff" opacity="0.9"/>
-    <circle cx="652" cy="248" r="2" fill="#fff" opacity="0.9"/>
+  <!-- ── SUITED SILHOUETTE (visible 0-5s, then 10-15s) ── -->
+  <g>
+    <animate attributeName="opacity" values="1;1;0;0;1" dur="10s" repeatCount="indefinite"/>
+    <!-- head -->
+    <ellipse cx="600" cy="255" rx="112" ry="145" fill="#040406"/>
+    <!-- suit shoulders -->
+    <path d="M 390 630 L 410 470 Q 500 415 600 412 Q 700 415 790 470 L 810 630 Z"
+          fill="#08080c"/>
+    <!-- lapels -->
+    <path d="M 600 412 L 548 500 L 600 558 L 652 500 Z" fill="#0d0d12"/>
+    <path d="M 548 500 L 524 520 L 558 558 L 600 558 Z" fill="#111116"/>
+    <path d="M 652 500 L 676 520 L 642 558 L 600 558 Z" fill="#111116"/>
+    <!-- eyes -->
+    <g filter="url(#eyeGlow)">
+      <ellipse cx="554" cy="245" rx="25" ry="11" fill="url(#holo)"/>
+      <ellipse cx="646" cy="245" rx="25" ry="11" fill="url(#holo)"/>
+      <circle cx="554" cy="245" r="5" fill="#000"/>
+      <circle cx="646" cy="245" r="5" fill="#000"/>
+      <circle cx="558" cy="241" r="2" fill="#fff" opacity="0.9"/>
+      <circle cx="650" cy="241" r="2" fill="#fff" opacity="0.9"/>
+    </g>
   </g>
 
-  <!-- Brow shadow for the serious stare -->
-  <path d="M 520 236 L 584 230" stroke="#000" stroke-width="7" stroke-linecap="round"/>
-  <path d="M 680 236 L 616 230" stroke="#000" stroke-width="7" stroke-linecap="round"/>
+  <!-- ── CASUAL SILHOUETTE (visible 5-10s) ── -->
+  <g>
+    <animate attributeName="opacity" values="0;0;1;1;0" dur="10s" repeatCount="indefinite"/>
+    <!-- head -->
+    <ellipse cx="600" cy="255" rx="110" ry="142" fill="#040406"/>
+    <!-- hoodie / casual shoulders -->
+    <path d="M 395 630 L 412 465 Q 500 420 600 418 Q 700 420 788 465 L 805 630 Z"
+          fill="#0a0a0e"/>
+    <!-- hood collar -->
+    <path d="M 530 430 Q 600 475 670 430 L 660 455 Q 600 495 540 455 Z" fill="#0d0d12"/>
+    <!-- drawstrings -->
+    <line x1="575" y1="460" x2="572" y2="520" stroke="#1f1f2a" stroke-width="3"/>
+    <line x1="625" y1="460" x2="628" y2="520" stroke="#1f1f2a" stroke-width="3"/>
+    <!-- eyes (same stare) -->
+    <g filter="url(#eyeGlow)">
+      <ellipse cx="554" cy="245" rx="25" ry="11" fill="url(#holo)"/>
+      <ellipse cx="646" cy="245" rx="25" ry="11" fill="url(#holo)"/>
+      <circle cx="554" cy="245" r="5" fill="#000"/>
+      <circle cx="646" cy="245" r="5" fill="#000"/>
+      <circle cx="558" cy="241" r="2" fill="#fff" opacity="0.9"/>
+      <circle cx="650" cy="241" r="2" fill="#fff" opacity="0.9"/>
+    </g>
+  </g>
 
-  <!-- Holographic rim light on the silhouette -->
-  <path d="M 482 270 Q 482 190 600 180 Q 718 190 718 270"
-        fill="none" stroke="url(#holo)" stroke-width="2" opacity="0.55"/>
-  <path d="M 400 470 Q 500 415 600 412 Q 700 415 800 470"
-        fill="none" stroke="url(#holo)" stroke-width="1.5" opacity="0.35"/>
+  <!-- Brow shadow -->
+  <path d="M 522 232 L 584 226" stroke="#000" stroke-width="7" stroke-linecap="round"/>
+  <path d="M 678 232 L 616 226" stroke="#000" stroke-width="7" stroke-linecap="round"/>
 
-  <!-- Wordmark -->
+  <!-- Holographic rim -->
+  <path d="M 490 255 Q 490 185 600 178 Q 710 185 710 255"
+        fill="none" stroke="url(#holo)" stroke-width="2" opacity="0.5"/>
+
+  <!-- Wordmark: ATHOL (fixed) -->
   <text x="600" y="560" text-anchor="middle"
-        font-family="system-ui, -apple-system, sans-serif"
-        font-size="86" font-weight="800" letter-spacing="18"
+        font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif"
+        font-size="92" font-weight="800" letter-spacing="20"
         fill="url(#holo)">ATHOL</text>
-  <text x="600" y="596" text-anchor="middle"
-        font-family="system-ui, sans-serif" font-size="15"
-        letter-spacing="7" fill="#6b7280">FILM · TOKEN · FUTURE</text>
-
-  <!-- Scanline texture -->
-  <rect width="1200" height="630" fill="#fff" filter="url(#scan)" opacity="0.5"/>
+  <text x="600" y="598" text-anchor="middle"
+        font-family="system-ui, Arial, sans-serif" font-size="15"
+        letter-spacing="8" fill="#6b7280">FILM · TOKEN · FUTURE</text>
 </svg>

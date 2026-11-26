@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ATHOL — Film Token on Polygon</title>
-<meta name="description" content="ATHOL Film Token. Contract address, token details, and how to acquire on Polygon. High-risk digital asset — not an investment.">
+<meta name="description" content="ATHOL Film Token. Contract address, token details, and how to acquire on Polygon. High-risk digital asset.">
 <link rel="canonical" href="https://onroadnow.pages.dev/athol/">
 <link rel="stylesheet" href="/theme.css">
 <style>
@@ -15,14 +15,16 @@ h1{font-size:2.6rem;letter-spacing:.18em;margin:.3rem 0;
 .box{background:#0a0a0f;border:1px solid #1c1c26;border-radius:12px;padding:1.2rem;margin:1rem 0}
 .box h2{margin:0 0 .6rem;font-size:.95rem;color:#00e5ff;letter-spacing:.05em;text-transform:uppercase}
 code{background:#000;padding:.25rem .5rem;border-radius:6px;font-size:.82em;color:#00e5ff;word-break:break-all;display:inline-block}
-.btn{display:inline-block;padding:.8rem 1.5rem;border-radius:9px;text-decoration:none;font-weight:700;margin:.3rem .3rem .3rem 0;font-size:.92em}
+.btn{display:inline-block;padding:.8rem 1.5rem;border-radius:9px;text-decoration:none;font-weight:700;margin:.3rem .3rem .3rem 0;font-size:.92em;cursor:pointer;border:none;font-family:inherit}
 .btn-buy{background:linear-gradient(120deg,#00e5ff,#a855f7);color:#000}
+.btn-wc{background:#3396ff;color:#fff}
 .btn-outline{border:1px solid #00e5ff;color:#00e5ff;background:transparent}
 .warn{background:#1a0a0a;border-left:4px solid #ef4444;padding:1rem 1.1rem;border-radius:8px;font-size:.85em;color:#fca5a5;margin:1.2rem 0}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.8rem;margin:1rem 0}
 .stat{background:#000;border:1px solid #1c1c26;border-radius:9px;padding:.8rem}
 .stat .lbl{font-size:.7rem;color:#555;text-transform:uppercase;letter-spacing:.08em}
 .stat .val{font-size:.95rem;color:#e8e8e8;word-break:break-all;margin-top:.2rem}
+#wc-status{margin-top:.8rem;font-size:.85em;color:#6b7280}
 .tool-link{display:block;padding:.7rem 1rem;background:#0a0a0f;border:1px solid #1c1c26;border-radius:9px;
            text-decoration:none;color:#e8e8e8;margin:.4rem 0;font-size:.9em}
 .tool-link:hover{border-color:#00e5ff}
@@ -38,7 +40,7 @@ code{background:#000;padding:.25rem .5rem;border-radius:6px;font-size:.82em;colo
 <p class="sub">Film Token · Polygon Mainnet · ERC-20</p>
 
 <div class="warn">
-<strong>High-risk digital asset.</strong> ATHOL has no guaranteed value and no return is promised. You can lose everything you spend. This is not an investment, not a security offering, and not financial advice. Only spend what you can afford to lose entirely.
+<strong>High-risk digital asset.</strong> ATHOL has no guaranteed value and no return is promised. You can lose everything you spend. This is not an investment, not a security offering, and not financial advice.
 </div>
 
 <div class="box">
@@ -48,96 +50,121 @@ code{background:#000;padding:.25rem .5rem;border-radius:6px;font-size:.82em;colo
   <div class="stat"><div class="lbl">Chain</div><div class="val">Polygon (137)</div></div>
   <div class="stat"><div class="lbl">Deployed at block</div><div class="val">98,006,547</div></div>
 </div>
-<p style="font-size:.85em;color:#6b7280;margin-top:.8rem">
-Always verify this address on PolygonScan before sending anything. Copy it from this page or from the deploy transaction — never from a DM.
-</p>
 </div>
 
 <div class="box">
-<h2>How to acquire ATHOL</h2>
+<h2>Buy ATHOL</h2>
 <p style="font-size:.9em;color:#9ca3af">
-ATHOL is not sold directly by this site. It trades on a Polygon DEX liquidity pool. To buy:
+ATHOL is not sold directly. It trades on a QuickSwap liquidity pool on Polygon. Connect a wallet, then swap POL for ATHOL.
 </p>
+
+<button id="wc-connect" class="btn btn-wc">🔗 Connect Wallet</button>
+<a class="btn btn-buy" id="swap-link" href="#" target="_blank" rel="noopener">Open QuickSwap →</a>
+<a class="btn btn-outline" id="scan-link" href="#" target="_blank" rel="noopener">PolygonScan</a>
+
+<p id="wc-status">Wallet not connected.</p>
+<p style="font-size:.8em;color:#4b5563;margin-top:.8rem" id="pool-note">Checking pool…</p>
+</div>
+
+<div class="box">
+<h2>How to buy (step by step)</h2>
 <ol style="font-size:.9em;color:#9ca3af;padding-left:1.2rem">
-  <li>Install a wallet (MetaMask, Trust Wallet) and add the Polygon network.</li>
-  <li>Add a small amount of <strong>POL</strong> for gas and for the swap.</li>
-  <li>Open QuickSwap and paste the ATHOL contract address into the "To" field.</li>
+  <li>Install <strong>MetaMask</strong> or <strong>Trust Wallet</strong>, add the Polygon network.</li>
+  <li>Buy a small amount of <strong>POL</strong> on an exchange (Binance works) and send it to your wallet.</li>
+  <li>Click <strong>Connect Wallet</strong> above — this opens WalletConnect.</li>
+  <li>Click <strong>Open QuickSwap</strong>, paste the ATHOL address into the "To" field.</li>
   <li>Review the price, slippage, and gas before confirming.</li>
 </ol>
-<a class="btn btn-buy" id="swap-link" href="#" target="_blank" rel="noopener">Swap on QuickSwap →</a>
-<a class="btn btn-outline" id="scan-link" href="#" target="_blank" rel="noopener">View on PolygonScan</a>
-<p style="font-size:.8em;color:#4b5563;margin-top:.8rem" id="pool-note">
-Checking for a liquidity pool…
+<p style="font-size:.82em;color:#6b7280">
+<strong>PayPal is not accepted for ATHOL.</strong> PayPal's policy prohibits cryptocurrency sales without pre-approval. Use a wallet.
 </p>
-</div>
-
-<div class="box">
-<h2>What ATHOL is</h2>
-<p style="font-size:.9em;color:#9ca3af" id="about">Loading…</p>
 </div>
 
 <div class="box">
 <h2>Tools I use</h2>
 <a class="tool-link" href="/go/binance" target="_blank" rel="noopener sponsored">
-  <strong>Binance</strong><span>Lower spot fees · KYC required</span>
+  <strong>Binance — buy POL</strong><span>Lower spot fees · KYC required</span>
 </a>
 <a class="tool-link" href="/go/coinbase" target="_blank" rel="noopener sponsored">
   <strong>Coinbase</strong><span>US-listed · simpler UI</span>
 </a>
-<a class="tool-link" href="/telemarketing/" >
-  <strong>Remote jobs board</strong><span>Telemarketing roles with pay rates listed</span>
-</a>
 <p style="font-size:.75em;color:#4b5563;margin-top:.6rem">
-Some links are referrals — I may earn a commission at no cost to you. Crypto is high-risk. Not financial advice.
+Some links are referrals — I may earn a commission at no cost to you.
 </p>
 </div>
 
 <p style="margin:2rem 0;font-size:.85em">
 <a href="/" style="color:#00e5ff">← KorerussBiz</a> ·
-<a href="/disclaimer/" style="color:#00e5ff">Disclaimer</a> ·
-<a href="/shop/" style="color:#00e5ff">Shop</a>
+<a href="/disclaimer/" style="color:#00e5ff">Disclaimer</a>
 </p>
-
-<div style="max-width:160px;margin:1.5rem auto;text-align:center">
-<script data-cfasync="false" type="text/javascript">
-  atOptions = {"key":"e13300f1ce92251ca254f5333f95afce","format":"iframe","height":300,"width":160,"params":{}};
-</script>
-<script data-cfasync="false" type="text/javascript" src="https://www.highrevenueformat.com/e13300f1ce92251ca254f5333f95afce/invoke.js"></script>
-</div>
 </main>
 
-<script>
-fetch("/athol/token.json")
-  .then(r => r.json())
-  .then(t => {
-    document.getElementById("addr").textContent = t.address;
-    document.getElementById("about").textContent = t.description;
-    document.getElementById("swap-link").href =
-      "https://quickswap.exchange/#/swap?outputCurrency=" + t.address + "&chain=polygon";
-    document.getElementById("scan-link").href =
-      "https://polygonscan.com/token/" + t.address;
+<script type="module">
+import { createAppKit } from "https://esm.sh/@reown/appkit@1.7.0";
+import { WagmiAdapter } from "https://esm.sh/@reown/appkit-adapter-wagmi@1.7.0";
+import { polygon } from "https://esm.sh/@reown/appkit@1.7.0/networks";
+import { createConfig, http } from "https://esm.sh/wagmi@2.14.0";
 
-    // Check if a QuickSwap pool exists by querying DexScreener
-    return fetch("https://api.dexscreener.com/latest/dex/tokens/" + t.address)
-      .then(r => r.json())
-      .then(d => {
-        const pairs = d.pairs || [];
-        const note = document.getElementById("pool-note");
-        if (!pairs.length) {
-          note.textContent = "⚠️ No liquidity pool exists yet. ATHOL cannot be bought until a pool is created.";
-          note.style.color = "#f59e0b";
-        } else {
-          const p = pairs[0];
-          const liq = p.liquidity?.usd ?? 0;
-          const price = p.priceUsd ?? "?";
-          note.innerHTML = `Pool found: ${p.dexId} · Price $${price} · Liquidity $${Number(liq).toFixed(2)}`;
-          note.style.color = liq > 100 ? "#10b981" : "#f59e0b";
-        }
-      })
-      .catch(() => {});
-  })
-  .catch(() => {
-    document.getElementById("addr").textContent = "0x991C5505b6517e80c4bBb7a7c247BB8BB65210A6";
+const TOKEN = "0x991C5505b6517e80c4bBb7a7c247BB8BB65210A6";
+const PROJECT_ID = "PASTE_YOUR_WC_PROJECT_ID";
+
+fetch("/athol/token.json").then(r => r.json()).then(t => {
+  document.getElementById("addr").textContent = t.address;
+  document.getElementById("swap-link").href =
+    "https://dapp.quickswap.exchange/#/swap?outputCurrency=" + t.address;
+  document.getElementById("scan-link").href =
+    "https://polygonscan.com/token/" + t.address;
+
+  // Pool check
+  fetch("https://api.dexscreener.com/latest/dex/tokens/" + t.address)
+    .then(r => r.json())
+    .then(d => {
+      const note = document.getElementById("pool-note");
+      const pairs = d.pairs || [];
+      if (!pairs.length) {
+        note.textContent = "⚠️ No pool yet — ATHOL cannot be bought until liquidity is added on QuickSwap.";
+        note.style.color = "#f59e0b";
+      } else {
+        const p = pairs[0];
+        note.innerHTML = `Pool live: ${p.dexId} · $${p.priceUsd} · Liquidity $${Number(p.liquidity?.usd ?? 0).toFixed(2)}`;
+        note.style.color = "#10b981";
+      }
+    }).catch(() => {});
+});
+
+// WalletConnect / AppKit
+if (PROJECT_ID !== "PASTE_YOUR_WC_PROJECT_ID") {
+  const wagmiAdapter = new WagmiAdapter({
+    networks: [polygon],
+    projectId: PROJECT_ID,
+    transports: { [polygon.id]: http() },
   });
+
+  createAppKit({
+    adapters: [wagmiAdapter],
+    networks: [polygon],
+    projectId: PROJECT_ID,
+    metadata: {
+      name: "ATHOL Film Token",
+      description: "Buy ATHOL on Polygon",
+      url: "https://onroadnow.pages.dev/athol/",
+      icons: ["https://onroadnow.pages.dev/athol/poster.svg"],
+    },
+    features: { analytics: false, email: false, socials: [] },
+  });
+
+  document.getElementById("wc-connect").addEventListener("click", () => {
+    // AppKit opens its modal automatically when the button uses data-w3m-open
+    const btn = document.getElementById("wc-connect");
+    btn.setAttribute("data-w3m-open", "");
+    btn.click();
+  });
+
+  document.getElementById("wc-status").textContent = "WalletConnect ready — tap Connect Wallet.";
+} else {
+  document.getElementById("wc-status").textContent =
+    "⚠️ WalletConnect not configured — paste your project ID in token.json.";
+  document.getElementById("wc-connect").disabled = true;
+}
 </script>
 </body></html>
