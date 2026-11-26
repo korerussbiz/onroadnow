@@ -1,0 +1,47 @@
+<svg xmlns="http://w3.org" viewBox="0 0 800 1000" width="800" height="1000">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#111b2e"/>
+      <stop offset="100%" stop-color="#030408"/>
+    </radialGradient>
+    <linearGradient id="holo" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f5d4"/>
+      <stop offset="50%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="dirt" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4b4237"/>
+      <stop offset="100%" stop-color="#171411"/>
+    </linearGradient>
+    <pattern id="grid" width="14" height="14" patternUnits="userSpaceOnUse">
+      <path d="M14 0H0v14" fill="none" stroke="#00f5d4" stroke-width="0.6" stroke-opacity="0.3"/>
+    </pattern>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <rect width="800" height="1000" fill="url(#grid)" opacity="0.4"/>
+  <circle cx="400" cy="300" r="195" fill="none" stroke="url(#holo)" stroke-width="1.5" stroke-dasharray="8 6" opacity="0.6"/>
+  <path d="M275 325 C275 185,525 185,525 325 C525 410,480 460,400 470 C320 460,275 410,275 325 Z" fill="#06080d" stroke="url(#holo)" stroke-width="2"/>
+  <ellipse cx="400" cy="320" rx="86" ry="110" fill="#020306" stroke="#1e293b"/>
+  <g filter="url(#glow)">
+    <path d="M342 304 Q364 292 384 304 Q364 314 342 304 Z" fill="#e0f2fe"/>
+    <circle cx="363" cy="304" r="5" fill="#00f5d4"/>
+    <path d="M416 304 Q436 292 458 304 Q436 314 416 304 Z" fill="#e0f2fe"/>
+    <circle cx="437" cy="304" r="5" fill="#00f5d4"/>
+  </g>
+  <path d="M400 470 L335 480 L175 560 L145 850 L400 850 Z" fill="url(#dirt)" stroke="#6b5e4c" stroke-width="1.5"/>
+  <path d="M235 610 Q290 635 345 615 M210 695 Q285 720 370 690" fill="none" stroke="#1c1915" stroke-width="4" opacity="0.8"/>
+  <ellipse cx="275" cy="675" rx="32" ry="16" fill="#171411" opacity="0.75"/>
+  <path d="M400 470 L465 480 L625 560 L655 850 L400 850 Z" fill="#091124" stroke="url(#holo)" stroke-width="2.5"/>
+  <path d="M400 470 L465 480 L625 560 L655 850 L400 850 Z" fill="url(#grid)" opacity="0.8"/>
+  <polygon points="458,488 515,536 435,690 400,680" fill="url(#holo)" fill-opacity="0.35" stroke="#00f5d4" stroke-width="2"/>
+  <polygon points="400,498 434,486 434,512 400,502" fill="#00f5d4" filter="url(#glow)"/>
+  <line x1="400" y1="205" x2="400" y2="850" stroke="#00f5d4" stroke-width="2" stroke-dasharray="6 4" filter="url(#glow)"/>
+  <rect y="730" width="800" height="270" fill="#030408" opacity="0.9"/>
+  <text x="400" y="845" text-anchor="middle" font-family="sans-serif" font-weight="900" font-size="115" fill="#ffffff" filter="url(#glow)">@thol</text>
+  <text x="400" y="898" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="20" letter-spacing="4" fill="#00f5d4">FROM THE STREETS TO THE DECENTRALIZED EMPIRE</text>
+  <text x="400" y="936" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="15" letter-spacing="3" fill="#94a3b8">LEAD ROLE OPEN • PROOF-OF-CONCEPT FILM &amp; SERIES</text>
+</svg>
